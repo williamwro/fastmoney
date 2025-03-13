@@ -1,12 +1,10 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -16,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { toast } from 'sonner';
 import { AuthFormHeader } from './auth/AuthFormHeader';
 import { InputWithIcon } from './auth/InputWithIcon';
 import { useAuthFormSchema } from './auth/useAuthFormSchema';
@@ -35,7 +32,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues,
+    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
   });
   
   const onSubmit = async (values: any) => {
@@ -60,7 +57,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
   
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white/90 backdrop-blur-sm shadow-sm rounded-lg border">
+    <div className="w-full max-w-md mx-auto p-6 bg-card shadow-sm rounded-lg border">
       <AuthFormHeader title={isLogin ? 'Login' : 'Criar Conta'} />
       
       <Form {...form}>
@@ -73,7 +70,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <InputWithIcon icon={<User className="h-4 w-4 text-gray-400" />} placeholder="Seu nome" {...field} />
+                    <InputWithIcon icon={<User className="h-4 w-4 text-gray-400 dark:text-gray-500" />} placeholder="Seu nome" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,7 +85,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <InputWithIcon icon={<Mail className="h-4 w-4 text-gray-400" />} type="email" placeholder="seu@email.com" {...field} />
+                  <InputWithIcon icon={<Mail className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="email" placeholder="seu@email.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -102,7 +99,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400" />} type="password" placeholder="********" {...field} />
+                  <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="password" placeholder="********" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -117,7 +114,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 <FormItem>
                   <FormLabel>Confirmar Senha</FormLabel>
                   <FormControl>
-                    <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400" />} type="password" placeholder="********" {...field} />
+                    <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="password" placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
