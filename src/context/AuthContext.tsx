@@ -53,7 +53,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Important: First set user to null to trigger UI updates
       setUser(null);
-      setAuthChecked(true);
       
       // Then call the logout operation to clean up server-side
       await performLogout();
@@ -81,6 +80,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   };
+
+  // Add more verbose logging for authentication state
+  console.log("AuthContext - Estado atual:", { 
+    user: !!user, 
+    authChecked, 
+    isAuthenticated: authChecked && !!user 
+  });
 
   // Create the context value object
   const contextValue: AuthContextType = {

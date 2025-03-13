@@ -12,6 +12,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   
+  console.log("Login page - Estado de autenticação:", { isAuthenticated, authChecked });
+  
   const handleResendEmail = async () => {
     if (!email) {
       return;

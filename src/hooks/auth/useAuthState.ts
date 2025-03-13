@@ -84,6 +84,7 @@ export const useAuthState = () => {
         // Set these states at the end of initialization process
         setIsLoading(false);
         setAuthChecked(true);
+        console.log('Autenticação inicializada, authChecked definido como true');
       }
     };
     

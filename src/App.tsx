@@ -65,8 +65,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, authChecked, isLoading } = useAuth();
   
+  console.log("AuthRoute - Estado de autenticação:", { 
+    isAuthenticated, 
+    authChecked, 
+    isLoading 
+  });
+  
   // If authentication is still being checked, show loading
-  if (!authChecked || isLoading) {
+  if (!authChecked) {
+    console.log("AuthRoute - Autenticação ainda sendo verificada");
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -77,12 +84,27 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // If user is already authenticated, redirect to bills
-  if (isAuthenticated) {
+  // Only redirect if both authChecked is true AND user is authenticated
+  if (authChecked && isAuthenticated) {
+    console.log("AuthRoute - Usuário autenticado, redirecionando para /bills");
     return <Navigate to="/bills" replace />;
   }
   
-  // Render auth routes directly
+  // Mostrar loading durante operações de autenticação
+  if (isLoading) {
+    console.log("AuthRoute - Carregando operações de autenticação");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Se chegamos aqui, o usuário não está autenticado e pode ver a tela de login/signup
+  console.log("AuthRoute - Renderizando tela de autenticação");
   return <>{children}</>;
 };
 
