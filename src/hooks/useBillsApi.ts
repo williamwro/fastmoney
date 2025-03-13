@@ -25,13 +25,27 @@ export const useBillsApi = () => {
         const { data, error } = await supabase
           .from('bills')
           .select('*')
-          .order('dueDate', { ascending: true });
+          .order('due_date', { ascending: true });
           
         if (error) {
           throw error;
         }
         
-        setBills(data || []);
+        // Transform data from snake_case to camelCase if needed
+        const formattedData = data?.map(bill => ({
+          id: bill.id,
+          userId: bill.user_id,
+          vendorName: bill.vendor_name,
+          amount: bill.amount,
+          dueDate: bill.due_date,
+          category: bill.category,
+          status: bill.status,
+          notes: bill.notes,
+          createdAt: bill.created_at,
+          updatedAt: bill.updated_at
+        })) || [];
+        
+        setBills(formattedData);
       } catch (error) {
         console.error('Error fetching bills:', error);
         toast.error('Failed to load bills');
@@ -51,17 +65,23 @@ export const useBillsApi = () => {
     
     const now = new Date().toISOString();
     
-    const newBill = {
-      ...billInput,
-      userId: user.id,
-      createdAt: now,
-      updatedAt: now,
+    // Transform camelCase to snake_case for Supabase
+    const newBillForDb = {
+      user_id: user.id,
+      vendor_name: billInput.vendorName,
+      amount: billInput.amount,
+      due_date: billInput.dueDate,
+      category: billInput.category,
+      status: billInput.status || 'unpaid',
+      notes: billInput.notes,
+      created_at: now,
+      updated_at: now
     };
     
     try {
       const { data, error } = await supabase
         .from('bills')
-        .insert(newBill)
+        .insert(newBillForDb)
         .select()
         .single();
         
@@ -69,7 +89,21 @@ export const useBillsApi = () => {
         throw error;
       }
       
-      setBills(prevBills => [...prevBills, data]);
+      // Transform back to camelCase for the app
+      const newBill: Bill = {
+        id: data.id,
+        userId: data.user_id,
+        vendorName: data.vendor_name,
+        amount: data.amount,
+        dueDate: data.due_date,
+        category: data.category,
+        status: data.status,
+        notes: data.notes,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      setBills(prevBills => [...prevBills, newBill]);
       toast.success('Bill added successfully');
     } catch (error) {
       console.error('Error adding bill:', error);
@@ -79,10 +113,17 @@ export const useBillsApi = () => {
 
   const updateBill = async (id: string, billUpdates: Partial<BillInput>) => {
     try {
-      const updates = {
-        ...billUpdates,
-        updatedAt: new Date().toISOString(),
+      // Transform camelCase to snake_case for Supabase
+      const updates: Record<string, any> = {
+        updated_at: new Date().toISOString()
       };
+      
+      if (billUpdates.vendorName !== undefined) updates.vendor_name = billUpdates.vendorName;
+      if (billUpdates.amount !== undefined) updates.amount = billUpdates.amount;
+      if (billUpdates.dueDate !== undefined) updates.due_date = billUpdates.dueDate;
+      if (billUpdates.category !== undefined) updates.category = billUpdates.category;
+      if (billUpdates.status !== undefined) updates.status = billUpdates.status;
+      if (billUpdates.notes !== undefined) updates.notes = billUpdates.notes;
       
       const { error } = await supabase
         .from('bills')
@@ -93,9 +134,21 @@ export const useBillsApi = () => {
         throw error;
       }
       
+      // Transform camelCase updates for the local state
+      const camelCaseUpdates: Partial<Bill> = {
+        updatedAt: updates.updated_at
+      };
+      
+      if (billUpdates.vendorName !== undefined) camelCaseUpdates.vendorName = billUpdates.vendorName;
+      if (billUpdates.amount !== undefined) camelCaseUpdates.amount = billUpdates.amount;
+      if (billUpdates.dueDate !== undefined) camelCaseUpdates.dueDate = billUpdates.dueDate;
+      if (billUpdates.category !== undefined) camelCaseUpdates.category = billUpdates.category;
+      if (billUpdates.status !== undefined) camelCaseUpdates.status = billUpdates.status;
+      if (billUpdates.notes !== undefined) camelCaseUpdates.notes = billUpdates.notes;
+      
       setBills(prevBills => 
         prevBills.map(bill => 
-          bill.id === id ? { ...bill, ...updates } : bill
+          bill.id === id ? { ...bill, ...camelCaseUpdates } : bill
         )
       );
       
