@@ -41,16 +41,9 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* FastMoney brand positioned above main content */}
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Brand />
-        </div>
-      </div>
-      
-      {/* Navigation menu moved outside the main content area */}
-      <div className="w-full bg-white border-b border-gray-200 py-2 px-4">
-        <div className="max-w-6xl mx-auto">
           <NavLinks isAuthenticated={isAuthenticated} />
         </div>
       </div>
