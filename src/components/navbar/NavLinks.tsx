@@ -4,15 +4,33 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart2, Receipt, Users, Tag } from 'lucide-react';
 
-const NavLinks: React.FC = () => {
+interface NavLinksProps {
+  isAuthenticated?: boolean;
+  mobile?: boolean;
+  closeMenu?: () => void;
+}
+
+const NavLinks: React.FC<NavLinksProps> = ({ 
+  isAuthenticated = false, 
+  mobile = false, 
+  closeMenu 
+}) => {
   const location = useLocation();
   
-  const links = [
+  // Only show these links when authenticated
+  const authenticatedLinks = [
     { name: 'Dashboard', href: '/', icon: <BarChart2 className="size-4" /> },
     { name: 'Contas', href: '/bills', icon: <Receipt className="size-4" /> },
     { name: 'Usuários', href: '/users', icon: <Users className="size-4" /> },
     { name: 'Categorias', href: '/categories', icon: <Tag className="size-4" /> }
   ];
+  
+  // Show these links always
+  const publicLinks = [
+    { name: 'Dashboard', href: '/', icon: <BarChart2 className="size-4" /> }
+  ];
+  
+  const links = isAuthenticated ? authenticatedLinks : publicLinks;
 
   return (
     <nav className="space-y-0.5">
@@ -31,6 +49,7 @@ const NavLinks: React.FC = () => {
                 ? "bg-accent text-accent-foreground"
                 : "transparent hover:bg-muted text-muted-foreground hover:text-foreground"
             )}
+            onClick={closeMenu}
           >
             <span className="mr-3 text-muted-foreground group-hover:text-foreground">
               {link.icon}
