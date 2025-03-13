@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -26,11 +26,14 @@ const Login = () => {
     console.log('User requested logout from login page');
     setLoggingOut(true);
     try {
-      const success = await logout();
-      console.log('Logout result:', success);
+      await logout();
+      console.log('Logout completed, user should no longer be authenticated');
       
-      // No need for window.location.reload() - this was part of the problem
-      // The context will update and re-render this component when isAuthenticated changes
+      // Force manual re-render if the auth context hasn't updated yet
+      if (isAuthenticated) {
+        console.log('Still authenticated after logout, forcing window reload');
+        window.location.href = '/login';
+      }
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {

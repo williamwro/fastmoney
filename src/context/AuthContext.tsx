@@ -124,16 +124,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       console.log('Logout: Iniciando processo de logout');
+      // Force update UI state before API call to improve responsiveness
+      setUser(null);
+      
+      // Then call the logout operation
       const success = await logoutOperation();
       
-      if (success) {
-        console.log('Logout: Definindo usuário como null após logout bem-sucedido');
-        setUser(null);
-      } else {
-        console.error('Logout: Falha no logout');
-        // Force clear user even if the Supabase logout failed
-        setUser(null);
-      }
+      console.log('Logout operation complete, success:', success);
+      // User state is already null at this point
       
       return success;
     } catch (error) {

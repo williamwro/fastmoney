@@ -142,25 +142,33 @@ export const useAuthOperations = () => {
   const logout = async () => {
     console.log('Attempting to log out');
     try {
-      // Primeiro tentamos realizar o logout via Supabase
+      // Force clear all Supabase auth tokens from localStorage first
+      console.log('Clearing all Supabase auth data from localStorage');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          console.log(`Removing localStorage key: ${key}`);
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Then try to officially sign out via Supabase
+      console.log('Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut({
-        scope: 'local' // Garante que desconecta apenas a sessão atual
+        scope: 'local' // Ensure we only disconnect the current session
       });
       
       if (error) {
-        console.error('Error signing out:', error);
+        console.error('Error signing out from Supabase:', error);
         toast.error('Erro ao sair da conta');
         return false;
       } else {
-        console.log('Logged out successfully');
+        console.log('Logged out successfully from Supabase');
         
-        // Limpar qualquer estado local de autenticação
-        localStorage.removeItem('supabase.auth.token');
-        
-        // Clear any cached auth data in localStorage (if any)
-        Object.keys(localStorage).forEach(key => {
+        // Additional cleanup - clear any session storage as well
+        Object.keys(sessionStorage).forEach(key => {
           if (key.startsWith('supabase.auth.')) {
-            localStorage.removeItem(key);
+            console.log(`Removing sessionStorage key: ${key}`);
+            sessionStorage.removeItem(key);
           }
         });
         
@@ -170,6 +178,18 @@ export const useAuthOperations = () => {
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       toast.error('Erro ao sair da conta');
+      
+      // Even if there's an error, try to force clear any auth data
+      try {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('supabase.auth.')) {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (e) {
+        console.error('Error clearing localStorage:', e);
+      }
+      
       return false;
     }
   };
