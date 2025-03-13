@@ -26,6 +26,13 @@ export const useLogin = () => {
       console.log('Login successful:', data.user?.id);
       toast.success('Login bem-sucedido');
       
+      // Certifique-se de que a sessão e o usuário foram obtidos
+      if (!data.user) {
+        console.error('Login successful but no user returned');
+        toast.error('Erro ao obter dados do usuário');
+        throw new Error('No user data returned');
+      }
+      
       // Return session data to confirm successful authentication
       return data;
     } catch (error) {

@@ -24,7 +24,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const data = await performLogin(email, password);
-      console.log('Login bem-sucedido, redirecionando para dashboard', data);
+      console.log('Login bem-sucedido, dados recebidos:', data);
+      
+      // Atualizar o usuário se os dados forem válidos
+      if (data?.user) {
+        console.log('Atualizando estado do usuário com:', data.user.id);
+        setUser({
+          id: data.user.id,
+          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
+          email: data.user.email || '',
+          isAdmin: data.user.email === 'william@makecard.com.br' || data.user.user_metadata?.is_admin === true
+        });
+      }
+      
       return data;
     } catch (error) {
       console.error('Login error in context:', error);

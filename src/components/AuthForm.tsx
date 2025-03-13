@@ -50,7 +50,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is authenticated, navigating to /bills');
-      navigate('/bills');
+      navigate('/bills', { replace: true });
     }
   }, [isAuthenticated, navigate]);
   

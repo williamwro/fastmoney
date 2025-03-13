@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { BillProvider } from "./context/BillContext";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
+import { useEffect } from "react";
 import Bills from "./pages/Bills";
 import BillForm from "./pages/BillForm";
 import Login from "./pages/Login";
@@ -27,11 +28,23 @@ const queryClient = new QueryClient({
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading, authChecked } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    if (authChecked && !isAuthenticated && !isLoading) {
+      console.log("ProtectedRoute - Usuário não autenticado, redirecionando para /login", {
+        path: location.pathname
+      });
+      navigate("/login", { replace: true });
+    }
+  }, [isAuthenticated, authChecked, isLoading, navigate, location]);
   
   console.log("ProtectedRoute - Estado de autenticação:", { 
     isAuthenticated, 
     authChecked, 
-    isLoading 
+    isLoading,
+    path: location.pathname
   });
   
   // Se a autenticação ainda está sendo verificada, mostrar indicador de carregamento
@@ -60,10 +73,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Redirecionar para login se não estiver autenticado após verificação
+  // Não redireciona aqui - isso é feito no useEffect para evitar problemas de renderização
   if (!isAuthenticated) {
-    console.log("ProtectedRoute - Usuário não autenticado, redirecionando para /login");
-    return <Navigate to="/login" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Redirecionando para o login...</div>
+        </div>
+      </div>
+    );
   }
   
   console.log("ProtectedRoute - Usuário autenticado, renderizando conteúdo protegido");
@@ -73,11 +93,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // Component for auth routes (login/signup)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, authChecked, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    if (authChecked && isAuthenticated && !isLoading) {
+      console.log("AuthRoute - Usuário autenticado, redirecionando para /bills", {
+        path: location.pathname
+      });
+      navigate("/bills", { replace: true });
+    }
+  }, [isAuthenticated, authChecked, isLoading, navigate, location]);
   
   console.log("AuthRoute - Estado de autenticação:", { 
     isAuthenticated, 
     authChecked, 
-    isLoading 
+    isLoading,
+    path: location.pathname
   });
   
   // Mostrar tela de carregamento enquanto verifica autenticação
@@ -94,10 +126,17 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Redirecionar apenas se estiver autenticado
+  // Não redireciona aqui - isso é feito no useEffect para evitar problemas de renderização
   if (isAuthenticated) {
-    console.log("AuthRoute - Usuário autenticado, redirecionando para /bills");
-    return <Navigate to="/bills" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Redirecionando para o dashboard...</div>
+        </div>
+      </div>
+    );
   }
   
   // Mostrar loading durante operações de autenticação
