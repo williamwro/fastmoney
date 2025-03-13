@@ -30,13 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for saved user in localStorage
-    const storedUser = localStorage.getItem('billcraft_user');
+    const storedUser = localStorage.getItem('fintec_user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error('Failed to parse stored user', error);
-        localStorage.removeItem('billcraft_user');
+        localStorage.removeItem('fintec_user');
       }
     }
     setIsLoading(false);
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Save user to state and localStorage
       setUser(userWithoutPassword);
-      localStorage.setItem('billcraft_user', JSON.stringify(userWithoutPassword));
+      localStorage.setItem('fintec_user', JSON.stringify(userWithoutPassword));
       toast.success('Successfully logged in');
     } catch (error) {
       toast.error((error as Error).message || 'Login failed');
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Save user to state and localStorage
       setUser(newUser);
-      localStorage.setItem('billcraft_user', JSON.stringify(newUser));
+      localStorage.setItem('fintec_user', JSON.stringify(newUser));
       toast.success('Account created successfully');
     } catch (error) {
       toast.error((error as Error).message || 'Signup failed');
@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('billcraft_user');
+    localStorage.removeItem('fintec_user');
     toast.success('Logged out successfully');
   };
 
