@@ -5,6 +5,7 @@ import { useBills } from '@/context/BillContext';
 import Navbar from '@/components/Navbar';
 import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
+import UserManagement from '@/components/UserManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -60,6 +61,8 @@ const Index = () => {
               </Button>
             </Link>
           </div>
+          
+          <UserManagement />
           
           <DashboardSummary />
           

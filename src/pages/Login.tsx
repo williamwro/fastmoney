@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 
@@ -36,13 +36,6 @@ const Login = () => {
           <AuthForm type="login" />
           
           <div className="mt-6 text-center">
-            <p className="text-sm text-blue-100">
-              Não tem uma conta?{' '}
-              <Link to="/signup" className="font-medium text-white hover:underline">
-                Cadastre-se
-              </Link>
-            </p>
-            
             <div className="mt-4 text-xs text-blue-100/70">
               <p>Para fins de demonstração, use:</p>
               <p className="mt-1 font-mono">
