@@ -31,6 +31,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   const isLogin = type === 'login';
   const { schema, defaultValues } = useAuthFormSchema(isLogin);
   
+  // Initialize form before trying to use it
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
+  });
+  
   // Pass email to parent component when it changes
   const emailValue = form.watch('email');
   
@@ -46,11 +52,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       navigate('/bills');
     }
   }, [isAuthenticated, navigate]);
-  
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
-  });
   
   const onSubmit = async (values: any) => {
     if (isSubmitting || authLoading) return;
