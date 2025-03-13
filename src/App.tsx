@@ -11,6 +11,8 @@ import Bills from "./pages/Bills";
 import BillForm from "./pages/BillForm";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
               <Route 
                 path="/" 
                 element={
@@ -57,9 +61,6 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              {/* Redirects to pages that were removed */}
-              <Route path="/login" element={<Navigate to="/auth" replace />} />
-              <Route path="/signup" element={<Navigate to="/auth" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
