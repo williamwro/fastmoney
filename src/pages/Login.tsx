@@ -56,7 +56,7 @@ const Login = () => {
       </div>
       
       <footer className="absolute bottom-4 text-center text-white/60 text-xs">
-        &copy; {new Date().getFullYear()} FinTec - Todos os direitos reservados
+        &copy; {new Date().getFullYear()} TecWeb - Todos os direitos reservados
       </footer>
     </div>
   );
