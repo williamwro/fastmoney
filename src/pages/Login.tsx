@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -16,26 +15,23 @@ const Login = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Se o usuário estiver autenticado e a verificação de autenticação terminou, redirecione para o dashboard
     if (authChecked && isAuthenticated && !isLoading) {
-      console.log('Already authenticated, redirecting to dashboard');
+      console.log('Usuário já autenticado, redirecionando para dashboard');
       navigate('/', { replace: true });
     }
   }, [authChecked, isAuthenticated, isLoading, navigate]);
   
-  // Evita renderizar antes de verificar a autenticação
   if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
         <div className="text-white text-center">
           <div className="animate-spin inline-block h-8 w-8 border-4 border-t-transparent border-white rounded-full mb-4"></div>
-          <p>Carregando...</p>
+          <p>Verificando autenticação...</p>
         </div>
       </div>
     );
   }
   
-  // Se autenticado e não carregando, redirecione
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { UserData, AuthContextType } from '@/types/auth';
@@ -20,11 +19,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       try {
+        console.log('Inicializando autenticação...');
+        
         // Check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
-          console.log('Session found:', session.user.id);
+          console.log('Sessão encontrada:', session.user.id);
           try {
             const userData = await updateUserState(session.user);
             setUser(userData);
@@ -39,14 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
           }
         } else {
-          console.log('No active session found');
+          console.log('Nenhuma sessão ativa encontrada');
           setUser(null);
         }
         
         // Set up auth state change listener
         const { data: { subscription } } = await supabase.auth.onAuthStateChange(
           async (_event, session) => {
-            console.log('Auth state changed:', _event, session?.user?.id);
+            console.log('Estado de autenticação alterado:', _event, session?.user?.id);
             if (session) {
               try {
                 const userData = await updateUserState(session.user);
@@ -68,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         );
         
+        // Finaliza a inicialização da autenticação
         setAuthChecked(true);
         setIsLoading(false);
         
@@ -76,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subscription.unsubscribe();
         };
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Erro ao inicializar autenticação:', error);
         setUser(null);
         setIsLoading(false);
         setAuthChecked(true);

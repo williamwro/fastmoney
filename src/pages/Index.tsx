@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
 import Navbar from '@/components/Navbar';
@@ -13,30 +12,21 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { isAuthenticated, isLoading: authLoading, authChecked } = useAuth();
+  const { isLoading: authLoading } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
-  const navigate = useNavigate();
   
   const overdueBills = getOverdueBills().slice(0, 3);
   const dueSoonBills = getDueSoonBills().slice(0, 3);
   
   useEffect(() => {
-    if (overdueBills.length > 0 && isAuthenticated) {
+    if (overdueBills.length > 0) {
       toast.warning(`Você tem ${overdueBills.length} conta(s) vencida(s)`, {
         description: 'Verifique suas contas para evitar juros e multas.',
         id: 'overdue-bills-notice',
         duration: 5000,
       });
     }
-  }, [overdueBills.length, isAuthenticated]);
-  
-  // Redirect to login if not authenticated and auth check is complete
-  useEffect(() => {
-    if (authChecked && !isAuthenticated && !authLoading) {
-      console.log('Not authenticated, redirecting to login');
-      navigate('/login');
-    }
-  }, [authChecked, isAuthenticated, authLoading, navigate]);
+  }, [overdueBills.length]);
   
   if (authLoading || billsLoading) {
     return (
@@ -47,11 +37,6 @@ const Index = () => {
         </div>
       </div>
     );
-  }
-  
-  // Second check to ensure we don't show dashboard to unauthenticated users
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
   }
   
   return (
