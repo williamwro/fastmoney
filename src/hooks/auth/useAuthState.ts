@@ -18,26 +18,16 @@ export const useAuthState = () => {
       console.log('Inicializando autenticação...');
       
       try {
-        // Clear any existing sessions from localStorage to force fresh check
+        // Force clear ALL existing sessions from localStorage and sessionStorage
         try {
-          // This is a safety measure to clear potential stale sessions
-          for (const key in localStorage) {
-            if (key.includes('supabase.auth')) {
-              localStorage.removeItem(key);
-            }
-          }
-          
-          for (const key in sessionStorage) {
-            if (key.includes('supabase.auth')) {
-              sessionStorage.removeItem(key);
-            }
-          }
-          console.log('Limpou potenciais sessões antigas para garantir verificação limpa');
+          console.log('Forçando limpeza de todas as sessões para garantir verificação limpa');
+          localStorage.clear();
+          sessionStorage.clear();
         } catch (storageError) {
           console.error('Erro ao limpar storage:', storageError);
         }
         
-        // Agora verifica se há sessão ativa no Supabase
+        // Now check if there's an active session in Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
