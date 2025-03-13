@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import UserManagement from '@/components/users/UserManagement';
 import { Navigate } from 'react-router-dom';
 import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
+import UserMenu from '@/components/navbar/UserMenu';
 
 const Users = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout, isAuthenticated } = useAuth();
   
   // Check if current user is the authorized admin
   const isAuthorizedAdmin = user?.email === 'william@makecard.com.br';
@@ -30,11 +32,19 @@ const Users = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center">
-          <Brand />
-          <div className="ml-6">
-            <NavLinks isAuthenticated={true} />
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Brand />
+            <div className="ml-6">
+              <NavLinks isAuthenticated={isAuthenticated} />
+            </div>
           </div>
+          
+          <UserMenu 
+            user={user} 
+            logout={logout} 
+            isAuthenticated={isAuthenticated} 
+          />
         </div>
       </div>
       

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User, PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 type UserMenuProps = {
-  user: { email?: string; name?: string } | null;
+  user: any | null;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   mobile?: boolean;
@@ -41,12 +41,12 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogout = async () => {
     await logout();
-    navigate('/auth');
+    navigate('/login');
     if (closeMenu) closeMenu();
   };
 
   const handleLogin = () => {
-    navigate('/auth');
+    navigate('/login');
     if (closeMenu) closeMenu();
   };
 
@@ -69,7 +69,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
     );
   }
 
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Usuário';
+  const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário';
 
   if (mobile) {
     return (
@@ -86,14 +86,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
   }
 
   return (
-    <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-      <Link to="/bills/new">
-        <Button size="sm" variant="default" className="flex items-center space-x-1">
-          <PlusCircle className="h-4 w-4 mr-1" />
-          <span>Nova Conta</span>
-        </Button>
-      </Link>
-      
+    <div className="flex items-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -102,13 +95,13 @@ const UserMenu: React.FC<UserMenuProps> = ({
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 bg-white">
           <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
           <DropdownMenuLabel className="font-normal text-xs text-gray-500">{user?.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer" disabled>
             <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
+            <span>Meu Perfil</span>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />

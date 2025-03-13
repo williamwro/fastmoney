@@ -5,9 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 import CategoryManagement from '@/components/categories/CategoryManagement';
 import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
+import UserMenu from '@/components/navbar/UserMenu';
 
 const Categories = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
 
   if (isLoading) {
     return (
@@ -27,11 +28,19 @@ const Categories = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center">
-          <Brand />
-          <div className="ml-6">
-            <NavLinks isAuthenticated={isAuthenticated} />
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Brand />
+            <div className="ml-6">
+              <NavLinks isAuthenticated={isAuthenticated} />
+            </div>
           </div>
+          
+          <UserMenu 
+            user={user} 
+            logout={logout} 
+            isAuthenticated={isAuthenticated} 
+          />
         </div>
       </div>
       

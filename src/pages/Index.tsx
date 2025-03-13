@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
 import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
+import UserMenu from '@/components/navbar/UserMenu';
 import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { isLoading: authLoading, isAuthenticated } = useAuth();
+  const { isLoading: authLoading, isAuthenticated, user, logout } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
   
   const overdueBills = getOverdueBills().slice(0, 3);
@@ -43,11 +44,19 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center">
-          <Brand />
-          <div className="ml-6">
-            <NavLinks isAuthenticated={isAuthenticated} />
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Brand />
+            <div className="ml-6">
+              <NavLinks isAuthenticated={isAuthenticated} />
+            </div>
           </div>
+          
+          <UserMenu 
+            user={user} 
+            logout={logout} 
+            isAuthenticated={isAuthenticated} 
+          />
         </div>
       </div>
       

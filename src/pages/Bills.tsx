@@ -9,9 +9,10 @@ import { Link } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
+import UserMenu from '@/components/navbar/UserMenu';
 
 const Bills = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
   const { isLoading: billsLoading } = useBills();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -41,11 +42,19 @@ const Bills = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center">
-          <Brand />
-          <div className="ml-6">
-            <NavLinks isAuthenticated={isAuthenticated} />
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Brand />
+            <div className="ml-6">
+              <NavLinks isAuthenticated={isAuthenticated} />
+            </div>
           </div>
+          
+          <UserMenu 
+            user={user} 
+            logout={logout} 
+            isAuthenticated={isAuthenticated} 
+          />
         </div>
       </div>
       
