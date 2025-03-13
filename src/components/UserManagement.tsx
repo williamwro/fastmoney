@@ -9,19 +9,12 @@ import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
 
 const UserManagement = () => {
-  const { user, signup } = useAuth();
+  const { signup } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Check if current user is the authorized admin
-  const isAuthorizedAdmin = user?.email === 'william@makecard.com.br';
-
-  if (!isAuthorizedAdmin) {
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
