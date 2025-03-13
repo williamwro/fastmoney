@@ -46,9 +46,9 @@ const Login = () => {
             <div className="mt-4 text-xs text-blue-100/70">
               <p>Para fins de demonstração, use:</p>
               <p className="mt-1 font-mono">
-                Admin: william@makecard.com.br
+                Email: admin@example.com
                 <br />
-                Senha: Kb109733*
+                Senha: password123
               </p>
             </div>
           </div>
@@ -56,7 +56,7 @@ const Login = () => {
       </div>
       
       <footer className="absolute bottom-4 text-center text-white/60 text-xs">
-        &copy; {new Date().getFullYear()} TecWeb - Todos os direitos reservados
+        &copy; {new Date().getFullYear()} FinTec - Todos os direitos reservados
       </footer>
     </div>
   );

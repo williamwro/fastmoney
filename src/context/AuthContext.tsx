@@ -6,14 +6,12 @@ type User = {
   id: string;
   name: string;
   email: string;
-  isAdmin?: boolean;
 };
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -24,7 +22,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Mock users data (in a real app, this would be in a database)
 const MOCK_USERS = [
   { id: '1', name: 'Admin User', email: 'admin@example.com', password: 'password123' },
-  { id: '2', name: 'William Admin', email: 'william@makecard.com.br', password: 'Kb109733*', isAdmin: true },
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -117,7 +114,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isLoading,
-        isAdmin: !!user?.isAdmin,
         login,
         signup,
         logout,
