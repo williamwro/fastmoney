@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -14,7 +14,16 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutCompleted, setLogoutCompleted] = useState(false);
   const navigate = useNavigate();
+  
+  // Force a component re-render after logout
+  useEffect(() => {
+    if (logoutCompleted && !isAuthenticated && !isLoading) {
+      console.log('Logout completed, resetting state');
+      setLogoutCompleted(false);
+    }
+  }, [logoutCompleted, isAuthenticated, isLoading]);
   
   // Check if user is already logged in and *wants* to go to dashboard
   const handleGoToDashboard = () => {
@@ -23,9 +32,16 @@ const Login = () => {
   
   // Handle user logout
   const handleLogout = async () => {
+    console.log('User requested logout from login page');
     setLoggingOut(true);
     try {
-      await logout();
+      const success = await logout();
+      console.log('Logout result:', success);
+      if (success) {
+        setLogoutCompleted(true);
+        // Force refresh to make sure we show the login form
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
@@ -74,6 +90,7 @@ const Login = () => {
   
   // If already authenticated, show options
   if (isAuthenticated) {
+    console.log('User is authenticated, showing dashboard options');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
@@ -103,6 +120,7 @@ const Login = () => {
     );
   }
   
+  console.log('User is not authenticated, showing login form');
   // Login form for unauthenticated users
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">

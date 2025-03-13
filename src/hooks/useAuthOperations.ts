@@ -142,7 +142,13 @@ export const useAuthOperations = () => {
   const logout = async () => {
     console.log('Attempting to log out');
     try {
-      const { error } = await supabase.auth.signOut();
+      // Primeiro tenta limpar quaisquer dados de sessão locais
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Chama o método de signOut do Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'local' // Garante que desconecta apenas a sessão atual
+      });
       
       if (error) {
         console.error('Error signing out:', error);

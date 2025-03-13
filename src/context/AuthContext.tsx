@@ -50,6 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           async (event, session) => {
             console.log('Estado de autenticação alterado:', event, session?.user?.id);
             
+            if (event === 'SIGNED_OUT') {
+              console.log('Usuário deslogou, limpando o estado');
+              setUser(null);
+              return;
+            }
+            
             if (session) {
               try {
                 const userData = await updateUserState(session.user);
@@ -116,10 +122,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setIsLoading(true);
     try {
+      console.log('Logout: Iniciando processo de logout');
       const success = await logoutOperation();
+      
       if (success) {
+        console.log('Logout: Definindo usuário como null após logout bem-sucedido');
         setUser(null);
+      } else {
+        console.error('Logout: Falha no logout');
       }
+      
       return success;
     } catch (error) {
       console.error('Logout error:', error);

@@ -63,10 +63,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Componente para rotas de autenticação (login/signup)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { authChecked } = useAuth();
+  const { authChecked, isLoading } = useAuth();
   
   // Se a autenticação ainda está sendo verificada, mostra um loading
-  if (!authChecked) {
+  if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -77,7 +77,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Renderiza diretamente as rotas de autenticação sem mais verificações
+  // Renderiza diretamente as rotas de autenticação
   return <>{children}</>;
 };
 
