@@ -122,25 +122,20 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
             />
           )}
           
-          <SubmitButton isSubmitting={isSubmitting} isLogin={isLogin} />
+          <Button 
+            type="submit" 
+            className="w-full mt-6"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            {isLogin ? 'Entrar' : 'Cadastrar'}
+          </Button>
         </form>
       </Form>
     </div>
   );
 };
-
-// Separate component for the submit button
-const SubmitButton = ({ isSubmitting, isLogin }: { isSubmitting: boolean; isLogin: boolean }) => (
-  <Button 
-    type="submit" 
-    className="w-full mt-6"
-    disabled={isSubmitting}
-  >
-    {isSubmitting ? (
-      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-    ) : null}
-    {isLogin ? 'Entrar' : 'Cadastrar'}
-  </Button>
-);
 
 export default AuthForm;

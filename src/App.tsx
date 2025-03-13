@@ -13,28 +13,27 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <BillProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/bills" element={<Bills />} />
-            <Route path="/bills/new" element={<BillForm />} />
-            <Route path="/bills/:id/edit" element={<BillForm />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BillProvider>
-      </AuthProvider>
+      <BillProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/bills" element={<ProtectedRoute><Bills /></ProtectedRoute>} />
+          <Route path="/bills/new" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
+          <Route path="/bills/:id/edit" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute isAdminRoute><Users /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BillProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

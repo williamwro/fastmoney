@@ -1,11 +1,21 @@
 
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+  
+  React.useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate, from]);
   
   if (isLoading) {
     return (
@@ -19,7 +29,7 @@ const Login = () => {
   }
   
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return null; // Don't render anything during redirect
   }
   
   return (
@@ -42,15 +52,6 @@ const Login = () => {
                 Cadastre-se
               </Link>
             </p>
-            
-            <div className="mt-4 text-xs text-blue-100/70">
-              <p>Para fins de demonstração, use:</p>
-              <p className="mt-1 font-mono">
-                Admin: william@makecard.com.br
-                <br />
-                Senha: Kb109733*
-              </p>
-            </div>
           </div>
         </div>
       </div>

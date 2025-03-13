@@ -1,11 +1,18 @@
 
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 
 const SignUp = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+  
+  React.useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
   
   if (isLoading) {
     return (
@@ -19,7 +26,7 @@ const SignUp = () => {
   }
   
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return null; // Don't render anything during redirect
   }
   
   return (
