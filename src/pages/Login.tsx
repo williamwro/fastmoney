@@ -1,21 +1,11 @@
 
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-  
-  React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, isLoading, navigate, from]);
   
   if (isLoading) {
     return (
@@ -28,8 +18,12 @@ const Login = () => {
     );
   }
   
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">FinTec</h1>
@@ -48,6 +42,15 @@ const Login = () => {
                 Cadastre-se
               </Link>
             </p>
+            
+            <div className="mt-4 text-xs text-blue-100/70">
+              <p>Para fins de demonstração, use:</p>
+              <p className="mt-1 font-mono">
+                Admin: william@makecard.com.br
+                <br />
+                Senha: Kb109733*
+              </p>
+            </div>
           </div>
         </div>
       </div>
