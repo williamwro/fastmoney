@@ -29,25 +29,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Atualizar o usuário se os dados forem válidos
       if (data?.user) {
         console.log('Atualizando estado do usuário com:', data.user.id);
+        // Atualize o estado do usuário imediatamente para acelerar a redireção
         setUser({
           id: data.user.id,
           name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
           email: data.user.email || '',
           isAdmin: data.user.email === 'william@makecard.com.br' || data.user.user_metadata?.is_admin === true
         });
+        
+        // Verificar dados definidos para debug
+        return data;
+      } else {
+        console.error('No user data found after successful login');
+        toast.error('Erro ao obter dados do usuário');
+        throw new Error('No user data returned');
       }
-      
-      return data;
     } catch (error) {
       console.error('Login error in context:', error);
-      // Error is already handled in performLogin
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Wrap the signup function to void the return value
+  // Wrap the signup function
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -108,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Create the context value object
   const contextValue: AuthContextType = {
     user,
-    isAuthenticated: authChecked && !!user, // Only consider authenticated if authChecked is true
+    isAuthenticated: authChecked && !!user,
     isLoading,
     isAdmin: !!user?.isAdmin,
     authChecked,

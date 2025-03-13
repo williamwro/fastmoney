@@ -20,6 +20,27 @@ export const useLogin = () => {
       
       if (error) {
         console.error('Login failed with error:', error);
+        
+        // Handle specific error codes
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
+          
+          // Try to resend confirmation email
+          try {
+            await supabase.auth.resend({
+              type: 'signup',
+              email,
+            });
+            toast.info('Email de confirmação reenviado. Por favor, verifique sua caixa de entrada.');
+          } catch (resendError) {
+            console.error('Failed to resend confirmation email:', resendError);
+          }
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Email ou senha incorretos. Por favor, tente novamente.');
+        } else {
+          toast.error(error.message || 'Falha no login');
+        }
+        
         throw error;
       }
       
@@ -33,32 +54,9 @@ export const useLogin = () => {
         throw new Error('No user data returned');
       }
       
-      // Return session data to confirm successful authentication
       return data;
     } catch (error) {
-      const authError = error as AuthError;
-      console.error('Login error details:', authError);
-      
-      // Handle specific error codes
-      if (authError.message.includes('Email not confirmed')) {
-        toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
-        
-        // Try to resend confirmation email
-        try {
-          await supabase.auth.resend({
-            type: 'signup',
-            email,
-          });
-          toast.info('Email de confirmação reenviado. Por favor, verifique sua caixa de entrada.');
-        } catch (resendError) {
-          console.error('Failed to resend confirmation email:', resendError);
-        }
-      } else if (authError.message.includes('Invalid login credentials')) {
-        toast.error('Email ou senha incorretos. Por favor, tente novamente.');
-      } else {
-        toast.error(authError.message || 'Falha no login');
-      }
-      
+      console.error('Login error details:', error);
       throw error;
     } finally {
       setIsLoading(false);

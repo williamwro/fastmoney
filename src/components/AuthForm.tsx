@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import {
   Form,
   FormControl,
@@ -50,7 +51,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is authenticated, navigating to /bills');
-      navigate('/bills', { replace: true });
+      navigate('/bills');
     }
   }, [isAuthenticated, navigate]);
   
@@ -64,9 +65,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       
       if (isLogin) {
         const { email, password } = values;
-        const userData = await login(email, password);
-        console.log('Login successful, user data:', userData);
-        console.log('Login successful, redirecting via useEffect');
+        await login(email, password);
+        console.log('Login successful, waiting for auth state update');
         // Navigation happens in useEffect when isAuthenticated changes
       } else {
         const { name, email, password } = values;
@@ -74,7 +74,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       }
     } catch (error: any) {
       console.error(`${isLogin ? 'Login' : 'Signup'} error:`, error);
-      // Toast error is already handled in useAuthOperations
+      toast.error(`Falha no ${isLogin ? 'login' : 'cadastro'}: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setIsSubmitting(false);
     }
