@@ -16,15 +16,15 @@ const Login = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // If authenticated and auth is checked, redirect to dashboard
+    // Se o usuário estiver autenticado e a verificação de autenticação terminou, redirecione para o dashboard
     if (authChecked && isAuthenticated && !isLoading) {
       console.log('Already authenticated, redirecting to dashboard');
       navigate('/', { replace: true });
     }
   }, [authChecked, isAuthenticated, isLoading, navigate]);
   
-  // Prevent rendering if we're still checking auth or already redirecting
-  if (isLoading || !authChecked) {
+  // Evita renderizar antes de verificar a autenticação
+  if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
         <div className="text-white text-center">
@@ -35,8 +35,8 @@ const Login = () => {
     );
   }
   
-  // If already authenticated and not loading, redirect
-  if (authChecked && isAuthenticated) {
+  // Se autenticado e não carregando, redirecione
+  if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
   

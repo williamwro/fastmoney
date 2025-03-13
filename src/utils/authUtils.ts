@@ -16,7 +16,12 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
   try {
     console.log('Updating user state for:', authUser.id);
     
-    // Try to get the user profile from the profiles table
+    // Dados básicos do usuário que serão retornados mesmo em caso de falha
+    const isAdmin = authUser.email === ADMIN_EMAIL || authUser.user_metadata?.is_admin === true;
+    const userName = authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User';
+    const userEmail = authUser.email || '';
+    
+    // Primeiro tentamos buscar o perfil na tabela profiles
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -28,9 +33,9 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
         console.log('Profile found in database:', data);
         return {
           id: authUser.id,
-          name: data.name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-          email: authUser.email || '',
-          isAdmin: data.is_admin || authUser.email === ADMIN_EMAIL
+          name: data.name || userName,
+          email: userEmail,
+          isAdmin: data.is_admin || isAdmin
         };
       }
     } catch (err) {
@@ -39,23 +44,20 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
     
     console.log('Profile not found in database, using fallback data');
     
-    // If we get here, we couldn't get a profile from the database
-    // Try to create one before falling back to metadata
-    const userName = authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User';
-    const userEmail = authUser.email || '';
-    const isAdmin = userEmail === ADMIN_EMAIL;
+    // Se chegamos aqui, vamos tentar criar um perfil
+    try {
+      await createUserProfile(
+        authUser.id,
+        userName,
+        userEmail,
+        isAdmin
+      );
+      console.log('Profile creation attempted');
+    } catch (profileError) {
+      console.error('Error creating profile, using metadata:', profileError);
+    }
     
-    // Try to create a profile
-    const profileCreated = await createUserProfile(
-      authUser.id,
-      userName,
-      userEmail,
-      isAdmin
-    );
-    
-    console.log('Profile creation attempt result:', profileCreated);
-    
-    // Return user data regardless of profile creation success
+    // Sempre retornamos os dados básicos do usuário
     return {
       id: authUser.id,
       name: userName,
@@ -65,13 +67,13 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
   } catch (error) {
     console.error('Error in updateUserState:', error);
     
-    // Fallback to basic user data on any error
+    // Fallback para dados básicos em caso de qualquer erro
     if (authUser) {
       return {
         id: authUser.id,
         name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
         email: authUser.email || '',
-        isAdmin: authUser.email === ADMIN_EMAIL
+        isAdmin: authUser.email === ADMIN_EMAIL || authUser.user_metadata?.is_admin === true
       };
     }
     
@@ -85,7 +87,7 @@ export const createUserProfile = async (userId: string, name: string, email: str
     console.log('Creating profile with:', { userId, name, email, isAdmin });
     
     // First method: Direct insert to profiles table
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .upsert({
         id: userId,
@@ -102,31 +104,30 @@ export const createUserProfile = async (userId: string, name: string, email: str
     }
     
     console.error('Error creating profile in database:', error);
-    
-    // Fallback: Update auth metadata
-    try {
-      console.log('Attempting to update user metadata as fallback');
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: { 
-          name, 
-          is_admin: isAdmin || email === ADMIN_EMAIL,
-          profile_created: false
-        }
-      });
-      
-      if (metadataError) {
-        console.error('Failed to update user metadata:', metadataError);
-        return false;
-      } else {
-        console.log('Updated user metadata as fallback');
-        return true;
-      }
-    } catch (metaError) {
-      console.error('Unexpected error updating user metadata:', metaError);
-      return false;
-    }
   } catch (error) {
     console.error('Unexpected error in createUserProfile:', error);
+  }
+  
+  // Sempre tente atualizar os metadados como fallback
+  try {
+    console.log('Updating user metadata as fallback');
+    const { error } = await supabase.auth.updateUser({
+      data: { 
+        name, 
+        is_admin: isAdmin || email === ADMIN_EMAIL,
+        profile_created: false
+      }
+    });
+    
+    if (error) {
+      console.error('Failed to update user metadata:', error);
+      return false;
+    } else {
+      console.log('Updated user metadata as fallback');
+      return true;
+    }
+  } catch (metaError) {
+    console.error('Unexpected error updating user metadata:', metaError);
     return false;
   }
 };

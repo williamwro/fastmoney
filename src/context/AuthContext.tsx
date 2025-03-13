@@ -25,8 +25,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session) {
           console.log('Session found:', session.user.id);
-          const userData = await updateUserState(session.user);
-          setUser(userData);
+          try {
+            const userData = await updateUserState(session.user);
+            setUser(userData);
+          } catch (error) {
+            console.error('Error updating user state:', error);
+            // Fallback para dados básicos
+            setUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+              email: session.user.email || '',
+              isAdmin: session.user.email === 'william@makecard.com.br'
+            });
+          }
         } else {
           console.log('No active session found');
           setUser(null);
@@ -37,8 +48,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           async (_event, session) => {
             console.log('Auth state changed:', _event, session?.user?.id);
             if (session) {
-              const userData = await updateUserState(session.user);
-              setUser(userData);
+              try {
+                const userData = await updateUserState(session.user);
+                setUser(userData);
+              } catch (error) {
+                console.error('Error during auth state change:', error);
+                // Fallback para dados básicos
+                setUser({
+                  id: session.user.id,
+                  name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                  email: session.user.email || '',
+                  isAdmin: session.user.email === 'william@makecard.com.br'
+                });
+              }
             } else {
               setUser(null);
             }
@@ -66,21 +88,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Wrap the login function to match the expected type
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
       await authLogin(email, password);
     } catch (error) {
       console.error('Login error in context:', error);
       // Error is already handled in useAuthOperations
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Wrap the signup function to void the return value
   const signup = async (name: string, email: string, password: string) => {
+    setIsLoading(true);
     try {
       await authSignup(name, email, password);
     } catch (error) {
       console.error('Signup error in context:', error);
       // Error is already handled in useAuthOperations
+    } finally {
+      setIsLoading(false);
     }
   };
 

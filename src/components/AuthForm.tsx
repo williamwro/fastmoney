@@ -25,7 +25,7 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
-  const { login, signup, isAuthenticated } = useAuth();
+  const { login, signup, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -54,6 +54,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   }, [isAuthenticated, navigate]);
   
   const onSubmit = async (values: any) => {
+    if (isSubmitting || authLoading) return;
+    
     setIsSubmitting(true);
     
     try {
@@ -142,7 +144,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
             />
           )}
           
-          <SubmitButton isSubmitting={isSubmitting} isLogin={isLogin} />
+          <SubmitButton isSubmitting={isSubmitting || authLoading} isLogin={isLogin} />
         </form>
       </Form>
     </div>
