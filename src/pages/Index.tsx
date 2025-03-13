@@ -42,12 +42,16 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="container mx-auto px-4 pt-6 pb-2">
+      {/* FastMoney brand positioned above main content */}
+      <div className="w-full bg-white py-2 px-4 shadow-sm">
+        <div className="max-w-6xl mx-auto">
+          <Brand />
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 pt-2 pb-2">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col items-start">
-            <div className="mb-2">
-              <Brand />
-            </div>
             <div className="mb-4">
               <NavLinks isAuthenticated={isAuthenticated} />
             </div>
