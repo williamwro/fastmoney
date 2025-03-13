@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Create the context value object
   const contextValue: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: authChecked && !!user, // Only consider authenticated if authChecked is true
     isLoading,
     isAdmin: !!user?.isAdmin,
     authChecked,

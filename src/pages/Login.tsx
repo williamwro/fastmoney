@@ -8,17 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Info, Mail } from 'lucide-react';
 
 const Login = () => {
-  const { resendConfirmationEmail, isAuthenticated } = useAuth();
+  const { resendConfirmationEmail, isAuthenticated, authChecked } = useAuth();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const navigate = useNavigate();
   
-  // Add effect to redirect to bills page if already authenticated
+  // Only redirect if we've confirmed the auth state and user is authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (authChecked && isAuthenticated) {
       navigate('/bills');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authChecked, navigate]);
   
   const handleResendEmail = async () => {
     if (!email) {

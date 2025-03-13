@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { UserData } from '@/types/auth';
@@ -13,6 +12,8 @@ export const useAuthState = () => {
     // Check active session and set up auth state listener
     const initializeAuth = async () => {
       setIsLoading(true);
+      // Start with authChecked as false until we've checked session
+      setAuthChecked(false); 
       console.log('Inicializando autenticação...');
       
       try {
@@ -80,9 +81,9 @@ export const useAuthState = () => {
         console.error('Erro ao inicializar autenticação:', error);
         setUser(null);
       } finally {
-        // Always set these states, even if there's an error
-        setAuthChecked(true);
+        // Set these states at the end of initialization process
         setIsLoading(false);
+        setAuthChecked(true);
       }
     };
     
