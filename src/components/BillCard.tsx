@@ -10,7 +10,8 @@ import {
   getBillStatusInfo,
   getCategoryInfo
 } from '@/utils/formatters';
-import { Bill, useBills } from '@/context/BillContext';
+import { Bill } from '@/types/supabase';
+import { useBills } from '@/context/BillContext';
 
 interface BillCardProps {
   bill: Bill;
