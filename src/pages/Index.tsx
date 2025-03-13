@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
 import Navbar from '@/components/Navbar';
@@ -13,21 +12,21 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isLoading: authLoading } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
   
   const overdueBills = getOverdueBills().slice(0, 3);
   const dueSoonBills = getDueSoonBills().slice(0, 3);
   
   useEffect(() => {
-    if (overdueBills.length > 0 && isAuthenticated) {
+    if (overdueBills.length > 0) {
       toast.warning(`Você tem ${overdueBills.length} conta(s) vencida(s)`, {
         description: 'Verifique suas contas para evitar juros e multas.',
         id: 'overdue-bills-notice',
         duration: 5000,
       });
     }
-  }, [overdueBills.length, isAuthenticated]);
+  }, [overdueBills.length]);
   
   if (authLoading || billsLoading) {
     return (
@@ -38,10 +37,6 @@ const Index = () => {
         </div>
       </div>
     );
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
   }
   
   return (

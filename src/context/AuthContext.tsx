@@ -25,20 +25,14 @@ const MOCK_USERS = [
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Definir um usuário padrão para que o sistema inicie já autenticado
+  const defaultUser = { id: '1', name: 'Admin User', email: 'admin@example.com' };
+  
+  const [user, setUser] = useState<User | null>(defaultUser);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const storedUser = localStorage.getItem('fintec_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user', error);
-        localStorage.removeItem('fintec_user');
-      }
-    }
+    // Não precisamos mais verificar o localStorage, sempre estamos autenticados
     setIsLoading(false);
   }, []);
 
@@ -103,8 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('fintec_user');
+    // Agora não removemos o usuário ao fazer logout, apenas mostramos a mensagem
     toast.success('Logged out successfully');
   };
 
@@ -112,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated: true, // Sempre autenticado
         isLoading,
         login,
         signup,
