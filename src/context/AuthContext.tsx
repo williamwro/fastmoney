@@ -124,16 +124,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       console.log('Logout: Iniciando processo de logout');
-      // Force update UI state before API call to improve responsiveness
+      
+      // Important: First set user to null to trigger UI updates
       setUser(null);
+      setAuthChecked(true);
       
-      // Then call the logout operation
-      const success = await logoutOperation();
+      // Then call the logout operation to clean up server-side
+      await logoutOperation();
       
-      console.log('Logout operation complete, success:', success);
-      // User state is already null at this point
-      
-      return success;
+      console.log('Logout operation complete');
+      return true;
     } catch (error) {
       console.error('Logout error:', error);
       // Force clear user even if there was an error

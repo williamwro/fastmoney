@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -16,6 +16,16 @@ const Login = () => {
   const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
   
+  // Effect to detect and fix auth state issues
+  useEffect(() => {
+    // If we just came from a logout action (detected by loggingOut state)
+    // but we're still authenticated, force a page reload
+    if (loggingOut && !isLoading && isAuthenticated) {
+      console.log('Still authenticated after logout attempt, forcing page reload');
+      window.location.reload();
+    }
+  }, [isAuthenticated, isLoading, loggingOut]);
+  
   // Check if user is already logged in and *wants* to go to dashboard
   const handleGoToDashboard = () => {
     navigate('/', { replace: true });
@@ -29,13 +39,16 @@ const Login = () => {
       await logout();
       console.log('Logout completed, user should no longer be authenticated');
       
-      // Force manual re-render if the auth context hasn't updated yet
+      // Force a hard navigation to ensure clean state
       if (isAuthenticated) {
-        console.log('Still authenticated after logout, forcing window reload');
+        console.log('Still authenticated after logout, forcing navigation');
+        // Use direct navigation instead of React Router to ensure full page reload
         window.location.href = '/login';
       }
     } catch (error) {
       console.error('Error during logout:', error);
+      // Force reload even if there was an error
+      window.location.href = '/login';
     } finally {
       setLoggingOut(false);
     }
