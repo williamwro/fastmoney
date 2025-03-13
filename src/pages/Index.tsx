@@ -2,7 +2,8 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
-import Navbar from '@/components/Navbar';
+import Brand from '@/components/navbar/Brand';
+import NavLinks from '@/components/navbar/NavLinks';
 import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,7 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { isLoading: authLoading } = useAuth();
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
   
   const overdueBills = getOverdueBills().slice(0, 3);
@@ -41,9 +42,20 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      <Navbar />
+      <div className="container mx-auto px-4 pt-6 pb-2">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col items-start">
+            <div className="mb-2">
+              <Brand />
+            </div>
+            <div className="mb-4">
+              <NavLinks isAuthenticated={isAuthenticated} />
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <main className="container mx-auto px-4 pt-20 pb-12 animate-fade-in">
+      <main className="container mx-auto px-4 pt-6 pb-12 animate-fade-in">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div className="text-left">
