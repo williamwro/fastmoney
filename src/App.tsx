@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <BillForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/users" 
+                element={
+                  <ProtectedRoute>
+                    <Users />
                   </ProtectedRoute>
                 } 
               />
