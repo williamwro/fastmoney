@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
-import UserManagement from '@/components/UserManagement';
+import UserManagement from '@/components/users/UserManagement';
 import { Navigate } from 'react-router-dom';
 
 const Users = () => {
