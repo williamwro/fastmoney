@@ -10,7 +10,7 @@ type MobileMenuProps = {
   closeMenu: () => void;
   isAuthenticated: boolean;
   user: { name: string } | null;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ 
