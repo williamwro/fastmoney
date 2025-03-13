@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 
@@ -26,10 +26,6 @@ const Login = () => {
         </div>
       </div>
     );
-  }
-  
-  if (isAuthenticated) {
-    return null; // Don't render anything during redirect
   }
   
   return (

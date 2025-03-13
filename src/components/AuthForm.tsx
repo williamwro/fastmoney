@@ -50,14 +50,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
       }
     } catch (error) {
       // Error is already handled by auth context
-      console.error(error);
+      console.error('Error during authentication:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
   
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-card shadow-sm rounded-lg border">
+    <div className="w-full max-w-md mx-auto p-6 bg-white shadow-sm rounded-lg border">
       <AuthFormHeader title={isLogin ? 'Login' : 'Criar Conta'} />
       
       <Form {...form}>
@@ -70,7 +70,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <InputWithIcon icon={<User className="h-4 w-4 text-gray-400 dark:text-gray-500" />} placeholder="Seu nome" {...field} />
+                    <InputWithIcon icon={<User className="h-4 w-4 text-gray-400" />} placeholder="Seu nome" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,7 +85,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <InputWithIcon icon={<Mail className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="email" placeholder="seu@email.com" {...field} />
+                  <InputWithIcon icon={<Mail className="h-4 w-4 text-gray-400" />} type="email" placeholder="seu@email.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +99,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="password" placeholder="********" {...field} />
+                  <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400" />} type="password" placeholder="********" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -114,7 +114,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 <FormItem>
                   <FormLabel>Confirmar Senha</FormLabel>
                   <FormControl>
-                    <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400 dark:text-gray-500" />} type="password" placeholder="********" {...field} />
+                    <InputWithIcon icon={<Lock className="h-4 w-4 text-gray-400" />} type="password" placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

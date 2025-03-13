@@ -10,7 +10,7 @@ import { ThemeProvider } from './components/ThemeProvider'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="light">
         <AuthProvider>
           <App />
         </AuthProvider>
