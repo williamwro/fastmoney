@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -72,7 +71,6 @@ const BillForm = () => {
   }, [id, getBill, isEditMode, billsLoading]);
 
   useEffect(() => {
-    // Carregar categorias do banco de dados
     const fetchCategories = async () => {
       try {
         setLoadingCategories(true);
@@ -110,7 +108,6 @@ const BillForm = () => {
     },
   });
   
-  // Populate form with bill data when in edit mode and bill is loaded
   useEffect(() => {
     if (bill) {
       form.reset({
@@ -129,7 +126,6 @@ const BillForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Convert string values to appropriate types
       const formattedBill = {
         vendorName: values.vendorName,
         amount: parseFloat(values.amount),
@@ -155,16 +151,29 @@ const BillForm = () => {
     }
   };
 
-  // Handler for when category is selected
   const handleCategoryChange = (categoryId: string) => {
-    // Encontrar a categoria pelo ID
     const selectedCategory = categories.find(cat => cat.id === categoryId);
     
     if (selectedCategory) {
-      // Atualizar tanto o id_categoria quanto o campo category (para compatibilidade com código existente)
       form.setValue('id_categoria', categoryId);
       form.setValue('category', selectedCategory.nome_categoria);
     }
+  };
+
+  const formatAmountValue = (value: string) => {
+    let numericValue = value.replace(/[^\d.]/g, '');
+    
+    const parts = numericValue.split('.');
+    if (parts.length > 2) {
+      numericValue = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    if (numericValue.includes('.')) {
+      const [wholePart, decimalPart] = numericValue.split('.');
+      return `${wholePart}.${decimalPart.slice(0, 2)}`;
+    }
+    
+    return numericValue;
   };
   
   if (authLoading || (isEditMode && billsLoading) || loadingCategories) {
@@ -226,11 +235,28 @@ const BillForm = () => {
                         <FormLabel>Valor (R$)</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
-                            step="0.01" 
-                            min="0.01" 
                             placeholder="0,00" 
                             {...field} 
+                            onChange={(e) => {
+                              const formattedValue = formatAmountValue(e.target.value);
+                              field.onChange(formattedValue);
+                            }}
+                            onBlur={(e) => {
+                              let value = e.target.value;
+                              if (value && !value.includes('.')) {
+                                value = `${value}.00`;
+                                field.onChange(value);
+                              } else if (value && value.includes('.')) {
+                                const [whole, decimal = ''] = value.split('.');
+                                if (decimal.length === 0) {
+                                  value = `${whole}.00`;
+                                } else if (decimal.length === 1) {
+                                  value = `${whole}.${decimal}0`;
+                                }
+                                field.onChange(value);
+                              }
+                              field.onBlur();
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
