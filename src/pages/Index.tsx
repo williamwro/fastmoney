@@ -46,7 +46,7 @@ const Index = () => {
       <main className="container mx-auto px-4 pt-20 pb-12 animate-fade-in">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-            <div>
+            <div className="text-left">
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-gray-500 mt-1">
                 Gerencie suas contas a pagar de forma eficiente
