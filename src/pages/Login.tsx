@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -8,9 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Info, Mail } from 'lucide-react';
 
 const Login = () => {
-  const { resendConfirmationEmail } = useAuth();
+  const { resendConfirmationEmail, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
+  const navigate = useNavigate();
+  
+  // Add effect to redirect to bills page if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/bills');
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleResendEmail = async () => {
     if (!email) {

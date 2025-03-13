@@ -25,6 +25,8 @@ export const useLogin = () => {
       
       console.log('Login successful:', data.user?.id);
       toast.success('Login bem-sucedido');
+      
+      // Return session data to confirm successful authentication
       return data;
     } catch (error) {
       const authError = error as AuthError;

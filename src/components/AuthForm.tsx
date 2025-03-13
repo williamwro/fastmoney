@@ -31,11 +31,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   const isLogin = type === 'login';
   const { schema, defaultValues } = useAuthFormSchema(isLogin);
   
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
-  });
-  
   // Pass email to parent component when it changes
   const emailValue = form.watch('email');
   
@@ -45,7 +40,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
     }
   }, [emailValue, onEmailChange]);
   
-  // We don't need to redirect here as the Login component will handle this
+  // Redirect to bills page after successful authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/bills');
+    }
+  }, [isAuthenticated, navigate]);
+  
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
+  });
   
   const onSubmit = async (values: any) => {
     if (isSubmitting || authLoading) return;
@@ -58,11 +63,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       if (isLogin) {
         const { email, password } = values;
         await login(email, password);
-        // Toast is now handled in useAuthOperations
+        console.log('Login successful, authenticated:', isAuthenticated);
+        // No need to navigate here as the useEffect will handle it
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);
-        // Toast is now handled in useAuthOperations
       }
     } catch (error: any) {
       console.error(`${isLogin ? 'Login' : 'Signup'} error:`, error);
