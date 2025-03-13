@@ -71,7 +71,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     isLoading 
   });
   
-  // If authentication is still being checked, show loading
+  // Mostrar tela de carregamento enquanto verifica autenticação
   if (!authChecked) {
     console.log("AuthRoute - Autenticação ainda sendo verificada");
     return (
@@ -84,7 +84,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Only redirect if both authChecked is true AND user is authenticated
+  // Redirecionar apenas se estiver autenticado
   if (authChecked && isAuthenticated) {
     console.log("AuthRoute - Usuário autenticado, redirecionando para /bills");
     return <Navigate to="/bills" replace />;
