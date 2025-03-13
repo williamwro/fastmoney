@@ -1,6 +1,4 @@
 
-import { User } from '@supabase/supabase-js';
-
 export type UserData = {
   id: string;
   name: string;
@@ -15,5 +13,5 @@ export type AuthContextType = {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };

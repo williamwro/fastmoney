@@ -13,13 +13,6 @@ export const useAuthOperations = () => {
     try {
       console.log('Attempting login with:', { email, passwordLength: password.length });
       
-      // First, check if user exists
-      const { data: userExists } = await supabase.auth.admin.getUserByEmail(email);
-      
-      if (!userExists) {
-        console.log('User does not exist in Supabase auth system');
-      }
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password

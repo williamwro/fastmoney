@@ -10,7 +10,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { login, signup, logout: logoutOperation } = useAuthOperations();
+  const { login: authLogin, signup, logout: logoutOperation } = useAuthOperations();
 
   useEffect(() => {
     // Check active session and set up auth state listener
@@ -48,6 +48,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     initializeAuth();
   }, []);
+
+  // Wrap the login function to match the expected type
+  const login = async (email: string, password: string) => {
+    await authLogin(email, password);
+  };
 
   const logout = async () => {
     const success = await logoutOperation();
