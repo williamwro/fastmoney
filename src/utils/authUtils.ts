@@ -77,14 +77,14 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
 };
 
 // Create a profile for the user in the profiles table
-export const createUserProfile = async (userId: string, name: string, email: string) => {
+export const createUserProfile = async (userId: string, name: string, email: string, isAdmin = false) => {
   const { error } = await supabase
     .from('profiles')
     .insert({
       id: userId,
       name,
       email,
-      is_admin: email === ADMIN_EMAIL
+      is_admin: isAdmin || email === ADMIN_EMAIL
     });
     
   if (error) {
