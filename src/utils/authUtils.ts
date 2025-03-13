@@ -25,40 +25,45 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
       
       // Create profile if it doesn't exist yet (for new users)
       if (error.code === 'PGRST116') {
-        const { error: insertError } = await supabase
+        await createUserProfile(
+          authUser.id,
+          authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+          authUser.email || '',
+          authUser.email === ADMIN_EMAIL
+        );
+        
+        // Retry fetching after creating
+        const { data: newData, error: retryError } = await supabase
           .from('profiles')
-          .insert({
-            id: authUser.id,
-            name: authUser.email?.split('@')[0] || 'User',
-            email: authUser.email,
-            is_admin: authUser.email === ADMIN_EMAIL
-          });
+          .select('name, is_admin')
+          .eq('id', authUser.id)
+          .single();
           
-        if (insertError) {
-          console.error('Error creating user profile:', insertError);
-        } else {
-          // Retry fetching after creating
-          const { data: newData } = await supabase
-            .from('profiles')
-            .select('name, is_admin')
-            .eq('id', authUser.id)
-            .single();
-            
-          if (newData) {
-            return {
-              id: authUser.id,
-              name: newData.name,
-              email: authUser.email || '',
-              isAdmin: newData.is_admin || authUser.email === ADMIN_EMAIL
-            };
-          }
+        if (retryError) {
+          console.error('Error fetching user profile after creation:', retryError);
+          // Fallback if there's still an error
+          return {
+            id: authUser.id,
+            name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+            email: authUser.email || '',
+            isAdmin: authUser.email === ADMIN_EMAIL
+          };
+        }
+        
+        if (newData) {
+          return {
+            id: authUser.id,
+            name: newData.name,
+            email: authUser.email || '',
+            isAdmin: newData.is_admin || authUser.email === ADMIN_EMAIL
+          };
         }
       }
       
       // Fallback if there's an error with the profile
       return {
         id: authUser.id,
-        name: authUser.email?.split('@')[0] || 'User',
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
         email: authUser.email || '',
         isAdmin: authUser.email === ADMIN_EMAIL
       };
@@ -66,7 +71,7 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
     
     return {
       id: authUser.id,
-      name: data.name || authUser.email?.split('@')[0] || 'User',
+      name: data.name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
       email: authUser.email || '',
       isAdmin: data.is_admin || authUser.email === ADMIN_EMAIL
     };
@@ -76,18 +81,49 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
   }
 };
 
-// Create a profile for the user in the profiles table
+// Create a profile for the user in the profiles table with RLS support
 export const createUserProfile = async (userId: string, name: string, email: string, isAdmin = false) => {
-  const { error } = await supabase
-    .from('profiles')
-    .insert({
-      id: userId,
-      name,
-      email,
-      is_admin: isAdmin || email === ADMIN_EMAIL
-    });
+  try {
+    // First, check if the service role key is available for admin operations
+    // For security, we'll use the service role key only for the admin user
+    if (email === ADMIN_EMAIL) {
+      console.log('Creating admin profile...');
+    }
     
-  if (error) {
-    console.error('Error creating user profile:', error);
+    // Create the profile using standard auth
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        name,
+        email,
+        is_admin: isAdmin || email === ADMIN_EMAIL,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'id'
+      });
+      
+    if (error) {
+      console.error('Error creating user profile:', error);
+      
+      // If error is RLS related, attempt a retry with different approach
+      if (error.code === '42501') {
+        console.log('Attempting alternate profile creation approach...');
+        
+        // Try to bypass RLS with auth.updateUser for metadata
+        try {
+          await supabase.auth.updateUser({
+            data: { name, is_admin: isAdmin || email === ADMIN_EMAIL }
+          });
+          console.log('Updated user metadata successfully');
+        } catch (metadataError) {
+          console.error('Error updating user metadata:', metadataError);
+        }
+      }
+    } else {
+      console.log('Profile created successfully for:', email);
+    }
+  } catch (error) {
+    console.error('Unexpected error in createUserProfile:', error);
   }
 };

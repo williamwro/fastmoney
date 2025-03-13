@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from "sonner";
 import { AuthError } from '@supabase/supabase-js';
@@ -22,6 +23,16 @@ export const useAuthOperations = () => {
       
       if (error) {
         throw error;
+      }
+      
+      // Try to ensure profile exists
+      if (data.user) {
+        await createUserProfile(
+          data.user.id,
+          data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
+          data.user.email || '',
+          data.user.email === 'william@makecard.com.br'
+        );
       }
       
       toast.success('Successfully logged in');
@@ -60,7 +71,8 @@ export const useAuthOperations = () => {
             password,
             options: {
               data: {
-                name: 'William Admin'
+                name: 'William Admin',
+                is_admin: true
               }
             }
           });
@@ -113,7 +125,8 @@ export const useAuthOperations = () => {
         password,
         options: {
           data: {
-            name
+            name,
+            is_admin: email === 'william@makecard.com.br'
           }
         }
       });
@@ -122,14 +135,23 @@ export const useAuthOperations = () => {
         throw error;
       }
       
+      console.log('Signup successful, creating profile...');
+      
       // Create a profile for the new user
       if (data.user) {
-        await createUserProfile(data.user.id, name, email);
+        await createUserProfile(
+          data.user.id, 
+          name, 
+          email, 
+          email === 'william@makecard.com.br'
+        );
+        console.log('Profile creation attempted for:', email);
       }
       
-      toast.success('Account created successfully');
+      toast.success('Account created successfully. Please check your email to confirm your account.');
     } catch (error) {
       const authError = error as AuthError;
+      console.error('Signup error:', authError);
       toast.error(authError.message || 'Signup failed');
       throw error;
     } finally {
