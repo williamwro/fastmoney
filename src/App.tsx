@@ -88,7 +88,7 @@ const AppContent = () => {
       <Toaster />
       <Sonner />
       <Routes>
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/bills" element={<ProtectedRoute><Bills /></ProtectedRoute>} />
         <Route path="/bills/new" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
         <Route path="/bills/:id/edit" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
