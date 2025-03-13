@@ -26,7 +26,7 @@ const SignUp = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">BillCraft</h1>
+          <h1 className="text-3xl font-bold text-white">FinTec</h1>
           <p className="mt-2 text-white/80">
             Crie sua conta para gerenciar suas contas a pagar
           </p>
@@ -47,7 +47,7 @@ const SignUp = () => {
       </div>
       
       <footer className="absolute bottom-4 text-center text-white/60 text-xs">
-        &copy; {new Date().getFullYear()} BillCraft - Todos os direitos reservados
+        &copy; {new Date().getFullYear()} FinTec - Todos os direitos reservados
       </footer>
     </div>
   );
