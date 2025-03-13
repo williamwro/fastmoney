@@ -20,10 +20,11 @@ export const useAuthOperations = () => {
       });
       
       if (error) {
+        console.error('Login failed with error:', error);
         throw error;
       }
       
-      toast.success('Successfully logged in');
+      console.log('Login successful:', data.user?.id);
       return data;
     } catch (error) {
       const authError = error as AuthError;
@@ -95,29 +96,42 @@ export const useAuthOperations = () => {
       });
       
       if (error) {
+        console.error('Signup error:', error);
         throw error;
       }
       
-      console.log('Signup successful, creating profile...', data.user);
+      console.log('Signup successful, creating profile...', data.user?.id);
       
       // Create a profile for the new user
       if (data.user) {
         const isAdmin = email === 'william@makecard.com.br';
         
-        // Create the profile
-        await createUserProfile(
-          data.user.id, 
-          name, 
-          email, 
-          isAdmin
-        );
+        // Create the profile with multiple retries
+        let profileCreated = false;
+        try {
+          profileCreated = await createUserProfile(
+            data.user.id, 
+            name, 
+            email, 
+            isAdmin
+          );
+          
+          console.log('Profile creation result:', profileCreated);
+        } catch (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
+        
+        // Even if profile creation failed, continue with signup
+        toast.success('Conta criada com sucesso. Por favor, verifique seu email para confirmar sua conta.');
+      } else {
+        toast.warning('Conta criada, mas houve um problema ao configurar seu perfil.');
       }
       
-      toast.success('Account created successfully. Please check your email to confirm your account.');
+      return data;
     } catch (error) {
       const authError = error as AuthError;
       console.error('Signup error:', authError);
-      toast.error(authError.message || 'Signup failed');
+      toast.error(authError.message || 'Falha no cadastro');
       throw error;
     } finally {
       setIsLoading(false);
@@ -125,15 +139,23 @@ export const useAuthOperations = () => {
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      console.error('Error signing out:', error);
-      toast.error('Error signing out');
+    console.log('Attempting to log out');
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+        toast.error('Erro ao sair da conta');
+        return false;
+      } else {
+        console.log('Logged out successfully');
+        toast.success('Sessão encerrada com sucesso');
+        return true;
+      }
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      toast.error('Erro ao sair da conta');
       return false;
-    } else {
-      toast.success('Logged out successfully');
-      return true;
     }
   };
 

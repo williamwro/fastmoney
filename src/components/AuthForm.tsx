@@ -17,6 +17,7 @@ import {
 import { AuthFormHeader } from './auth/AuthFormHeader';
 import { InputWithIcon } from './auth/InputWithIcon';
 import { useAuthFormSchema } from './auth/useAuthFormSchema';
+import { toast } from 'sonner';
 
 interface AuthFormProps {
   type: 'login' | 'signup';
@@ -24,7 +25,7 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
-  const { login, signup } = useAuth();
+  const { login, signup, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -45,22 +46,31 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
     }
   }, [emailValue, onEmailChange]);
   
+  // Redirect if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+  
   const onSubmit = async (values: any) => {
     setIsSubmitting(true);
     
     try {
+      console.log(`Attempting ${isLogin ? 'login' : 'signup'} with:`, values);
+      
       if (isLogin) {
         const { email, password } = values;
         await login(email, password);
-        navigate('/');
+        toast.success('Login bem-sucedido');
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);
-        navigate('/');
+        toast.success('Conta criada com sucesso');
       }
-    } catch (error) {
-      // Error is already handled by auth context
-      console.error(error);
+    } catch (error: any) {
+      console.error(`${isLogin ? 'Login' : 'Signup'} error:`, error);
+      toast.error(`Erro: ${error?.message || 'Falha na operação'}`);
     } finally {
       setIsSubmitting(false);
     }

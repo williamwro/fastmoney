@@ -10,6 +10,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const { login: authLogin, signup, logout: logoutOperation } = useAuthOperations();
 
   useEffect(() => {
@@ -17,33 +18,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       setIsLoading(true);
       
-      // Check for existing session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        const userData = await updateUserState(session.user);
-        setUser(userData);
-      }
-      
-      // Set up auth state change listener
-      const { data: { subscription } } = await supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          if (session) {
-            const userData = await updateUserState(session.user);
-            setUser(userData);
-          } else {
-            setUser(null);
-          }
-          setIsLoading(false);
+      try {
+        // Check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('Session found:', session.user.id);
+          const userData = await updateUserState(session.user);
+          setUser(userData);
+        } else {
+          console.log('No active session found');
+          setUser(null);
         }
-      );
-      
-      setIsLoading(false);
-      
-      // Cleanup subscription on unmount
-      return () => {
-        subscription.unsubscribe();
-      };
+        
+        // Set up auth state change listener
+        const { data: { subscription } } = await supabase.auth.onAuthStateChange(
+          async (_event, session) => {
+            console.log('Auth state changed:', _event, session?.user?.id);
+            if (session) {
+              const userData = await updateUserState(session.user);
+              setUser(userData);
+            } else {
+              setUser(null);
+            }
+            setIsLoading(false);
+          }
+        );
+        
+        setAuthChecked(true);
+        setIsLoading(false);
+        
+        // Cleanup subscription on unmount
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setUser(null);
+        setIsLoading(false);
+        setAuthChecked(true);
+      }
     };
     
     initializeAuth();
@@ -68,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         isAdmin: !!user?.isAdmin,
+        authChecked,
         login,
         signup,
         logout,

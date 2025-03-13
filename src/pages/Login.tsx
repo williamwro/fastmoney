@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
 import AuthForm from '@/components/AuthForm';
@@ -9,23 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Info, Mail } from 'lucide-react';
 
 const Login = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, authChecked } = useAuth();
   const { resendConfirmationEmail } = useAuthOperations();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
+  const navigate = useNavigate();
   
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="animate-pulse space-y-2 flex flex-col items-center">
-          <div className="h-10 w-36 bg-gray-200 rounded"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (isAuthenticated) {
+  // Only redirect if auth check is complete and user is authenticated
+  if (authChecked && isAuthenticated && !isLoading) {
+    console.log('Already authenticated, redirecting to dashboard');
     return <Navigate to="/" replace />;
   }
   

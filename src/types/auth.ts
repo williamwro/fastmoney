@@ -11,6 +11,7 @@ export type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  authChecked: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;

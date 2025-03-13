@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
 import Navbar from '@/components/Navbar';
@@ -13,8 +13,9 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, authChecked } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
+  const navigate = useNavigate();
   
   const overdueBills = getOverdueBills().slice(0, 3);
   const dueSoonBills = getDueSoonBills().slice(0, 3);
@@ -29,6 +30,14 @@ const Index = () => {
     }
   }, [overdueBills.length, isAuthenticated]);
   
+  // Redirect to login if not authenticated and auth check is complete
+  useEffect(() => {
+    if (authChecked && !isAuthenticated && !authLoading) {
+      console.log('Not authenticated, redirecting to login');
+      navigate('/login');
+    }
+  }, [authChecked, isAuthenticated, authLoading, navigate]);
+  
   if (authLoading || billsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -40,6 +49,7 @@ const Index = () => {
     );
   }
   
+  // Second check to ensure we don't show dashboard to unauthenticated users
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
