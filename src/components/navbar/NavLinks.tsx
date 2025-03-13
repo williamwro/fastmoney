@@ -1,34 +1,39 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText } from 'lucide-react';
+import { Home, FileText, Users } from 'lucide-react';
 
 type NavLinkItem = {
   name: string;
   path: string;
   icon: React.ReactNode;
+  adminOnly?: boolean;
 };
 
 type NavLinksProps = {
   mobile?: boolean;
   closeMenu?: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 };
 
-const NavLinks: React.FC<NavLinksProps> = ({ mobile = false, closeMenu, isAuthenticated }) => {
+const NavLinks: React.FC<NavLinksProps> = ({ mobile = false, closeMenu, isAuthenticated, isAdmin }) => {
   const location = useLocation();
   
   const navigation: NavLinkItem[] = [
     { name: 'Dashboard', path: '/', icon: <Home className="h-5 w-5" /> },
     { name: 'Contas', path: '/bills', icon: <FileText className="h-5 w-5" /> },
+    { name: 'Usuários', path: '/users', icon: <Users className="h-5 w-5" />, adminOnly: true },
   ];
   
   if (!isAuthenticated) return null;
   
+  const filteredNavigation = navigation.filter(item => !item.adminOnly || (item.adminOnly && isAdmin));
+  
   if (mobile) {
     return (
       <>
-        {navigation.map((item) => (
+        {filteredNavigation.map((item) => (
           <Link
             key={item.name}
             to={item.path}
@@ -51,7 +56,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ mobile = false, closeMenu, isAuthen
   
   return (
     <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-      {navigation.map((item) => (
+      {filteredNavigation.map((item) => (
         <Link
           key={item.name}
           to={item.path}

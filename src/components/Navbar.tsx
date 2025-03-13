@@ -12,7 +12,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
   
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Brand />
-            <NavLinks isAuthenticated={isAuthenticated} />
+            <NavLinks isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
           </div>
           
           <div className="flex items-center gap-2">
@@ -49,6 +49,7 @@ const Navbar: React.FC = () => {
         isOpen={isOpen} 
         closeMenu={closeMenu} 
         isAuthenticated={isAuthenticated}
+        isAdmin={isAdmin}
         user={user}
         logout={logout}
       />

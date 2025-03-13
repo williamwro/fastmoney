@@ -46,9 +46,9 @@ const Login = () => {
             <div className="mt-4 text-xs text-blue-100/70">
               <p>Para fins de demonstração, use:</p>
               <p className="mt-1 font-mono">
-                Email: admin@example.com
+                Admin: william@makecard.com.br
                 <br />
-                Senha: password123
+                Senha: Kb109733*
               </p>
             </div>
           </div>
