@@ -25,11 +25,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Componente para rotas protegidas
+// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading, authChecked } = useAuth();
   
-  // Se a autenticação ainda está sendo verificada, mostra um loading
+  // If authentication is still being checked, show loading indicator
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -41,7 +41,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Mostrar outro estado de loading durante operações de autenticação
+  // Show loading state during authentication operations
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -53,7 +53,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Se não estiver autenticado após a verificação, redireciona para login
+  // Redirect to login if not authenticated after checking
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -61,11 +61,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Componente para rotas de autenticação (login/signup)
+// Component for auth routes (login/signup)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { authChecked, isLoading } = useAuth();
+  const { isAuthenticated, authChecked, isLoading } = useAuth();
   
-  // Se a autenticação ainda está sendo verificada, mostra um loading
+  // If authentication is still being checked, show loading
   if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -77,11 +77,16 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Renderiza diretamente as rotas de autenticação
+  // If user is already authenticated, redirect to bills
+  if (isAuthenticated) {
+    return <Navigate to="/bills" replace />;
+  }
+  
+  // Render auth routes directly
   return <>{children}</>;
 };
 
-// Componente principal do App
+// Main App component
 const AppContent = () => {
   return (
     <>

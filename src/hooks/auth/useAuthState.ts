@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { UserData } from '@/types/auth';
@@ -49,7 +50,6 @@ export const useAuthState = () => {
             if (event === 'SIGNED_OUT') {
               console.log('Usuário deslogou, limpando o estado');
               setUser(null);
-              setIsLoading(false); // Ensure we're not in loading state after logout
               return;
             }
             

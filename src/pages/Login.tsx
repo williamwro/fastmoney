@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,14 +11,6 @@ const Login = () => {
   const { resendConfirmationEmail, isAuthenticated, authChecked } = useAuth();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
-  const navigate = useNavigate();
-  
-  // Only redirect if we've confirmed the auth state and user is authenticated
-  useEffect(() => {
-    if (authChecked && isAuthenticated) {
-      navigate('/bills');
-    }
-  }, [isAuthenticated, authChecked, navigate]);
   
   const handleResendEmail = async () => {
     if (!email) {
