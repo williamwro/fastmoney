@@ -38,7 +38,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isAdmin: data.user.email === 'william@makecard.com.br' || data.user.user_metadata?.is_admin === true
         });
         
-        // Verificar dados definidos para debug
         return data;
       } else {
         console.error('No user data found after successful login');

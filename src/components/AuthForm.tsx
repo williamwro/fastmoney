@@ -47,13 +47,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
     }
   }, [emailValue, onEmailChange]);
   
-  // Redirect to bills page after successful authentication
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User is authenticated, navigating to /bills');
-      navigate('/bills');
-    }
-  }, [isAuthenticated, navigate]);
+  // Remove direct navigation in useEffect as this is now handled by AuthRoute
   
   const onSubmit = async (values: any) => {
     if (isSubmitting || authLoading) return;
@@ -67,7 +61,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
         const { email, password } = values;
         await login(email, password);
         console.log('Login successful, waiting for auth state update');
-        // Navigation happens in useEffect when isAuthenticated changes
+        // Navigation happens in AuthRoute component when isAuthenticated changes
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);
