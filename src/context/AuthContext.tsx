@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (success) {
         setUser(null);
       }
-      return true;
+      return success;
     } catch (error) {
       console.error('Logout error:', error);
       return false;
