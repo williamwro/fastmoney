@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { Bill, BillCategory, useBills } from '@/context/BillContext';
+import { Bill, useBills } from '@/context/BillContext';
+import { Category } from '@/hooks/useCategoryManagement';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +39,8 @@ const billSchema = z.object({
   dueDate: z.string().refine(val => !isNaN(Date.parse(val)), {
     message: 'Data de vencimento inválida',
   }),
-  category: z.enum(['utilities', 'rent', 'insurance', 'subscription', 'services', 'supplies', 'taxes', 'other']),
+  category: z.string(),
+  id_categoria: z.string().nullable(),
   status: z.enum(['paid', 'unpaid']),
   notes: z.string().optional(),
 });
@@ -52,6 +55,8 @@ const BillForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bill, setBill] = useState<Bill | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   
   const isEditMode = !!id;
   
@@ -65,6 +70,32 @@ const BillForm = () => {
       }
     }
   }, [id, getBill, isEditMode, billsLoading]);
+
+  useEffect(() => {
+    // Carregar categorias do banco de dados
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('nome_categoria', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+        setError('Falha ao carregar categorias');
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
   
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
@@ -72,7 +103,8 @@ const BillForm = () => {
       vendorName: '',
       amount: '',
       dueDate: new Date().toISOString().split('T')[0],
-      category: 'other',
+      category: '',
+      id_categoria: null,
       status: 'unpaid',
       notes: '',
     },
@@ -86,6 +118,7 @@ const BillForm = () => {
         amount: bill.amount.toString(),
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
+        id_categoria: bill.id_categoria,
         status: bill.status,
         notes: bill.notes || '',
       });
@@ -101,7 +134,8 @@ const BillForm = () => {
         vendorName: values.vendorName,
         amount: parseFloat(values.amount),
         dueDate: values.dueDate,
-        category: values.category as BillCategory,
+        category: values.category,
+        id_categoria: values.id_categoria,
         status: values.status,
         notes: values.notes,
       };
@@ -120,8 +154,20 @@ const BillForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Handler for when category is selected
+  const handleCategoryChange = (categoryId: string) => {
+    // Encontrar a categoria pelo ID
+    const selectedCategory = categories.find(cat => cat.id === categoryId);
+    
+    if (selectedCategory) {
+      // Atualizar tanto o id_categoria quanto o campo category (para compatibilidade com código existente)
+      form.setValue('id_categoria', categoryId);
+      form.setValue('category', selectedCategory.nome_categoria);
+    }
+  };
   
-  if (authLoading || (isEditMode && billsLoading)) {
+  if (authLoading || (isEditMode && billsLoading) || loadingCategories) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -135,17 +181,6 @@ const BillForm = () => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
-  const categoryOptions = [
-    { value: 'utilities', label: 'Utilidades' },
-    { value: 'rent', label: 'Aluguel' },
-    { value: 'insurance', label: 'Seguro' },
-    { value: 'subscription', label: 'Assinatura' },
-    { value: 'services', label: 'Serviços' },
-    { value: 'supplies', label: 'Suprimentos' },
-    { value: 'taxes', label: 'Impostos' },
-    { value: 'other', label: 'Outros' },
-  ];
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -221,14 +256,14 @@ const BillForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
-                    name="category"
+                    name="id_categoria"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Categoria</FormLabel>
                         <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          value={field.value}
+                          onValueChange={(value) => handleCategoryChange(value)} 
+                          defaultValue={field.value || undefined}
+                          value={field.value || undefined}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -236,11 +271,11 @@ const BillForm = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {categoryOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
+                            {categories.map(category => (
+                              <SelectItem key={category.id} value={category.id}>
                                 <div className="flex items-center">
-                                  <span className="mr-2">{getCategoryInfo(option.value).icon}</span>
-                                  <span>{option.label}</span>
+                                  <span className="mr-2">{getCategoryInfo(category.nome_categoria.toLowerCase()).icon}</span>
+                                  <span>{category.nome_categoria}</span>
                                 </div>
                               </SelectItem>
                             ))}

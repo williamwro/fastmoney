@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Check, ChevronDown } from 'lucide-react';
+import { Search, Filter, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,32 +11,49 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { BillCategory, useBills } from '@/context/BillContext';
+import { useBills } from '@/context/BillContext';
 import BillCard from '@/components/BillCard';
 import { getCategoryInfo } from '@/utils/formatters';
+import { supabase } from '@/integrations/supabase/client';
+import { Category } from '@/hooks/useCategoryManagement';
 
 const BillsList: React.FC = () => {
   const { filterBills, bills, isLoading } = useBills();
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>('all');
-  const [category, setCategory] = useState<BillCategory | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [filteredBills, setFilteredBills] = useState(bills);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   
   useEffect(() => {
-    setFilteredBills(filterBills(status, category, searchQuery));
-  }, [bills, status, category, searchQuery, filterBills]);
+    // Carregar categorias do banco de dados
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('nome_categoria', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
   
-  const categoryOptions: Array<{ value: BillCategory | 'all', label: string }> = [
-    { value: 'all', label: 'Todas Categorias' },
-    { value: 'utilities', label: 'Utilidades' },
-    { value: 'rent', label: 'Aluguel' },
-    { value: 'insurance', label: 'Seguro' },
-    { value: 'subscription', label: 'Assinatura' },
-    { value: 'services', label: 'Serviços' },
-    { value: 'supplies', label: 'Suprimentos' },
-    { value: 'taxes', label: 'Impostos' },
-    { value: 'other', label: 'Outros' },
-  ];
+  useEffect(() => {
+    setFilteredBills(filterBills(status, categoryFilter, searchQuery));
+  }, [bills, status, categoryFilter, searchQuery, filterBills]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -47,10 +64,10 @@ const BillsList: React.FC = () => {
   };
   
   const handleCategoryChange = (value: string) => {
-    setCategory(value as BillCategory | 'all');
+    setCategoryFilter(value);
   };
   
-  if (isLoading) {
+  if (isLoading || loadingCategories) {
     return (
       <div className="w-full flex items-center justify-center py-12">
         <div className="animate-pulse flex flex-col items-center">
@@ -85,13 +102,14 @@ const BillsList: React.FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuRadioGroup value={category} onValueChange={handleCategoryChange}>
-                {categoryOptions.map((option) => (
-                  <DropdownMenuRadioItem key={option.value} value={option.value}>
-                    {option.value !== 'all' && (
-                      <span className="mr-2">{getCategoryInfo(option.value).icon}</span>
-                    )}
-                    {option.label}
+              <DropdownMenuRadioGroup value={categoryFilter} onValueChange={handleCategoryChange}>
+                <DropdownMenuRadioItem value="all">
+                  Todas Categorias
+                </DropdownMenuRadioItem>
+                {categories.map(category => (
+                  <DropdownMenuRadioItem key={category.id} value={category.nome_categoria}>
+                    <span className="mr-2">{getCategoryInfo(category.nome_categoria.toLowerCase()).icon}</span>
+                    {category.nome_categoria}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>

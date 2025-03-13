@@ -1,25 +1,15 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
-
-export type BillCategory = 
-  | 'utilities' 
-  | 'rent' 
-  | 'insurance' 
-  | 'subscription' 
-  | 'services' 
-  | 'supplies'
-  | 'taxes'
-  | 'other';
 
 export type Bill = {
   id: string;
   vendorName: string;
   amount: number;
   dueDate: string;
-  category: BillCategory;
+  category: string;
+  id_categoria: string | null;
   status: 'paid' | 'unpaid';
   notes?: string;
   createdAt: string;
@@ -36,7 +26,7 @@ type BillContextType = {
   updateBill: (id: string, bill: Partial<BillInput>) => Promise<void>;
   deleteBill: (id: string) => Promise<void>;
   markBillAsPaid: (id: string) => Promise<void>;
-  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: BillCategory | 'all', search?: string) => Bill[];
+  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: string | 'all', search?: string) => Bill[];
   getTotalDue: () => number;
   getOverdueBills: () => Bill[];
   getDueSoonBills: () => Bill[];
@@ -74,7 +64,8 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
           vendorName: bill.vendor_name,
           amount: Number(bill.amount),
           dueDate: bill.due_date,
-          category: bill.category as BillCategory,
+          category: bill.category,
+          id_categoria: bill.id_categoria,
           status: bill.status as 'paid' | 'unpaid',
           notes: bill.notes,
           createdAt: bill.created_at,
@@ -110,6 +101,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         amount: billInput.amount,
         due_date: billInput.dueDate,
         category: billInput.category,
+        id_categoria: billInput.id_categoria,
         status: billInput.status,
         notes: billInput.notes,
         user_id: user.id
@@ -131,7 +123,8 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         vendorName: data.vendor_name,
         amount: Number(data.amount),
         dueDate: data.due_date,
-        category: data.category as BillCategory,
+        category: data.category,
+        id_categoria: data.id_categoria,
         status: data.status as 'paid' | 'unpaid',
         notes: data.notes,
         createdAt: data.created_at,
@@ -160,6 +153,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (billUpdates.amount !== undefined) dbUpdates.amount = billUpdates.amount;
       if (billUpdates.dueDate) dbUpdates.due_date = billUpdates.dueDate;
       if (billUpdates.category) dbUpdates.category = billUpdates.category;
+      if (billUpdates.id_categoria !== undefined) dbUpdates.id_categoria = billUpdates.id_categoria;
       if (billUpdates.status) dbUpdates.status = billUpdates.status;
       if (billUpdates.notes !== undefined) dbUpdates.notes = billUpdates.notes;
       
@@ -226,7 +220,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const filterBills = (
     status: 'paid' | 'unpaid' | 'all' = 'all', 
-    category: BillCategory | 'all' = 'all',
+    category: string | 'all' = 'all',
     search: string = ''
   ) => {
     return bills.filter(bill => {

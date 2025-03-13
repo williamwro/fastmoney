@@ -16,6 +16,7 @@ export type Database = {
           created_at: string | null
           due_date: string
           id: string
+          id_categoria: string | null
           notes: string | null
           status: string
           updated_at: string | null
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string | null
           due_date: string
           id?: string
+          id_categoria?: string | null
           notes?: string | null
           status: string
           updated_at?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string | null
           due_date?: string
           id?: string
+          id_categoria?: string | null
           notes?: string | null
           status?: string
           updated_at?: string | null
@@ -48,6 +51,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "bills_id_categoria_fkey"
+            columns: ["id_categoria"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bills_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -55,6 +65,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          nome_categoria: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome_categoria: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome_categoria?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
