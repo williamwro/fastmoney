@@ -29,7 +29,13 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading, authChecked } = useAuth();
   
-  // If authentication is still being checked, show loading indicator
+  console.log("ProtectedRoute - Estado de autenticação:", { 
+    isAuthenticated, 
+    authChecked, 
+    isLoading 
+  });
+  
+  // Se a autenticação ainda está sendo verificada, mostrar indicador de carregamento
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -41,7 +47,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Show loading state during authentication operations
+  // Mostrar estado de carregamento durante operações de autenticação
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -53,11 +59,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Redirect to login if not authenticated after checking
+  // Redirecionar para login se não estiver autenticado após verificação
   if (!isAuthenticated) {
+    console.log("ProtectedRoute - Usuário não autenticado, redirecionando para /login");
     return <Navigate to="/login" replace />;
   }
   
+  console.log("ProtectedRoute - Usuário autenticado, renderizando conteúdo protegido");
   return <>{children}</>;
 };
 
@@ -85,7 +93,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   // Redirecionar apenas se estiver autenticado
-  if (authChecked && isAuthenticated) {
+  if (isAuthenticated) {
     console.log("AuthRoute - Usuário autenticado, redirecionando para /bills");
     return <Navigate to="/bills" replace />;
   }

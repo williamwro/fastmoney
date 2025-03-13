@@ -18,17 +18,36 @@ export const useAuthState = () => {
       console.log('Inicializando autenticação...');
       
       try {
-        // Check for existing session
+        // Clear any existing sessions from localStorage to force fresh check
+        try {
+          // This is a safety measure to clear potential stale sessions
+          for (const key in localStorage) {
+            if (key.includes('supabase.auth')) {
+              localStorage.removeItem(key);
+            }
+          }
+          
+          for (const key in sessionStorage) {
+            if (key.includes('supabase.auth')) {
+              sessionStorage.removeItem(key);
+            }
+          }
+          console.log('Limpou potenciais sessões antigas para garantir verificação limpa');
+        } catch (storageError) {
+          console.error('Erro ao limpar storage:', storageError);
+        }
+        
+        // Agora verifica se há sessão ativa no Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
           console.log('Sessão encontrada:', session.user.id);
           try {
-            console.log('Updating user state for:', session.user.id);
+            console.log('Atualizando estado do usuário para:', session.user.id);
             const userData = await updateUserState(session.user);
             setUser(userData);
           } catch (error) {
-            console.error('Error updating user state:', error);
+            console.error('Erro ao atualizar estado do usuário:', error);
             // Fallback para dados básicos
             setUser({
               id: session.user.id,
