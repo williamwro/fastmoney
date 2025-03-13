@@ -6,7 +6,7 @@ import { useBills } from '@/context/BillContext';
 import BillsList from '@/components/BillsList';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, FileDown } from 'lucide-react';
 import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
 import UserMenu from '@/components/navbar/UserMenu';
@@ -68,12 +68,22 @@ const Bills = () => {
               </p>
             </div>
             
-            <Link to="/bills/new">
-              <Button className="mt-4 md:mt-0">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Nova Conta
+            <div className="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+              <Button
+                variant="outline"
+                className="flex items-center gap-1"
+                onClick={() => window.exportBillsToPDF()}
+              >
+                <FileDown className="h-4 w-4 mr-1" />
+                Exportar PDF
               </Button>
-            </Link>
+              <Link to="/bills/new">
+                <Button>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Nova Conta
+                </Button>
+              </Link>
+            </div>
           </div>
           
           <BillsList />

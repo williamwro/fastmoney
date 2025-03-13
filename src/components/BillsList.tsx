@@ -16,6 +16,8 @@ import BillCard from '@/components/BillCard';
 import { getCategoryInfo } from '@/utils/formatters';
 import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/hooks/useCategoryManagement';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const BillsList: React.FC = () => {
   const { filterBills, bills, isLoading } = useBills();
@@ -66,6 +68,84 @@ const BillsList: React.FC = () => {
   const handleCategoryChange = (value: string) => {
     setCategoryFilter(value);
   };
+
+  // Format currency value
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  // Format date to Brazilian format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  // Export bills to PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Relatório de Contas a Pagar', 14, 22);
+    
+    // Add filter information
+    doc.setFontSize(11);
+    let statusText = 'Todas as contas';
+    if (status === 'paid') statusText = 'Contas pagas';
+    if (status === 'unpaid') statusText = 'Contas pendentes';
+    
+    let categoryText = 'Todas as categorias';
+    if (categoryFilter !== 'all') categoryText = `Categoria: ${categoryFilter}`;
+    
+    doc.text(`${statusText} - ${categoryText}`, 14, 30);
+    doc.text(`Data do relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+    
+    // Add bills table
+    const tableColumn = ["Fornecedor", "Valor", "Vencimento", "Categoria", "Status"];
+    const tableRows = filteredBills.map(bill => [
+      bill.vendorName,
+      formatCurrency(bill.amount),
+      formatDate(bill.dueDate),
+      bill.category,
+      bill.status === 'paid' ? 'Paga' : 'Pendente'
+    ]);
+    
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 45,
+      styles: { 
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [68, 114, 196],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+    });
+    
+    // Add total amount
+    const totalAmount = filteredBills.reduce((total, bill) => total + bill.amount, 0);
+    const finalY = (doc as any).lastAutoTable.finalY || 45;
+    
+    doc.text(`Total: ${formatCurrency(totalAmount)}`, 14, finalY + 10);
+    
+    // Save PDF
+    doc.save('contas-a-pagar.pdf');
+  };
+  
+  // Make the export function available globally for the button in Bills.tsx
+  useEffect(() => {
+    window.exportBillsToPDF = exportToPDF;
+    
+    return () => {
+      delete window.exportBillsToPDF;
+    };
+  }, [filteredBills]);
   
   if (isLoading || loadingCategories) {
     return (
