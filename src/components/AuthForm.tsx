@@ -46,6 +46,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const isLogin = type === 'login';
   const title = isLogin ? 'Login' : 'Criar Conta';
   const schema = isLogin ? loginSchema : signupSchema;
+  const buttonText = isLogin ? 'Entrar' : 'Cadastrar';
   
   const form = useForm<LoginFormValues | SignupFormValues>({
     resolver: zodResolver(schema),
@@ -76,7 +77,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
   
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white/90 backdrop-blur-sm shadow-sm rounded-lg border">
+    <div className="w-full">
       <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
       
       <Form {...form}>
@@ -155,13 +156,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
           
           <Button 
             type="submit" 
-            className="w-full mt-6"
+            className="w-full mt-6 bg-blue-500 hover:bg-blue-600"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : null}
-            {isLogin ? 'Entrar' : 'Cadastrar'}
+            {buttonText}
           </Button>
         </form>
       </Form>
