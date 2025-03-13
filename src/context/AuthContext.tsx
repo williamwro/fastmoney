@@ -1,8 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
+import { supabase } from '@/lib/supabase';
+import { Session, User, AuthError } from '@supabase/supabase-js';
 
-type User = {
+type UserData = {
   id: string;
   name: string;
   email: string;
@@ -10,7 +12,7 @@ type User = {
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: UserData | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
@@ -21,53 +23,138 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users data (in a real app, this would be in a database)
-const MOCK_USERS = [
-  { id: '1', name: 'Admin User', email: 'admin@example.com', password: 'password123' },
-  { id: '2', name: 'William Admin', email: 'william@makecard.com.br', password: 'Kb109733*', isAdmin: true },
-];
+// Admin email for access control
+const ADMIN_EMAIL = 'william@makecard.com.br';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const storedUser = localStorage.getItem('fintec_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user', error);
-        localStorage.removeItem('fintec_user');
+    // Check active session and set up auth state listener
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      
+      // Check for existing session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        await updateUserState(session.user);
       }
-    }
-    setIsLoading(false);
+      
+      // Set up auth state change listener
+      const { data: { subscription } } = await supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          if (session) {
+            await updateUserState(session.user);
+          } else {
+            setUser(null);
+          }
+          setIsLoading(false);
+        }
+      );
+      
+      setIsLoading(false);
+      
+      // Cleanup subscription on unmount
+      return () => {
+        subscription.unsubscribe();
+      };
+    };
+    
+    initializeAuth();
   }, []);
+  
+  // Function to get user profile data from the profiles table
+  const updateUserState = async (authUser: User | null) => {
+    if (!authUser) {
+      setUser(null);
+      return;
+    }
+    
+    try {
+      // Get user profile from profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, is_admin')
+        .eq('id', authUser.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        
+        // Create profile if it doesn't exist yet (for new users)
+        if (error.code === 'PGRST116') {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: authUser.id,
+              name: authUser.email?.split('@')[0] || 'User',
+              email: authUser.email,
+              is_admin: authUser.email === ADMIN_EMAIL
+            });
+            
+          if (insertError) {
+            console.error('Error creating user profile:', insertError);
+          } else {
+            // Retry fetching after creating
+            const { data: newData } = await supabase
+              .from('profiles')
+              .select('name, is_admin')
+              .eq('id', authUser.id)
+              .single();
+              
+            if (newData) {
+              setUser({
+                id: authUser.id,
+                name: newData.name,
+                email: authUser.email || '',
+                isAdmin: newData.is_admin || authUser.email === ADMIN_EMAIL
+              });
+              return;
+            }
+          }
+        }
+        
+        // Fallback if there's an error with the profile
+        setUser({
+          id: authUser.id,
+          name: authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          isAdmin: authUser.email === ADMIN_EMAIL
+        });
+        return;
+      }
+      
+      setUser({
+        id: authUser.id,
+        name: data.name || authUser.email?.split('@')[0] || 'User',
+        email: authUser.email || '',
+        isAdmin: data.is_admin || authUser.email === ADMIN_EMAIL
+      });
+    } catch (error) {
+      console.error('Error in updateUserState:', error);
+      setUser(null);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     try {
-      // Find user in mock data (in a real app, this would be an API call)
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      if (!foundUser) {
-        throw new Error('Invalid email or password');
+      if (error) {
+        throw error;
       }
       
-      // Create user object without password
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      // Save user to state and localStorage
-      setUser(userWithoutPassword);
-      localStorage.setItem('fintec_user', JSON.stringify(userWithoutPassword));
       toast.success('Successfully logged in');
     } catch (error) {
-      toast.error((error as Error).message || 'Login failed');
+      const authError = error as AuthError;
+      toast.error(authError.message || 'Login failed');
       throw error;
     } finally {
       setIsLoading(false);
@@ -77,38 +164,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     try {
-      // Check if user already exists (in a real app, this would be an API call)
-      if (MOCK_USERS.some(u => u.email === email)) {
-        throw new Error('User with this email already exists');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
       }
       
-      // Create new user (in a real app, this would be an API call)
-      const newUser = {
-        id: String(MOCK_USERS.length + 1),
-        name,
-        email,
-      };
+      // Create a profile for the new user
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            name,
+            email,
+            is_admin: email === ADMIN_EMAIL
+          });
+          
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+      }
       
-      // Save user to state and localStorage
-      setUser(newUser);
-      localStorage.setItem('fintec_user', JSON.stringify(newUser));
       toast.success('Account created successfully');
     } catch (error) {
-      toast.error((error as Error).message || 'Signup failed');
+      const authError = error as AuthError;
+      toast.error(authError.message || 'Signup failed');
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('fintec_user');
-    toast.success('Logged out successfully');
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error signing out:', error);
+      toast.error('Error signing out');
+    } else {
+      setUser(null);
+      toast.success('Logged out successfully');
+    }
   };
 
   return (

@@ -3,6 +3,8 @@ import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -43,14 +45,20 @@ const Login = () => {
               </Link>
             </p>
             
-            <div className="mt-4 text-xs text-blue-100/70">
-              <p>Para fins de demonstração, use:</p>
-              <p className="mt-1 font-mono">
-                Admin: william@makecard.com.br
-                <br />
-                Senha: Kb109733*
-              </p>
-            </div>
+            <Alert className="mt-4 bg-white/10 text-white border-white/20">
+              <Info className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                Para fins de demonstração, use:
+                <div className="mt-1 font-mono">
+                  Admin: william@makecard.com.br
+                  <br />
+                  Senha: Kb109733*
+                </div>
+                <div className="mt-2 text-xs">
+                  O projeto agora usa Supabase para autenticação e armazenamento.
+                </div>
+              </AlertDescription>
+            </Alert>
           </div>
         </div>
       </div>
