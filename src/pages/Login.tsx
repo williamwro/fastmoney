@@ -1,40 +1,37 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
 import AuthForm from '@/components/AuthForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Info, Mail } from 'lucide-react';
+import { Info, Mail, LogOut } from 'lucide-react';
 
 const Login = () => {
-  const { isAuthenticated, isLoading, authChecked } = useAuth();
+  const { isAuthenticated, isLoading, authChecked, logout } = useAuth();
   const { resendConfirmationEmail } = useAuthOperations();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
   
-  useEffect(() => {
-    if (authChecked && isAuthenticated && !isLoading) {
-      console.log('Usuário já autenticado, redirecionando para dashboard');
-      navigate('/', { replace: true });
+  // Check if user is already logged in and *wants* to go to dashboard
+  const handleGoToDashboard = () => {
+    navigate('/', { replace: true });
+  };
+  
+  // Handle user logout
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      setLoggingOut(false);
     }
-  }, [authChecked, isAuthenticated, isLoading, navigate]);
-  
-  if (!authChecked || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
-        <div className="text-white text-center">
-          <div className="animate-spin inline-block h-8 w-8 border-4 border-t-transparent border-white rounded-full mb-4"></div>
-          <p>Verificando autenticação...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  };
   
   const handleResendEmail = async () => {
     if (!email) {
@@ -50,6 +47,47 @@ const Login = () => {
       setResendingEmail(false);
     }
   };
+  
+  if (!authChecked || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
+        <div className="text-white text-center">
+          <div className="animate-spin inline-block h-8 w-8 border-4 border-t-transparent border-white rounded-full mb-4"></div>
+          <p>Verificando autenticação...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold mb-4">Você já está autenticado</h2>
+          <p className="text-gray-600 mb-6">
+            Você já está conectado. Gostaria de ir para o dashboard ou sair da sua conta?
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={handleGoToDashboard}
+              className="flex items-center justify-center"
+            >
+              Ir para Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex items-center justify-center"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {loggingOut ? 'Saindo...' : 'Sair da conta'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">

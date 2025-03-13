@@ -49,6 +49,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Componente para rotas de autenticação (login/signup)
+const AuthRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading, authChecked } = useAuth();
+  
+  // Se a autenticação ainda está sendo verificada, mostra um loading
+  if (!authChecked || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  return <>{children}</>;
+};
+
 // Componente principal do App
 const AppContent = () => {
   return (
@@ -61,8 +80,8 @@ const AppContent = () => {
         <Route path="/bills/new" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
         <Route path="/bills/:id/edit" element={<ProtectedRoute><BillForm /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
+        <Route path="/signup" element={<AuthRoute><SignUp /></AuthRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
