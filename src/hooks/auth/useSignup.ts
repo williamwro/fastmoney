@@ -1,9 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from "sonner";
-import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { createUserProfile } from '@/utils/authUtils';
 
 export const useSignup = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +10,7 @@ export const useSignup = () => {
     setIsLoading(true);
     
     try {
-      console.log('Starting signup process for:', { name, email });
+      console.log('Attempting signup with:', { name, email, passwordLength: password.length });
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -26,42 +24,28 @@ export const useSignup = () => {
       });
       
       if (error) {
-        console.error('Signup error:', error);
+        console.error('Signup failed with error:', error);
+        
+        if (error.message.includes('already registered')) {
+          toast.error('Este email já está registrado. Por favor, use outro email ou recupere sua senha.');
+        } else {
+          toast.error(error.message || 'Falha no cadastro');
+        }
+        
         throw error;
       }
       
-      console.log('Signup successful, creating profile...', data.user?.id);
+      console.log('Signup response:', data);
       
-      // Create a profile for the new user
       if (data.user) {
-        const isAdmin = email === 'william@makecard.com.br';
-        
-        // Create the profile with multiple retries
-        let profileCreated = false;
-        try {
-          profileCreated = await createUserProfile(
-            data.user.id, 
-            name, 
-            email, 
-            isAdmin
-          );
-          
-          console.log('Profile creation result:', profileCreated);
-        } catch (profileError) {
-          console.error('Error creating profile:', profileError);
-        }
-        
-        // Even if profile creation failed, continue with signup
-        toast.success('Conta criada com sucesso. Por favor, verifique seu email para confirmar sua conta.');
+        toast.success('Cadastro realizado com sucesso! Verifique seu email para confirmar sua conta.');
+        return data;
       } else {
-        toast.warning('Conta criada, mas houve um problema ao configurar seu perfil.');
+        toast.error('Erro inesperado ao criar conta');
+        throw new Error('No user data returned from signup');
       }
-      
-      return data;
     } catch (error) {
-      const authError = error as AuthError;
-      console.error('Signup error:', authError);
-      toast.error(authError.message || 'Falha no cadastro');
+      console.error('Signup error:', error);
       throw error;
     } finally {
       setIsLoading(false);
