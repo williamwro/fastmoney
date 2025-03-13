@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -47,13 +46,10 @@ const Bills = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 pt-2 pb-2">
+      {/* Navigation menu moved outside the main content area */}
+      <div className="w-full bg-white border-b border-gray-200 py-2 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-start">
-            <div className="mb-4">
-              <NavLinks isAuthenticated={isAuthenticated} />
-            </div>
-          </div>
+          <NavLinks isAuthenticated={isAuthenticated} />
         </div>
       </div>
       
