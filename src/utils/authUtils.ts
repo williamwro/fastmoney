@@ -23,20 +23,37 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
     
     // Primeiro tentamos buscar o perfil na tabela profiles
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('name, is_admin')
-        .eq('id', authUser.id)
-        .single();
+      // Verificamos se o usuário tem permissão para acessar o profile
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('get_profile', {
+        user_id: authUser.id
+      });
       
-      if (!error && data) {
-        console.log('Profile found in database:', data);
+      if (!rpcError && rpcResult) {
+        console.log('Profile found via RPC:', rpcResult);
         return {
           id: authUser.id,
-          name: data.name || userName,
+          name: rpcResult.name || userName,
           email: userEmail,
-          isAdmin: data.is_admin || isAdmin
+          isAdmin: rpcResult.is_admin || isAdmin
         };
+      } else {
+        console.log('RPC fallback, trying direct query');
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('name, is_admin')
+          .eq('id', authUser.id)
+          .single();
+        
+        if (!error && data) {
+          console.log('Profile found in database:', data);
+          return {
+            id: authUser.id,
+            name: data.name || userName,
+            email: userEmail,
+            isAdmin: data.is_admin || isAdmin
+          };
+        }
       }
     } catch (err) {
       console.error('Error querying profiles table:', err);
@@ -46,13 +63,13 @@ export const updateUserState = async (authUser: User | null): Promise<UserData |
     
     // Se chegamos aqui, vamos tentar criar um perfil
     try {
-      await createUserProfile(
+      const profileCreated = await createUserProfile(
         authUser.id,
         userName,
         userEmail,
         isAdmin
       );
-      console.log('Profile creation attempted');
+      console.log('Profile creation attempted, result:', profileCreated);
     } catch (profileError) {
       console.error('Error creating profile, using metadata:', profileError);
     }
@@ -86,7 +103,23 @@ export const createUserProfile = async (userId: string, name: string, email: str
   try {
     console.log('Creating profile with:', { userId, name, email, isAdmin });
     
-    // First method: Direct insert to profiles table
+    // Primeiro, verificamos se o RLS está ativo tentando criar através de uma função RPC
+    // que deve ter permissões adequadas no banco de dados
+    const { data: rpcData, error: rpcError } = await supabase.rpc('create_user_profile', {
+      user_id: userId,
+      user_name: name,
+      user_email: email,
+      user_is_admin: isAdmin || email === ADMIN_EMAIL
+    });
+    
+    if (!rpcError) {
+      console.log('Profile created successfully via RPC:', rpcData);
+      return true;
+    }
+    
+    console.log('RPC profile creation failed, trying direct insert:', rpcError);
+    
+    // Se o RPC falhar, tentamos o método direto
     const { error } = await supabase
       .from('profiles')
       .upsert({
