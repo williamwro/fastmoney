@@ -5,8 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { BillProvider } from "./context/BillContext";
-import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useEffect } from "react";
 import Bills from "./pages/Bills";
 import BillForm from "./pages/BillForm";
@@ -48,7 +47,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   });
   
   // Se a autenticação ainda está sendo verificada, mostrar indicador de carregamento
-  if (!authChecked) {
+  if (!authChecked || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -60,20 +59,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Mostrar estado de carregamento durante operações de autenticação
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="animate-pulse space-y-2 flex flex-col items-center">
-          <div className="h-10 w-36 bg-gray-200 rounded"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
-          <div className="text-sm text-gray-500 mt-2">Carregando...</div>
-        </div>
-      </div>
-    );
-  }
-  
-  // Não redireciona aqui - isso é feito no useEffect para evitar problemas de renderização
+  // Se não estiver autenticado, redirect acontece no useEffect
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -113,8 +99,8 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   });
   
   // Mostrar tela de carregamento enquanto verifica autenticação
-  if (!authChecked) {
-    console.log("AuthRoute - Autenticação ainda sendo verificada");
+  if (!authChecked || isLoading) {
+    console.log("AuthRoute - Autenticação ainda sendo verificada ou carregando");
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -126,7 +112,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Não redireciona aqui - isso é feito no useEffect para evitar problemas de renderização
+  // Redirect acontece no useEffect
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -134,20 +120,6 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
           <div className="h-10 w-36 bg-gray-200 rounded"></div>
           <div className="h-4 w-64 bg-gray-200 rounded"></div>
           <div className="text-sm text-gray-500 mt-2">Redirecionando para o dashboard...</div>
-        </div>
-      </div>
-    );
-  }
-  
-  // Mostrar loading durante operações de autenticação
-  if (isLoading) {
-    console.log("AuthRoute - Carregando operações de autenticação");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="animate-pulse space-y-2 flex flex-col items-center">
-          <div className="h-10 w-36 bg-gray-200 rounded"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
-          <div className="text-sm text-gray-500 mt-2">Processando...</div>
         </div>
       </div>
     );
