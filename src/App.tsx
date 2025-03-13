@@ -30,7 +30,19 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading, authChecked } = useAuth();
   
   // Se a autenticação ainda está sendo verificada, mostra um loading
-  if (!authChecked || isLoading) {
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Mostrar outro estado de loading durante operações de autenticação
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -51,10 +63,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Componente para rotas de autenticação (login/signup)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, authChecked } = useAuth();
+  const { authChecked } = useAuth();
   
   // Se a autenticação ainda está sendo verificada, mostra um loading
-  if (!authChecked || isLoading) {
+  if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -65,6 +77,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // Renderiza diretamente as rotas de autenticação sem mais verificações
   return <>{children}</>;
 };
 

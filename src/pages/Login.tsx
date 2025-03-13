@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -48,7 +48,8 @@ const Login = () => {
     }
   };
   
-  if (!authChecked || isLoading) {
+  // Show loading state while checking authentication
+  if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
         <div className="text-white text-center">
@@ -59,6 +60,19 @@ const Login = () => {
     );
   }
   
+  // Show different loading state during authentication operations
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
+        <div className="text-white text-center">
+          <div className="animate-spin inline-block h-8 w-8 border-4 border-t-transparent border-white rounded-full mb-4"></div>
+          <p>Processando...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // If already authenticated, show options
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
@@ -89,6 +103,7 @@ const Login = () => {
     );
   }
   
+  // Login form for unauthenticated users
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
       <div className="max-w-md w-full space-y-8">

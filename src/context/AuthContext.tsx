@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { UserData, AuthContextType } from '@/types/auth';
@@ -17,16 +18,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check active session and set up auth state listener
     const initializeAuth = async () => {
       setIsLoading(true);
+      console.log('Inicializando autenticação...');
       
       try {
-        console.log('Inicializando autenticação...');
-        
         // Check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
           console.log('Sessão encontrada:', session.user.id);
           try {
+            console.log('Updating user state for:', session.user.id);
             const userData = await updateUserState(session.user);
             setUser(userData);
           } catch (error) {
@@ -46,8 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Set up auth state change listener
         const { data: { subscription } } = await supabase.auth.onAuthStateChange(
-          async (_event, session) => {
-            console.log('Estado de autenticação alterado:', _event, session?.user?.id);
+          async (event, session) => {
+            console.log('Estado de autenticação alterado:', event, session?.user?.id);
+            
             if (session) {
               try {
                 const userData = await updateUserState(session.user);
@@ -65,13 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } else {
               setUser(null);
             }
-            setIsLoading(false);
           }
         );
-        
-        // Finaliza a inicialização da autenticação
-        setAuthChecked(true);
-        setIsLoading(false);
         
         // Cleanup subscription on unmount
         return () => {
@@ -80,8 +77,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Erro ao inicializar autenticação:', error);
         setUser(null);
-        setIsLoading(false);
+      } finally {
+        // Always set these states, even if there's an error
         setAuthChecked(true);
+        setIsLoading(false);
       }
     };
     
@@ -115,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    setIsLoading(true);
     try {
       const success = await logoutOperation();
       if (success) {
@@ -124,6 +124,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Logout error:', error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 

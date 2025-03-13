@@ -46,12 +46,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
     }
   }, [emailValue, onEmailChange]);
   
-  // Redirect if authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+  // We don't need to redirect here as the Login component will handle this
   
   const onSubmit = async (values: any) => {
     if (isSubmitting || authLoading) return;
@@ -144,25 +139,20 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
             />
           )}
           
-          <SubmitButton isSubmitting={isSubmitting || authLoading} isLogin={isLogin} />
+          <Button 
+            type="submit" 
+            className="w-full mt-6"
+            disabled={isSubmitting || authLoading}
+          >
+            {(isSubmitting || authLoading) && (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            )}
+            {isLogin ? 'Entrar' : 'Cadastrar'}
+          </Button>
         </form>
       </Form>
     </div>
   );
 };
-
-// Separate component for the submit button
-const SubmitButton = ({ isSubmitting, isLogin }: { isSubmitting: boolean; isLogin: boolean }) => (
-  <Button 
-    type="submit" 
-    className="w-full mt-6"
-    disabled={isSubmitting}
-  >
-    {isSubmitting ? (
-      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-    ) : null}
-    {isLogin ? 'Entrar' : 'Cadastrar'}
-  </Button>
-);
 
 export default AuthForm;
