@@ -1,64 +1,57 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 import { toast } from "sonner";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
 
 type AuthContextType = {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users data (in a real app, this would be in a database)
-const MOCK_USERS = [
-  { id: '1', name: 'Admin User', email: 'admin@example.com', password: 'password123' },
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Definir um usuário padrão para que o sistema inicie já autenticado
-  const defaultUser = { id: '1', name: 'Admin User', email: 'admin@example.com' };
-  
-  const [user, setUser] = useState<User | null>(defaultUser);
-  const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Não precisamos mais verificar o localStorage, sempre estamos autenticados
-    setIsLoading(false);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     try {
-      // Find user in mock data (in a real app, this would be an API call)
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (!foundUser) {
-        throw new Error('Invalid email or password');
+      if (error) {
+        throw error;
       }
       
-      // Create user object without password
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      // Save user to state and localStorage
-      setUser(userWithoutPassword);
-      localStorage.setItem('fintec_user', JSON.stringify(userWithoutPassword));
-      toast.success('Successfully logged in');
+      toast.success('Login realizado com sucesso');
     } catch (error) {
-      toast.error((error as Error).message || 'Login failed');
+      toast.error((error as Error).message || 'Erro ao fazer login');
       throw error;
     } finally {
       setIsLoading(false);
@@ -68,44 +61,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     try {
-      // Check if user already exists (in a real app, this would be an API call)
-      if (MOCK_USERS.some(u => u.email === email)) {
-        throw new Error('User with this email already exists');
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            name
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
       }
       
-      // Create new user (in a real app, this would be an API call)
-      const newUser = {
-        id: String(MOCK_USERS.length + 1),
-        name,
-        email,
-      };
-      
-      // Save user to state and localStorage
-      setUser(newUser);
-      localStorage.setItem('fintec_user', JSON.stringify(newUser));
-      toast.success('Account created successfully');
+      toast.success('Conta criada com sucesso. Verifique seu email para confirmar o cadastro.');
     } catch (error) {
-      toast.error((error as Error).message || 'Signup failed');
+      toast.error((error as Error).message || 'Erro ao criar conta');
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    // Agora não removemos o usuário ao fazer logout, apenas mostramos a mensagem
-    toast.success('Logged out successfully');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Logout realizado com sucesso');
+    } catch (error) {
+      toast.error((error as Error).message || 'Erro ao fazer logout');
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: true, // Sempre autenticado
+        session,
+        isAuthenticated: !!user,
         isLoading,
         login,
         signup,

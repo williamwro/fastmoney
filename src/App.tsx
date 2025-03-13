@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import Bills from "./pages/Bills";
 import BillForm from "./pages/BillForm";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,13 +24,42 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/bills" element={<Bills />} />
-              <Route path="/bills/new" element={<BillForm />} />
-              <Route path="/bills/:id/edit" element={<BillForm />} />
-              {/* Redirecionamentos para telas que foram removidas */}
-              <Route path="/login" element={<Navigate to="/" replace />} />
-              <Route path="/signup" element={<Navigate to="/" replace />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bills" 
+                element={
+                  <ProtectedRoute>
+                    <Bills />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bills/new" 
+                element={
+                  <ProtectedRoute>
+                    <BillForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bills/:id/edit" 
+                element={
+                  <ProtectedRoute>
+                    <BillForm />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* Redirects to pages that were removed */}
+              <Route path="/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/signup" element={<Navigate to="/auth" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
