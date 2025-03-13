@@ -1,131 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { UserPlus, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import UserTable from './UserTable';
 import UserForm from './UserForm';
-
-type Profile = {
-  id: string;
-  name: string | null;
-  email: string | null;
-  created_at: string;
-};
+import { useUserManagement } from '@/hooks/useUserManagement';
 
 const UserManagement = () => {
-  const { signup } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [editUserId, setEditUserId] = useState<string | null>(null);
-  const [fetchLoading, setFetchLoading] = useState(true);
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
-
-  const fetchProfiles = async () => {
-    try {
-      setFetchLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      setProfiles(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-      toast.error('Erro ao carregar lista de usuários');
-    } finally {
-      setFetchLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Validate passwords match when editing
-    if (isEditing && password && password !== confirmPassword) {
-      toast.error('As senhas não correspondem');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      if (isEditing && editUserId) {
-        // Basic profile update
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ name, email })
-          .eq('id', editUserId);
-
-        if (profileError) throw profileError;
-        
-        // Update password if provided - using a different approach
-        // Instead of using admin.updateUserById which requires admin privileges,
-        // we'll use the user update functionality that's available to us
-        if (password) {
-          // Note: This is restricted by Supabase's permissions
-          // For proper password updates, we should create a Supabase Edge Function
-          // that has the proper permissions to handle this
-          toast.info('A atualização de senha requer permissões administrativas. Contate o administrador do sistema.');
-          
-          // For demonstration purposes, we'll still show a success message for the profile update
-          toast.success('Perfil do usuário atualizado com sucesso');
-        } else {
-          toast.success('Usuário atualizado com sucesso');
-        }
-        
-        fetchProfiles();
-      } else {
-        // Create new user
-        await signup(name, email, password);
-        toast.success('Usuário criado com sucesso');
-        fetchProfiles();
-      }
-      
-      resetForm();
-    } catch (error) {
-      console.error('Erro ao processar usuário:', error);
-      toast.error(isEditing ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEdit = (profile: Profile) => {
-    setName(profile.name || '');
-    setEmail(profile.email || '');
-    setPassword('');
-    setConfirmPassword('');
-    setEditUserId(profile.id);
-    setIsEditing(true);
-    setIsOpen(true);
-  };
-
-  const resetForm = () => {
-    setName('');
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    setIsOpen(false);
-    setIsEditing(false);
-    setEditUserId(null);
-  };
+  const {
+    isOpen,
+    setIsOpen,
+    isEditing,
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    isLoading,
+    profiles,
+    fetchLoading,
+    handleSubmit,
+    handleEdit,
+    resetForm
+  } = useUserManagement();
 
   return (
     <Card className="mb-6">
