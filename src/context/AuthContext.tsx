@@ -1,137 +1,133 @@
 
-import React, { createContext, useContext } from 'react';
-import { AuthContextType } from '@/types/auth';
-import { useAuthState } from '@/hooks/auth/useAuthState';
-import { performLogin, performSignup, performLogout, performResendConfirmation } from '@/utils/authOperations';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
-// Create the auth context
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin?: boolean;
+};
+
+type AuthContextType = {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create the auth provider component
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Use our custom hook to manage auth state
-  const { 
-    user, 
-    setUser, 
-    isLoading, 
-    setIsLoading, 
-    authChecked, 
-    setAuthChecked 
-  } = useAuthState();
+// Mock users data (in a real app, this would be in a database)
+const MOCK_USERS = [
+  { id: '1', name: 'Admin User', email: 'admin@example.com', password: 'password123' },
+  { id: '2', name: 'William Admin', email: 'william@makecard.com.br', password: 'Kb109733*', isAdmin: true },
+];
 
-  // Wrap the login function to match the expected type
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check for saved user in localStorage
+    const storedUser = localStorage.getItem('fintec_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to parse stored user', error);
+        localStorage.removeItem('fintec_user');
+      }
+    }
+    setIsLoading(false);
+  }, []);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     try {
-      const data = await performLogin(email, password);
-      console.log('Login bem-sucedido, dados recebidos:', data);
+      // Find user in mock data (in a real app, this would be an API call)
+      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
       
-      // Atualizar o usuário se os dados forem válidos
-      if (data?.user) {
-        console.log('Atualizando estado do usuário com:', data.user.id);
-        // Atualize o estado do usuário imediatamente para acelerar a redireção
-        setUser({
-          id: data.user.id,
-          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
-          email: data.user.email || '',
-          isAdmin: data.user.email === 'william@makecard.com.br' || data.user.user_metadata?.is_admin === true
-        });
-        
-        return data;
-      } else {
-        console.error('No user data found after successful login');
-        toast.error('Erro ao obter dados do usuário');
-        throw new Error('No user data returned');
+      if (!foundUser) {
+        throw new Error('Invalid email or password');
       }
+      
+      // Create user object without password
+      const { password: _, ...userWithoutPassword } = foundUser;
+      
+      // Save user to state and localStorage
+      setUser(userWithoutPassword);
+      localStorage.setItem('fintec_user', JSON.stringify(userWithoutPassword));
+      toast.success('Successfully logged in');
     } catch (error) {
-      console.error('Login error in context:', error);
+      toast.error((error as Error).message || 'Login failed');
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Wrap the signup function
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     try {
-      await performSignup(name, email, password);
+      // Check if user already exists (in a real app, this would be an API call)
+      if (MOCK_USERS.some(u => u.email === email)) {
+        throw new Error('User with this email already exists');
+      }
+      
+      // Create new user (in a real app, this would be an API call)
+      const newUser = {
+        id: String(MOCK_USERS.length + 1),
+        name,
+        email,
+      };
+      
+      // Save user to state and localStorage
+      setUser(newUser);
+      localStorage.setItem('fintec_user', JSON.stringify(newUser));
+      toast.success('Account created successfully');
     } catch (error) {
-      console.error('Signup error in context:', error);
-      // Error is already handled in useAuthOperations
+      toast.error((error as Error).message || 'Signup failed');
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Wrap the logout function
-  const logout = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Logout: Iniciando processo de logout');
-      
-      // Important: First set user to null to trigger UI updates
-      setUser(null);
-      
-      // Then call the logout operation to clean up server-side
-      await performLogout();
-      
-      console.log('Logout operation complete');
-      return true;
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Force clear user even if there was an error
-      setUser(null);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('fintec_user');
+    toast.success('Logged out successfully');
   };
 
-  // Wrap the resend confirmation email function
-  const resendConfirmationEmail = async (email: string) => {
-    setIsLoading(true);
-    try {
-      await performResendConfirmation(email);
-    } catch (error) {
-      console.error('Resend confirmation error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Add more verbose logging for authentication state
-  console.log("AuthContext - Estado atual:", { 
-    user: !!user, 
-    userDetails: user ? { id: user.id, name: user.name } : 'no user',
-    authChecked, 
-    isAuthenticated: authChecked && !!user,
-    isLoading 
-  });
-
-  // Create the context value object
-  const contextValue: AuthContextType = {
-    user,
-    isAuthenticated: authChecked && !!user,
-    isLoading,
-    isAdmin: !!user?.isAdmin,
-    authChecked,
-    login,
-    signup,
-    logout,
-    resendConfirmationEmail,
-  };
-
-  // Provide the context value to children
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        isAdmin: !!user?.isAdmin,
+        login,
+        signup,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Create the custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

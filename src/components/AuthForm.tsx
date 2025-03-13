@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import {
   Form,
   FormControl,
@@ -21,54 +20,37 @@ import { useAuthFormSchema } from './auth/useAuthFormSchema';
 
 interface AuthFormProps {
   type: 'login' | 'signup';
-  onEmailChange?: (email: string) => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
-  const { login, signup, isAuthenticated, isLoading: authLoading } = useAuth();
+const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const isLogin = type === 'login';
   const { schema, defaultValues } = useAuthFormSchema(isLogin);
   
-  // Initialize form before trying to use it
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
   });
   
-  // Pass email to parent component when it changes
-  const emailValue = form.watch('email');
-  
-  useEffect(() => {
-    if (onEmailChange && emailValue) {
-      onEmailChange(emailValue);
-    }
-  }, [emailValue, onEmailChange]);
-  
-  // Remove direct navigation in useEffect as this is now handled by AuthRoute
-  
   const onSubmit = async (values: any) => {
-    if (isSubmitting || authLoading) return;
-    
     setIsSubmitting(true);
     
     try {
-      console.log(`Attempting ${isLogin ? 'login' : 'signup'} with:`, values);
-      
       if (isLogin) {
         const { email, password } = values;
         await login(email, password);
-        console.log('Login successful, waiting for auth state update');
-        // Navigation happens in AuthRoute component when isAuthenticated changes
+        navigate('/');
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);
+        navigate('/');
       }
-    } catch (error: any) {
-      console.error(`${isLogin ? 'Login' : 'Signup'} error:`, error);
-      toast.error(`Falha no ${isLogin ? 'login' : 'cadastro'}: ${error.message || 'Erro desconhecido'}`);
+    } catch (error) {
+      // Error is already handled by auth context
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -140,20 +122,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
             />
           )}
           
-          <Button 
-            type="submit" 
-            className="w-full mt-6"
-            disabled={isSubmitting || authLoading}
-          >
-            {(isSubmitting || authLoading) && (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            )}
-            {isLogin ? 'Entrar' : 'Cadastrar'}
-          </Button>
+          <SubmitButton isSubmitting={isSubmitting} isLogin={isLogin} />
         </form>
       </Form>
     </div>
   );
 };
+
+// Separate component for the submit button
+const SubmitButton = ({ isSubmitting, isLogin }: { isSubmitting: boolean; isLogin: boolean }) => (
+  <Button 
+    type="submit" 
+    className="w-full mt-6"
+    disabled={isSubmitting}
+  >
+    {isSubmitting ? (
+      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+    ) : null}
+    {isLogin ? 'Entrar' : 'Cadastrar'}
+  </Button>
+);
 
 export default AuthForm;

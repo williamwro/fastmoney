@@ -1,33 +1,26 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Info, Mail } from 'lucide-react';
 
 const Login = () => {
-  const { resendConfirmationEmail, isAuthenticated, authChecked } = useAuth();
-  const [email, setEmail] = useState('');
-  const [resendingEmail, setResendingEmail] = useState(false);
+  const { isAuthenticated, isLoading } = useAuth();
   
-  console.log("Login page - Estado de autenticação:", { isAuthenticated, authChecked });
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-pulse space-y-2 flex flex-col items-center">
+          <div className="h-10 w-36 bg-gray-200 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
   
-  const handleResendEmail = async () => {
-    if (!email) {
-      return;
-    }
-    
-    setResendingEmail(true);
-    try {
-      await resendConfirmationEmail(email);
-    } catch (error) {
-      console.error('Failed to resend email:', error);
-    } finally {
-      setResendingEmail(false);
-    }
-  };
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
@@ -40,22 +33,7 @@ const Login = () => {
         </div>
         
         <div className="mt-8">
-          <AuthForm type="login" onEmailChange={setEmail} />
-          
-          {email && (
-            <div className="mt-4 flex justify-center">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
-                onClick={handleResendEmail}
-                disabled={resendingEmail}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmação'}
-              </Button>
-            </div>
-          )}
+          <AuthForm type="login" />
           
           <div className="mt-6 text-center">
             <p className="text-sm text-blue-100">
@@ -65,20 +43,14 @@ const Login = () => {
               </Link>
             </p>
             
-            <Alert className="mt-4 bg-white/10 text-white border-white/20">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-xs">
-                Para fins de demonstração, use:
-                <div className="mt-1 font-mono">
-                  Admin: william@makecard.com.br
-                  <br />
-                  Senha: Kb109733*
-                </div>
-                <div className="mt-2 text-xs">
-                  O projeto agora usa Supabase para autenticação e armazenamento.
-                </div>
-              </AlertDescription>
-            </Alert>
+            <div className="mt-4 text-xs text-blue-100/70">
+              <p>Para fins de demonstração, use:</p>
+              <p className="mt-1 font-mono">
+                Admin: william@makecard.com.br
+                <br />
+                Senha: Kb109733*
+              </p>
+            </div>
           </div>
         </div>
       </div>
