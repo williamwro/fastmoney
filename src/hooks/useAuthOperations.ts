@@ -142,10 +142,7 @@ export const useAuthOperations = () => {
   const logout = async () => {
     console.log('Attempting to log out');
     try {
-      // Primeiro tenta limpar quaisquer dados de sessão locais
-      localStorage.removeItem('supabase.auth.token');
-      
-      // Chama o método de signOut do Supabase
+      // Primeiro tentamos realizar o logout via Supabase
       const { error } = await supabase.auth.signOut({
         scope: 'local' // Garante que desconecta apenas a sessão atual
       });
@@ -156,6 +153,17 @@ export const useAuthOperations = () => {
         return false;
       } else {
         console.log('Logged out successfully');
+        
+        // Limpar qualquer estado local de autenticação
+        localStorage.removeItem('supabase.auth.token');
+        
+        // Clear any cached auth data in localStorage (if any)
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('supabase.auth.')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
         toast.success('Sessão encerrada com sucesso');
         return true;
       }

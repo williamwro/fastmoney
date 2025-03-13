@@ -14,16 +14,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [logoutCompleted, setLogoutCompleted] = useState(false);
   const navigate = useNavigate();
-  
-  // Force a component re-render after logout
-  useEffect(() => {
-    if (logoutCompleted && !isAuthenticated && !isLoading) {
-      console.log('Logout completed, resetting state');
-      setLogoutCompleted(false);
-    }
-  }, [logoutCompleted, isAuthenticated, isLoading]);
   
   // Check if user is already logged in and *wants* to go to dashboard
   const handleGoToDashboard = () => {
@@ -37,11 +28,9 @@ const Login = () => {
     try {
       const success = await logout();
       console.log('Logout result:', success);
-      if (success) {
-        setLogoutCompleted(true);
-        // Force refresh to make sure we show the login form
-        window.location.reload();
-      }
+      
+      // No need for window.location.reload() - this was part of the problem
+      // The context will update and re-render this component when isAuthenticated changes
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {

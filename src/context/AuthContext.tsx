@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (event === 'SIGNED_OUT') {
               console.log('Usuário deslogou, limpando o estado');
               setUser(null);
+              setIsLoading(false); // Ensure we're not in loading state after logout
               return;
             }
             
@@ -130,11 +131,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
       } else {
         console.error('Logout: Falha no logout');
+        // Force clear user even if the Supabase logout failed
+        setUser(null);
       }
       
       return success;
     } catch (error) {
       console.error('Logout error:', error);
+      // Force clear user even if there was an error
+      setUser(null);
       return false;
     } finally {
       setIsLoading(false);
