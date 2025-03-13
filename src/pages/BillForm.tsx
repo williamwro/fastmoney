@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { Bill, BillCategory, useBills } from '@/context/BillContext';
+import { BillCategory, useBills } from '@/context/BillContext';
+import { Bill } from '@/types/supabase';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,11 +31,11 @@ import { getCategoryInfo } from '@/utils/formatters';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const billSchema = z.object({
-  vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
+  vendor_name: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
   amount: z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
     message: 'O valor deve ser um número maior que zero',
   }),
-  dueDate: z.string().refine(val => !isNaN(Date.parse(val)), {
+  due_date: z.string().refine(val => !isNaN(Date.parse(val)), {
     message: 'Data de vencimento inválida',
   }),
   category: z.enum(['utilities', 'rent', 'insurance', 'subscription', 'services', 'supplies', 'taxes', 'other']),
@@ -69,9 +70,9 @@ const BillForm = () => {
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
     defaultValues: {
-      vendorName: '',
+      vendor_name: '',
       amount: '',
-      dueDate: new Date().toISOString().split('T')[0],
+      due_date: new Date().toISOString().split('T')[0],
       category: 'other',
       status: 'unpaid',
       notes: '',
@@ -82,10 +83,10 @@ const BillForm = () => {
   useEffect(() => {
     if (bill) {
       form.reset({
-        vendorName: bill.vendorName,
-        amount: bill.amount.toString(),
-        dueDate: bill.dueDate.split('T')[0],
-        category: bill.category,
+        vendor_name: bill.vendor_name,
+        amount: String(bill.amount),
+        due_date: new Date(bill.due_date).toISOString().split('T')[0],
+        category: bill.category as BillCategory,
         status: bill.status,
         notes: bill.notes || '',
       });
@@ -98,18 +99,18 @@ const BillForm = () => {
     try {
       // Convert string values to appropriate types
       const formattedBill = {
-        vendorName: values.vendorName,
+        vendor_name: values.vendor_name,
         amount: parseFloat(values.amount),
-        dueDate: values.dueDate,
+        due_date: values.due_date,
         category: values.category as BillCategory,
         status: values.status,
         notes: values.notes,
       };
       
       if (isEditMode && id) {
-        updateBill(id, formattedBill);
+        await updateBill(id, formattedBill);
       } else {
-        addBill(formattedBill);
+        await addBill(formattedBill);
       }
       
       navigate('/bills');
@@ -170,7 +171,7 @@ const BillForm = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="vendorName"
+                  name="vendor_name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome do Fornecedor</FormLabel>
@@ -205,7 +206,7 @@ const BillForm = () => {
                   
                   <FormField
                     control={form.control}
-                    name="dueDate"
+                    name="due_date"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Data de Vencimento</FormLabel>
