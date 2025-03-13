@@ -24,6 +24,7 @@ const UserManagement = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [editUserId, setEditUserId] = useState<string | null>(null);
@@ -58,15 +59,32 @@ const UserManagement = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate passwords match when editing
+    if (isEditing && password && password !== confirmPassword) {
+      toast.error('As senhas não correspondem');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isEditing && editUserId) {
-        // Update user profile
-        const { error } = await supabase
+        // Basic profile update
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({ name, email })
           .eq('id', editUserId);
 
-        if (error) throw error;
+        if (profileError) throw profileError;
+        
+        // Update password if provided
+        if (password) {
+          const { error: passwordError } = await supabase.auth.admin.updateUserById(
+            editUserId,
+            { password }
+          );
+          
+          if (passwordError) throw passwordError;
+        }
         
         toast.success('Usuário atualizado com sucesso');
         fetchProfiles();
@@ -90,6 +108,7 @@ const UserManagement = () => {
     setName(profile.name || '');
     setEmail(profile.email || '');
     setPassword('');
+    setConfirmPassword('');
     setEditUserId(profile.id);
     setIsEditing(true);
     setIsOpen(true);
@@ -99,6 +118,7 @@ const UserManagement = () => {
     setName('');
     setEmail('');
     setPassword('');
+    setConfirmPassword('');
     setIsOpen(false);
     setIsEditing(false);
     setEditUserId(null);
@@ -172,16 +192,33 @@ const UserManagement = () => {
               />
             </div>
             
-            {!isEditing && (
+            <div className="grid gap-2">
+              <Label htmlFor="password">
+                {isEditing ? "Nova Senha (deixe em branco para manter a atual)" : "Senha"}
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required={!isEditing}
+                placeholder={isEditing ? "Nova senha (opcional)" : "Senha segura"}
+                minLength={6}
+              />
+            </div>
+
+            {(isEditing || !isEditing) && (
               <div className="grid gap-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="confirmPassword">
+                  {isEditing ? "Confirmar Nova Senha" : "Confirmar Senha"}
+                </Label>
                 <Input
-                  id="password"
+                  id="confirmPassword"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required={!isEditing}
-                  placeholder="Senha segura"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required={!isEditing || (isEditing && password.length > 0)}
+                  placeholder="Confirme a senha"
                   minLength={6}
                 />
               </div>
