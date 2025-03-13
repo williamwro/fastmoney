@@ -17,7 +17,6 @@ import {
 import { AuthFormHeader } from './auth/AuthFormHeader';
 import { InputWithIcon } from './auth/InputWithIcon';
 import { useAuthFormSchema } from './auth/useAuthFormSchema';
-import { toast } from 'sonner';
 
 interface AuthFormProps {
   type: 'login' | 'signup';

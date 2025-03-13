@@ -2,15 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useAuthOperations } from '@/hooks/useAuthOperations';
 import AuthForm from '@/components/AuthForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Info, Mail, LogOut } from 'lucide-react';
 
 const Login = () => {
-  const { isAuthenticated, isLoading, authChecked, logout } = useAuth();
-  const { resendConfirmationEmail } = useAuthOperations();
+  const { isAuthenticated, isLoading, authChecked, logout, resendConfirmationEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
