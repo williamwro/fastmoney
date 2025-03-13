@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,16 +52,8 @@ export const useUserManagement = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validate passwords match when editing
-    if (isEditing && password && password !== confirmPassword) {
-      toast.error('As senhas não correspondem');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       if (isEditing && editUserId) {
-        // Basic profile update
         const { error: profileError } = await supabase
           .from('profiles')
           .update({ name, email })
@@ -70,20 +61,9 @@ export const useUserManagement = () => {
 
         if (profileError) throw profileError;
         
-        // Update password if provided - using a different approach
-        if (password) {
-          // Note: This is restricted by Supabase's permissions
-          toast.info('A atualização de senha requer permissões administrativas. Contate o administrador do sistema.');
-          
-          // For demonstration purposes, we'll still show a success message for the profile update
-          toast.success('Perfil do usuário atualizado com sucesso');
-        } else {
-          toast.success('Usuário atualizado com sucesso');
-        }
-        
+        toast.success('Usuário atualizado com sucesso');
         fetchProfiles();
       } else {
-        // Create new user
         await signup(name, email, password);
         toast.success('Usuário criado com sucesso');
         fetchProfiles();

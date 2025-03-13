@@ -57,35 +57,36 @@ const UserForm: React.FC<UserFormProps> = ({
         />
       </div>
       
-      <div className="grid gap-2">
-        <Label htmlFor="password">
-          {isEditing ? "Nova Senha (deixe em branco para manter a atual)" : "Senha"}
-        </Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required={!isEditing}
-          placeholder={isEditing ? "Nova senha (opcional)" : "Senha segura"}
-          minLength={6}
-        />
-      </div>
+      {/* Only show password fields when creating new users */}
+      {!isEditing && (
+        <>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Senha</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Senha segura"
+              minLength={6}
+            />
+          </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="confirmPassword">
-          {isEditing ? "Confirmar Nova Senha" : "Confirmar Senha"}
-        </Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required={!isEditing || (isEditing && password.length > 0)}
-          placeholder="Confirme a senha"
-          minLength={6}
-        />
-      </div>
+          <div className="grid gap-2">
+            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              placeholder="Confirme a senha"
+              minLength={6}
+            />
+          </div>
+        </>
+      )}
       
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (
