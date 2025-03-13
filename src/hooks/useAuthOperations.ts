@@ -30,8 +30,21 @@ export const useAuthOperations = () => {
       const authError = error as AuthError;
       console.error('Login error details:', authError);
       
-      // More specific error messages
-      if (authError.message.includes('invalid_credentials')) {
+      // Handle specific error codes
+      if (authError.code === 'email_not_confirmed') {
+        toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
+        
+        // Try to resend confirmation email
+        try {
+          await supabase.auth.resend({
+            type: 'signup',
+            email,
+          });
+          toast.info('Email de confirmação reenviado. Por favor, verifique sua caixa de entrada.');
+        } catch (resendError) {
+          console.error('Failed to resend confirmation email:', resendError);
+        }
+      } else if (authError.message.includes('invalid_credentials')) {
         toast.error('Email ou senha incorretos. Por favor, tente novamente.');
       } else {
         toast.error(authError.message || 'Falha no login');
@@ -56,13 +69,35 @@ export const useAuthOperations = () => {
             console.error('Failed to create test account:', signupError);
           } else if (data.user) {
             await createUserProfile(data.user.id, 'William Admin', email, true);
-            toast.success('Conta de teste criada. Por favor, tente fazer login novamente.');
+            toast.success('Conta de teste criada. Por favor, verifique seu email para confirmar a conta.');
           }
         } catch (createError) {
           console.error('Error creating test account:', createError);
         }
       }
       
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resendConfirmationEmail = async (email: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      });
+      
+      if (error) {
+        toast.error('Falha ao reenviar o email de confirmação. ' + error.message);
+        throw error;
+      }
+      
+      toast.success('Email de confirmação reenviado. Por favor, verifique sua caixa de entrada.');
+    } catch (error) {
+      console.error('Error resending confirmation email:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -119,6 +154,7 @@ export const useAuthOperations = () => {
     isLoading,
     login,
     signup,
-    logout
+    logout,
+    resendConfirmationEmail
   };
 };

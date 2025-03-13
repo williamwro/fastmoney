@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,9 +20,10 @@ import { useAuthFormSchema } from './auth/useAuthFormSchema';
 
 interface AuthFormProps {
   type: 'login' | 'signup';
+  onEmailChange?: (email: string) => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +35,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     resolver: zodResolver(schema),
     defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
   });
+  
+  // Pass email to parent component when it changes
+  const emailValue = form.watch('email');
+  
+  useEffect(() => {
+    if (onEmailChange && emailValue) {
+      onEmailChange(emailValue);
+    }
+  }, [emailValue, onEmailChange]);
   
   const onSubmit = async (values: any) => {
     setIsSubmitting(true);

@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useAuthOperations } from '@/hooks/useAuthOperations';
 import AuthForm from '@/components/AuthForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Info, Mail } from 'lucide-react';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { resendConfirmationEmail } = useAuthOperations();
+  const [email, setEmail] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
   
   if (isLoading) {
     return (
@@ -24,6 +29,21 @@ const Login = () => {
     return <Navigate to="/" replace />;
   }
   
+  const handleResendEmail = async () => {
+    if (!email) {
+      return;
+    }
+    
+    setResendingEmail(true);
+    try {
+      await resendConfirmationEmail(email);
+    } catch (error) {
+      console.error('Failed to resend email:', error);
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
       <div className="max-w-md w-full space-y-8">
@@ -35,7 +55,22 @@ const Login = () => {
         </div>
         
         <div className="mt-8">
-          <AuthForm type="login" />
+          <AuthForm type="login" onEmailChange={setEmail} />
+          
+          {email && (
+            <div className="mt-4 flex justify-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                onClick={handleResendEmail}
+                disabled={resendingEmail}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmação'}
+              </Button>
+            </div>
+          )}
           
           <div className="mt-6 text-center">
             <p className="text-sm text-blue-100">
