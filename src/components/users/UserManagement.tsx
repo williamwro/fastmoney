@@ -12,6 +12,7 @@ const UserManagement = () => {
     isOpen,
     setIsOpen,
     isEditing,
+    setIsEditing,
     name,
     setName,
     email,
