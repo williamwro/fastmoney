@@ -61,7 +61,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-blue-400">
       <div className="text-center text-white mb-8">
-        <h1 className="text-4xl font-bold">FinTec</h1>
+        <h1 className="text-4xl font-bold">ControlCash</h1>
         <p className="mt-2">
           Gerencie suas contas a pagar de forma simples e eficiente
         </p>
@@ -139,7 +139,7 @@ const Auth = () => {
       </div>
       
       <footer className="absolute bottom-4 text-center text-white opacity-70 text-xs">
-        &copy; {new Date().getFullYear()} FinTec - Todos os direitos reservados
+        &copy; {new Date().getFullYear()} ControlCash - Todos os direitos reservados
       </footer>
     </div>
   );
