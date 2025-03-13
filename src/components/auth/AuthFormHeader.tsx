@@ -7,6 +7,8 @@ interface AuthFormHeaderProps {
 
 export const AuthFormHeader: React.FC<AuthFormHeaderProps> = ({ title }) => {
   return (
-    <h2 className="text-2xl font-bold text-center mb-6 text-foreground">{title}</h2>
+    <div className="mb-6 text-center">
+      <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+    </div>
   );
 };
