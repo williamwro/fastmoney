@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
 export type BillCategory = 
   | 'utilities' 
@@ -30,146 +32,196 @@ type BillContextType = {
   bills: Bill[];
   isLoading: boolean;
   getBill: (id: string) => Bill | undefined;
-  addBill: (bill: BillInput) => void;
-  updateBill: (id: string, bill: Partial<BillInput>) => void;
-  deleteBill: (id: string) => void;
-  markBillAsPaid: (id: string) => void;
+  addBill: (bill: BillInput) => Promise<void>;
+  updateBill: (id: string, bill: Partial<BillInput>) => Promise<void>;
+  deleteBill: (id: string) => Promise<void>;
+  markBillAsPaid: (id: string) => Promise<void>;
   filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: BillCategory | 'all', search?: string) => Bill[];
   getTotalDue: () => number;
   getOverdueBills: () => Bill[];
   getDueSoonBills: () => Bill[];
 };
 
-// Sample data for bills
-const SAMPLE_BILLS: Bill[] = [
-  {
-    id: '1',
-    vendorName: 'Electricity Company',
-    amount: 120.50,
-    dueDate: '2023-12-15',
-    category: 'utilities',
-    status: 'unpaid',
-    notes: 'Monthly electricity bill',
-    createdAt: '2023-11-30T10:00:00Z',
-    updatedAt: '2023-11-30T10:00:00Z',
-  },
-  {
-    id: '2',
-    vendorName: 'Internet Provider',
-    amount: 89.99,
-    dueDate: '2023-12-10',
-    category: 'utilities',
-    status: 'unpaid',
-    createdAt: '2023-11-28T14:30:00Z',
-    updatedAt: '2023-11-28T14:30:00Z',
-  },
-  {
-    id: '3',
-    vendorName: 'Office Rent',
-    amount: 1500.00,
-    dueDate: '2023-12-01',
-    category: 'rent',
-    status: 'paid',
-    notes: 'December office rent',
-    createdAt: '2023-11-25T09:15:00Z',
-    updatedAt: '2023-12-01T11:20:00Z',
-  },
-  {
-    id: '4',
-    vendorName: 'Insurance Company',
-    amount: 210.75,
-    dueDate: '2023-12-20',
-    category: 'insurance',
-    status: 'unpaid',
-    notes: 'Quarterly insurance premium',
-    createdAt: '2023-11-26T16:45:00Z',
-    updatedAt: '2023-11-26T16:45:00Z',
-  },
-  {
-    id: '5',
-    vendorName: 'Software Subscription',
-    amount: 49.99,
-    dueDate: '2023-12-05',
-    category: 'subscription',
-    status: 'unpaid',
-    createdAt: '2023-11-29T13:10:00Z',
-    updatedAt: '2023-11-29T13:10:00Z',
-  }
-];
-
 const BillContext = createContext<BillContextType | undefined>(undefined);
 
 export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated } = useAuth();
 
+  // Load bills from Supabase
   useEffect(() => {
-    // Load bills from localStorage or use sample data
-    const loadBills = () => {
-      const storedBills = localStorage.getItem('billcraft_bills');
-      if (storedBills) {
-        try {
-          setBills(JSON.parse(storedBills));
-        } catch (error) {
-          console.error('Failed to parse stored bills', error);
-          setBills(SAMPLE_BILLS);
-        }
-      } else {
-        setBills(SAMPLE_BILLS);
+    const fetchBills = async () => {
+      if (!isAuthenticated || !user) {
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('bills')
+          .select('*')
+          .order('due_date', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        // Transform from database format to application format
+        const transformedBills = data.map(bill => ({
+          id: bill.id,
+          vendorName: bill.vendor_name,
+          amount: Number(bill.amount),
+          dueDate: bill.due_date,
+          category: bill.category as BillCategory,
+          status: bill.status as 'paid' | 'unpaid',
+          notes: bill.notes,
+          createdAt: bill.created_at,
+          updatedAt: bill.updated_at
+        }));
+
+        setBills(transformedBills);
+      } catch (error) {
+        console.error('Error fetching bills:', error);
+        toast.error('Falha ao carregar contas');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    // Simulate loading delay for demo purposes
-    setTimeout(loadBills, 1000);
-  }, []);
-
-  // Save bills to localStorage whenever they change
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem('billcraft_bills', JSON.stringify(bills));
-    }
-  }, [bills, isLoading]);
+    fetchBills();
+  }, [isAuthenticated, user]);
 
   const getBill = (id: string) => {
     return bills.find(bill => bill.id === id);
   };
 
-  const addBill = (billInput: BillInput) => {
-    const newBill: Bill = {
-      ...billInput,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const addBill = async (billInput: BillInput) => {
+    if (!user) {
+      toast.error('Você precisa estar autenticado');
+      return;
+    }
 
-    setBills(prevBills => [...prevBills, newBill]);
-    toast.success('Bill added successfully');
+    try {
+      // Transform from application format to database format
+      const dbBill = {
+        vendor_name: billInput.vendorName,
+        amount: billInput.amount,
+        due_date: billInput.dueDate,
+        category: billInput.category,
+        status: billInput.status,
+        notes: billInput.notes,
+        user_id: user.id
+      };
+
+      const { data, error } = await supabase
+        .from('bills')
+        .insert(dbBill)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Transform the returned data back to application format
+      const newBill: Bill = {
+        id: data.id,
+        vendorName: data.vendor_name,
+        amount: Number(data.amount),
+        dueDate: data.due_date,
+        category: data.category as BillCategory,
+        status: data.status as 'paid' | 'unpaid',
+        notes: data.notes,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+
+      setBills(prevBills => [...prevBills, newBill]);
+      toast.success('Conta adicionada com sucesso');
+    } catch (error) {
+      console.error('Error adding bill:', error);
+      toast.error('Falha ao adicionar conta');
+    }
   };
 
-  const updateBill = (id: string, billUpdates: Partial<BillInput>) => {
-    setBills(prevBills => 
-      prevBills.map(bill => 
-        bill.id === id 
-          ? { 
-              ...bill, 
-              ...billUpdates, 
-              updatedAt: new Date().toISOString() 
-            } 
-          : bill
-      )
-    );
-    toast.success('Bill updated successfully');
+  const updateBill = async (id: string, billUpdates: Partial<BillInput>) => {
+    if (!user) {
+      toast.error('Você precisa estar autenticado');
+      return;
+    }
+
+    try {
+      // Transform from application format to database format
+      const dbUpdates: any = {};
+      
+      if (billUpdates.vendorName) dbUpdates.vendor_name = billUpdates.vendorName;
+      if (billUpdates.amount !== undefined) dbUpdates.amount = billUpdates.amount;
+      if (billUpdates.dueDate) dbUpdates.due_date = billUpdates.dueDate;
+      if (billUpdates.category) dbUpdates.category = billUpdates.category;
+      if (billUpdates.status) dbUpdates.status = billUpdates.status;
+      if (billUpdates.notes !== undefined) dbUpdates.notes = billUpdates.notes;
+      
+      const { data, error } = await supabase
+        .from('bills')
+        .update(dbUpdates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setBills(prevBills => 
+        prevBills.map(bill => 
+          bill.id === id 
+            ? { 
+                ...bill, 
+                ...billUpdates,
+                updatedAt: data.updated_at 
+              } 
+            : bill
+        )
+      );
+
+      toast.success('Conta atualizada com sucesso');
+    } catch (error) {
+      console.error('Error updating bill:', error);
+      toast.error('Falha ao atualizar conta');
+    }
   };
 
-  const deleteBill = (id: string) => {
-    setBills(prevBills => prevBills.filter(bill => bill.id !== id));
-    toast.success('Bill deleted successfully');
+  const deleteBill = async (id: string) => {
+    if (!user) {
+      toast.error('Você precisa estar autenticado');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('bills')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setBills(prevBills => prevBills.filter(bill => bill.id !== id));
+      toast.success('Conta excluída com sucesso');
+    } catch (error) {
+      console.error('Error deleting bill:', error);
+      toast.error('Falha ao excluir conta');
+    }
   };
 
-  const markBillAsPaid = (id: string) => {
-    updateBill(id, { status: 'paid' });
-    toast.success('Bill marked as paid');
+  const markBillAsPaid = async (id: string) => {
+    await updateBill(id, { status: 'paid' });
+    toast.success('Conta marcada como paga');
   };
 
   const filterBills = (
