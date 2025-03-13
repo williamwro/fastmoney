@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { UserData, AuthContextType } from '@/types/auth';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
 import { updateUserState } from '@/utils/authUtils';
+import { toast } from 'sonner';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -65,18 +66,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Wrap the login function to match the expected type
   const login = async (email: string, password: string) => {
-    await authLogin(email, password);
+    try {
+      await authLogin(email, password);
+    } catch (error) {
+      console.error('Login error in context:', error);
+      // Error is already handled in useAuthOperations
+    }
   };
 
   // Wrap the signup function to void the return value
   const signup = async (name: string, email: string, password: string) => {
-    await authSignup(name, email, password);
+    try {
+      await authSignup(name, email, password);
+    } catch (error) {
+      console.error('Signup error in context:', error);
+      // Error is already handled in useAuthOperations
+    }
   };
 
   const logout = async () => {
-    const success = await logoutOperation();
-    if (success) {
-      setUser(null);
+    try {
+      const success = await logoutOperation();
+      if (success) {
+        setUser(null);
+      }
+      return true;
+    } catch (error) {
+      console.error('Logout error:', error);
+      return false;
     }
   };
 

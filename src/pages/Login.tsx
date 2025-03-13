@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -15,9 +15,28 @@ const Login = () => {
   const [resendingEmail, setResendingEmail] = useState(false);
   const navigate = useNavigate();
   
-  // Only redirect if auth check is complete and user is authenticated
-  if (authChecked && isAuthenticated && !isLoading) {
-    console.log('Already authenticated, redirecting to dashboard');
+  useEffect(() => {
+    // If authenticated and auth is checked, redirect to dashboard
+    if (authChecked && isAuthenticated && !isLoading) {
+      console.log('Already authenticated, redirecting to dashboard');
+      navigate('/', { replace: true });
+    }
+  }, [authChecked, isAuthenticated, isLoading, navigate]);
+  
+  // Prevent rendering if we're still checking auth or already redirecting
+  if (isLoading || !authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
+        <div className="text-white text-center">
+          <div className="animate-spin inline-block h-8 w-8 border-4 border-t-transparent border-white rounded-full mb-4"></div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // If already authenticated and not loading, redirect
+  if (authChecked && isAuthenticated) {
     return <Navigate to="/" replace />;
   }
   

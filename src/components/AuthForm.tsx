@@ -62,15 +62,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       if (isLogin) {
         const { email, password } = values;
         await login(email, password);
-        toast.success('Login bem-sucedido');
+        // Toast is now handled in useAuthOperations
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);
-        toast.success('Conta criada com sucesso');
+        // Toast is now handled in useAuthOperations
       }
     } catch (error: any) {
       console.error(`${isLogin ? 'Login' : 'Signup'} error:`, error);
-      toast.error(`Erro: ${error?.message || 'Falha na operação'}`);
+      // Toast error is already handled in useAuthOperations
     } finally {
       setIsSubmitting(false);
     }
