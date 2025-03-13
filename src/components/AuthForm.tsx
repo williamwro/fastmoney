@@ -32,7 +32,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as any, // Type assertion to fix the TypeScript error
+    defaultValues: defaultValues as any,
   });
   
   const onSubmit = async (values: any) => {
@@ -49,7 +49,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         navigate('/');
       }
     } catch (error) {
-      // Error is already handled by auth context
       console.error('Error during authentication:', error);
     } finally {
       setIsSubmitting(false);
