@@ -27,12 +27,15 @@ export const useAuthOperations = () => {
       
       // Try to ensure profile exists
       if (data.user) {
-        await createUserProfile(
+        // Ensure profile exists after login
+        const profileCreated = await createUserProfile(
           data.user.id,
           data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
           data.user.email || '',
           data.user.email === 'william@makecard.com.br'
         );
+        
+        console.log('Profile creation attempt after login:', profileCreated);
       }
       
       toast.success('Successfully logged in');
@@ -120,13 +123,16 @@ export const useAuthOperations = () => {
     setIsLoading(true);
     
     try {
+      console.log('Starting signup process for:', { name, email });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             name,
-            is_admin: email === 'william@makecard.com.br'
+            is_admin: email === 'william@makecard.com.br',
+            profile_created: false // Add flag to track profile creation
           }
         }
       });
@@ -135,17 +141,29 @@ export const useAuthOperations = () => {
         throw error;
       }
       
-      console.log('Signup successful, creating profile...');
+      console.log('Signup successful, creating profile...', data.user);
       
       // Create a profile for the new user
       if (data.user) {
-        await createUserProfile(
+        const isAdmin = email === 'william@makecard.com.br';
+        console.log('Creating profile with:', { userId: data.user.id, name, email, isAdmin });
+        
+        const profileCreated = await createUserProfile(
           data.user.id, 
           name, 
           email, 
-          email === 'william@makecard.com.br'
+          isAdmin
         );
-        console.log('Profile creation attempted for:', email);
+        
+        console.log('Profile creation result:', profileCreated);
+        
+        if (!profileCreated) {
+          // If profile creation failed initially, retry after short delay
+          setTimeout(async () => {
+            console.log('Retrying profile creation...');
+            await createUserProfile(data.user!.id, name, email, isAdmin);
+          }, 1000);
+        }
       }
       
       toast.success('Account created successfully. Please check your email to confirm your account.');
