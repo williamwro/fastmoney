@@ -1,111 +1,73 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
-import { supabase } from '@/lib/supabase';
-import { Profile } from '@/types/supabase';
-import { User, AuthError } from '@supabase/supabase-js';
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin?: boolean;
+};
 
 type AuthContextType = {
-  user: Profile | null;
-  session: User | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock users data (in a real app, this would be in a database)
+const MOCK_USERS = [
+  { id: '1', name: 'Admin User', email: 'admin@example.com', password: 'password123' },
+  { id: '2', name: 'William Admin', email: 'william@makecard.com.br', password: 'Kb109733*', isAdmin: true },
+];
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<User | null>(null);
-  const [user, setUser] = useState<Profile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
+    // Check for saved user in localStorage
+    const storedUser = localStorage.getItem('fintec_user');
+    if (storedUser) {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          throw error;
-        }
-
-        if (data?.session) {
-          setSession(data.session.user);
-          await fetchUserProfile(data.session.user.id);
-        }
+        setUser(JSON.parse(storedUser));
       } catch (error) {
-        console.error('Error checking session:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to parse stored user', error);
+        localStorage.removeItem('fintec_user');
       }
-    };
-
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          setSession(session.user);
-          await fetchUserProfile(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setUser(null);
-        }
-      }
-    );
-
-    checkSession();
-
-    // Cleanup subscription
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        setUser(data);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+    setIsLoading(false);
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Find user in mock data (in a real app, this would be an API call)
+      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
       
-      if (error) {
-        throw error;
+      if (!foundUser) {
+        throw new Error('Invalid email or password');
       }
       
-      if (data?.user) {
-        toast.success('Login realizado com sucesso!');
-      }
+      // Create user object without password
+      const { password: _, ...userWithoutPassword } = foundUser;
+      
+      // Save user to state and localStorage
+      setUser(userWithoutPassword);
+      localStorage.setItem('fintec_user', JSON.stringify(userWithoutPassword));
+      toast.success('Successfully logged in');
     } catch (error) {
-      const authError = error as AuthError;
-      toast.error(authError.message || 'Erro ao fazer login');
+      toast.error((error as Error).message || 'Login failed');
       throw error;
     } finally {
       setIsLoading(false);
@@ -115,68 +77,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     try {
-      // Sign up with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      // Check if user already exists (in a real app, this would be an API call)
+      if (MOCK_USERS.some(u => u.email === email)) {
+        throw new Error('User with this email already exists');
+      }
+      
+      // Create new user (in a real app, this would be an API call)
+      const newUser = {
+        id: String(MOCK_USERS.length + 1),
+        name,
         email,
-        password,
-      });
+      };
       
-      if (error) {
-        throw error;
-      }
-      
-      if (data?.user) {
-        // Create profile for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            name,
-            email,
-            is_admin: false,
-          });
-        
-        if (profileError) {
-          throw profileError;
-        }
-        
-        toast.success('Conta criada com sucesso!');
-      }
+      // Save user to state and localStorage
+      setUser(newUser);
+      localStorage.setItem('fintec_user', JSON.stringify(newUser));
+      toast.success('Account created successfully');
     } catch (error) {
-      const authError = error as any;
-      toast.error(authError.message || 'Erro ao criar conta');
+      toast.error((error as Error).message || 'Signup failed');
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      setSession(null);
-      setUser(null);
-      toast.success('Logout realizado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-      toast.error('Erro ao fazer logout');
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('fintec_user');
+    toast.success('Logged out successfully');
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        session,
-        isAuthenticated: !!session,
+        isAuthenticated: !!user,
         isLoading,
-        isAdmin: !!user?.is_admin,
+        isAdmin: !!user?.isAdmin,
         login,
         signup,
         logout,
