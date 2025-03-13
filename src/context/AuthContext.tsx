@@ -3,6 +3,7 @@ import React, { createContext, useContext } from 'react';
 import { AuthContextType } from '@/types/auth';
 import { useAuthState } from '@/hooks/auth/useAuthState';
 import { performLogin, performSignup, performLogout, performResendConfirmation } from '@/utils/authOperations';
+import { toast } from "sonner";
 
 // Create the auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
