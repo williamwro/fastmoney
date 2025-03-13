@@ -34,17 +34,6 @@ const Login = () => {
         
         <div className="mt-8">
           <AuthForm type="login" />
-          
-          <div className="mt-6 text-center">
-            <div className="mt-4 text-xs text-blue-100/70">
-              <p>Para fins de demonstração, use:</p>
-              <p className="mt-1 font-mono">
-                Email: admin@example.com
-                <br />
-                Senha: password123
-              </p>
-            </div>
-          </div>
         </div>
       </div>
       
