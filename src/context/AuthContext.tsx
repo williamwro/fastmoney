@@ -23,10 +23,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await performLogin(email, password);
+      const data = await performLogin(email, password);
+      console.log('Login bem-sucedido, redirecionando para dashboard', data);
+      return data;
     } catch (error) {
       console.error('Login error in context:', error);
-      // Error is already handled in useAuthOperations
+      // Error is already handled in performLogin
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Add more verbose logging for authentication state
   console.log("AuthContext - Estado atual:", { 
     user: !!user, 
+    userDetails: user ? { id: user.id, name: user.name } : 'no user',
     authChecked, 
-    isAuthenticated: authChecked && !!user 
+    isAuthenticated: authChecked && !!user,
+    isLoading 
   });
 
   // Create the context value object

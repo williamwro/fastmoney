@@ -49,6 +49,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
   // Redirect to bills page after successful authentication
   useEffect(() => {
     if (isAuthenticated) {
+      console.log('User is authenticated, navigating to /bills');
       navigate('/bills');
     }
   }, [isAuthenticated, navigate]);
@@ -64,8 +65,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onEmailChange }) => {
       if (isLogin) {
         const { email, password } = values;
         await login(email, password);
-        console.log('Login successful, authenticated:', isAuthenticated);
-        // No need to navigate here as the useEffect will handle it
+        console.log('Login successful, redirecting via useEffect');
+        // Navigation happens in useEffect when isAuthenticated changes
       } else {
         const { name, email, password } = values;
         await signup(name, email, password);

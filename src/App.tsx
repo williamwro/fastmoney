@@ -7,7 +7,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { BillProvider } from "./context/BillContext";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
-import Index from "./pages/Index";
 import Bills from "./pages/Bills";
 import BillForm from "./pages/BillForm";
 import Login from "./pages/Login";
@@ -42,6 +41,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         <div className="animate-pulse space-y-2 flex flex-col items-center">
           <div className="h-10 w-36 bg-gray-200 rounded"></div>
           <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Verificando autenticação...</div>
         </div>
       </div>
     );
@@ -54,6 +54,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         <div className="animate-pulse space-y-2 flex flex-col items-center">
           <div className="h-10 w-36 bg-gray-200 rounded"></div>
           <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Carregando...</div>
         </div>
       </div>
     );
@@ -87,6 +88,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         <div className="animate-pulse space-y-2 flex flex-col items-center">
           <div className="h-10 w-36 bg-gray-200 rounded"></div>
           <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Verificando autenticação...</div>
         </div>
       </div>
     );
@@ -106,6 +108,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         <div className="animate-pulse space-y-2 flex flex-col items-center">
           <div className="h-10 w-36 bg-gray-200 rounded"></div>
           <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="text-sm text-gray-500 mt-2">Processando...</div>
         </div>
       </div>
     );
