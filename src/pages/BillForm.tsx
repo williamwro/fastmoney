@@ -27,12 +27,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getCategoryInfo } from '@/utils/formatters';
+import { getCategoryInfo, formatBrazilianCurrency, brazilianCurrencyToNumber } from '@/utils/formatters';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const billSchema = z.object({
   vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
-  amount: z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+  amount: z.string().refine(val => {
+    const numericValue = brazilianCurrencyToNumber(val);
+    return !isNaN(parseFloat(numericValue)) && parseFloat(numericValue) > 0;
+  }, {
     message: 'O valor deve ser um número maior que zero',
   }),
   dueDate: z.string().refine(val => !isNaN(Date.parse(val)), {
@@ -99,7 +102,7 @@ const BillForm = () => {
     resolver: zodResolver(billSchema),
     defaultValues: {
       vendorName: '',
-      amount: '',
+      amount: 'R$ 0,00',
       dueDate: new Date().toISOString().split('T')[0],
       category: '',
       id_categoria: null,
@@ -112,7 +115,7 @@ const BillForm = () => {
     if (bill) {
       form.reset({
         vendorName: bill.vendorName,
-        amount: bill.amount.toString(),
+        amount: formatBrazilianCurrency(bill.amount.toString()),
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
@@ -128,7 +131,7 @@ const BillForm = () => {
     try {
       const formattedBill = {
         vendorName: values.vendorName,
-        amount: parseFloat(values.amount),
+        amount: parseFloat(brazilianCurrencyToNumber(values.amount)),
         dueDate: values.dueDate,
         category: values.category,
         id_categoria: values.id_categoria,
@@ -160,22 +163,6 @@ const BillForm = () => {
     }
   };
 
-  const formatAmountValue = (value: string) => {
-    let numericValue = value.replace(/[^\d.]/g, '');
-    
-    const parts = numericValue.split('.');
-    if (parts.length > 2) {
-      numericValue = parts[0] + '.' + parts.slice(1).join('');
-    }
-
-    if (numericValue.includes('.')) {
-      const [wholePart, decimalPart] = numericValue.split('.');
-      return `${wholePart}.${decimalPart.slice(0, 2)}`;
-    }
-    
-    return numericValue;
-  };
-  
   if (authLoading || (isEditMode && billsLoading) || loadingCategories) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -232,30 +219,19 @@ const BillForm = () => {
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valor (R$)</FormLabel>
+                        <FormLabel>Valor</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="0,00" 
+                            placeholder="R$ 0,00" 
                             {...field} 
                             onChange={(e) => {
-                              const formattedValue = formatAmountValue(e.target.value);
-                              field.onChange(formattedValue);
-                            }}
-                            onBlur={(e) => {
-                              let value = e.target.value;
-                              if (value && !value.includes('.')) {
-                                value = `${value}.00`;
-                                field.onChange(value);
-                              } else if (value && value.includes('.')) {
-                                const [whole, decimal = ''] = value.split('.');
-                                if (decimal.length === 0) {
-                                  value = `${whole}.00`;
-                                } else if (decimal.length === 1) {
-                                  value = `${whole}.${decimal}0`;
-                                }
-                                field.onChange(value);
+                              const numericValue = e.target.value.replace(/[^\d,]/g, '');
+                              if (numericValue === '') {
+                                field.onChange('R$ 0,00');
+                              } else {
+                                const formatted = formatBrazilianCurrency(numericValue);
+                                field.onChange(formatted);
                               }
-                              field.onBlur();
                             }}
                           />
                         </FormControl>

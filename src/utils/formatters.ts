@@ -1,4 +1,3 @@
-
 /**
  * Format a number as currency
  */
@@ -105,4 +104,46 @@ export function getCategoryInfo(category: string): {
     default:
       return { name: 'Outros', icon: '📋', bgColor: 'bg-gray-100' };
   }
+}
+
+/**
+ * Format a value to Brazilian currency format
+ */
+export function formatBrazilianCurrency(value: string): string {
+  // Remove non-numeric characters except for the last decimal point
+  let numericValue = value.replace(/[^\d.]/g, '');
+  
+  // Ensure only one decimal point
+  const parts = numericValue.split('.');
+  if (parts.length > 2) {
+    numericValue = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  // Format the value
+  let formattedValue = '';
+  
+  if (numericValue) {
+    // Convert to number and format to BRL
+    const number = parseFloat(numericValue);
+    if (!isNaN(number)) {
+      formattedValue = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(number);
+    }
+  } else {
+    formattedValue = 'R$ 0,00';
+  }
+  
+  return formattedValue;
+}
+
+/**
+ * Convert Brazilian currency format to number for storage
+ * R$ 1.234,56 -> 1234.56
+ */
+export function brazilianCurrencyToNumber(value: string): string {
+  // Strip currency symbol and separators, replace comma with dot
+  return value.replace(/[^\d,]/g, '')
+    .replace(',', '.');
 }
