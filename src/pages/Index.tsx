@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
@@ -42,9 +43,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center">
           <Brand />
-          <NavLinks isAuthenticated={isAuthenticated} />
+          <div className="ml-6">
+            <NavLinks isAuthenticated={isAuthenticated} />
+          </div>
         </div>
       </div>
       

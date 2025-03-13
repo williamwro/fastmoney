@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -26,9 +27,11 @@ const Categories = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center">
           <Brand />
-          <NavLinks isAuthenticated={isAuthenticated} />
+          <div className="ml-6">
+            <NavLinks isAuthenticated={isAuthenticated} />
+          </div>
         </div>
       </div>
       

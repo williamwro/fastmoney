@@ -29,11 +29,12 @@ const Users = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* Header with FastMoney brand and navigation menu inline */}
       <div className="w-full bg-white py-2 px-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center">
           <Brand />
-          <NavLinks isAuthenticated={true} />
+          <div className="ml-6">
+            <NavLinks isAuthenticated={true} />
+          </div>
         </div>
       </div>
       
