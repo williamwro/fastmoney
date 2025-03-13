@@ -1,3 +1,4 @@
+
 /**
  * Format a number as currency
  */
