@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -40,7 +39,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
 
-  // Load bills from Supabase
   useEffect(() => {
     const fetchBills = async () => {
       if (!isAuthenticated || !user) {
@@ -53,13 +51,12 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data, error } = await supabase
           .from('bills')
           .select('*')
-          .order('created_at', { ascending: false }); // Changed from 'due_date' to 'created_at' and order newest first
+          .order('due_date', { ascending: true });
 
         if (error) {
           throw error;
         }
 
-        // Transform from database format to application format
         const transformedBills = data.map(bill => ({
           id: bill.id,
           vendorName: bill.vendor_name,
@@ -96,7 +93,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Transform from application format to database format
       const dbBill = {
         vendor_name: billInput.vendorName,
         amount: billInput.amount,
@@ -118,7 +114,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // Transform the returned data back to application format
       const newBill: Bill = {
         id: data.id,
         vendorName: data.vendor_name,
@@ -147,7 +142,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Transform from application format to database format
       const dbUpdates: any = {};
       
       if (billUpdates.vendorName) dbUpdates.vendor_name = billUpdates.vendorName;
@@ -169,7 +163,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // Update local state
       setBills(prevBills => 
         prevBills.map(bill => 
           bill.id === id 
@@ -205,7 +198,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // Update local state
       setBills(prevBills => prevBills.filter(bill => bill.id !== id));
       toast.success('Conta excluída com sucesso');
     } catch (error) {

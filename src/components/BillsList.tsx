@@ -52,7 +52,8 @@ const BillsList: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    setFilteredBills(filterBills(status, categoryFilter, searchQuery));
+    const filtered = filterBills(status, categoryFilter, searchQuery);
+    setFilteredBills(filtered);
   }, [bills, status, categoryFilter, searchQuery, filterBills]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
