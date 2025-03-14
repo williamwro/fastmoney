@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,6 @@ const BillsList: React.FC = () => {
   const [loadingCategories, setLoadingCategories] = useState(true);
   
   useEffect(() => {
-    // Carregar categorias do banco de dados
     const fetchCategories = async () => {
       try {
         setLoadingCategories(true);
@@ -69,7 +67,6 @@ const BillsList: React.FC = () => {
     setCategoryFilter(value);
   };
 
-  // Format currency value
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -77,22 +74,17 @@ const BillsList: React.FC = () => {
     }).format(value);
   };
 
-  // Format date to Brazilian format
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   };
 
-  // Export bills to PDF
   const exportToPDF = () => {
     const doc = new jsPDF();
     
-    // Add title
     doc.setFontSize(18);
     doc.text('Relatório de Contas a Pagar', 14, 22);
     
-    // Add filter information
-    doc.setFontSize(11);
     let statusText = 'Todas as contas';
     if (status === 'paid') statusText = 'Contas pagas';
     if (status === 'unpaid') statusText = 'Contas pendentes';
@@ -103,7 +95,6 @@ const BillsList: React.FC = () => {
     doc.text(`${statusText} - ${categoryText}`, 14, 30);
     doc.text(`Data do relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
     
-    // Add bills table
     const tableColumn = ["Fornecedor", "Valor", "Vencimento", "Categoria", "Status"];
     const tableRows = filteredBills.map(bill => [
       bill.vendorName,
@@ -128,17 +119,14 @@ const BillsList: React.FC = () => {
       },
     });
     
-    // Add total amount
     const totalAmount = filteredBills.reduce((total, bill) => total + bill.amount, 0);
     const finalY = (doc as any).lastAutoTable.finalY || 45;
     
     doc.text(`Total: ${formatCurrency(totalAmount)}`, 14, finalY + 10);
     
-    // Save PDF
     doc.save('contas-a-pagar.pdf');
   };
   
-  // Make the export function available globally for the button in Bills.tsx
   useEffect(() => {
     window.exportBillsToPDF = exportToPDF;
     

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -52,7 +53,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data, error } = await supabase
           .from('bills')
           .select('*')
-          .order('due_date', { ascending: true });
+          .order('created_at', { ascending: false }); // Changed from 'due_date' to 'created_at' and order newest first
 
         if (error) {
           throw error;
