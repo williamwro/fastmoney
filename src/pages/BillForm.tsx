@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from "sonner";
 import LottieSuccess from '@/components/LottieSuccess';
+import successAnimation from '@/assets/success-animation.json';
 import { 
   Form, 
   FormControl, 
@@ -206,7 +207,7 @@ const BillForm = () => {
           <div className="flex-1 w-0 flex items-center">
             <div className="w-12 h-12 flex-shrink-0">
               <LottieSuccess 
-                animationData={require('@/assets/success-animation.json')} 
+                animationData={successAnimation} 
                 loop={false}
               />
             </div>
