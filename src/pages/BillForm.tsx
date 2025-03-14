@@ -203,7 +203,7 @@ const BillForm = () => {
       }
       
       toast.custom(() => (
-        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
+        <div className="w-full min-w-[300px] md:min-w-[420px] bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
           <div className="flex-1 w-0 flex items-center">
             <div className="w-12 h-12 flex-shrink-0">
               <LottieSuccess 
