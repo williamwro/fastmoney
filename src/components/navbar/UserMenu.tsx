@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ChangePassword from '@/components/ChangePassword';
 
 type UserMenuProps = {
   user: any | null;
@@ -29,6 +30,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
   closeMenu
 }) => {
   const navigate = useNavigate();
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   
   const getInitials = (name: string) => {
     return name
@@ -47,6 +49,11 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogin = () => {
     navigate('/login');
+    if (closeMenu) closeMenu();
+  };
+
+  const handleOpenPasswordDialog = () => {
+    setIsPasswordDialogOpen(true);
     if (closeMenu) closeMenu();
   };
 
@@ -73,15 +80,30 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
   if (mobile) {
     return (
-      <button
-        onClick={handleLogout}
-        className="w-full text-left block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-base font-medium"
-      >
-        <div className="flex items-center">
-          <LogOut className="h-5 w-5" />
-          <span className="ml-2">Sair</span>
-        </div>
-      </button>
+      <>
+        <button
+          onClick={handleOpenPasswordDialog}
+          className="w-full text-left block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-base font-medium"
+        >
+          <div className="flex items-center">
+            <Key className="h-5 w-5" />
+            <span className="ml-2">Alterar Senha</span>
+          </div>
+        </button>
+        <button
+          onClick={handleLogout}
+          className="w-full text-left block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 text-base font-medium"
+        >
+          <div className="flex items-center">
+            <LogOut className="h-5 w-5" />
+            <span className="ml-2">Sair</span>
+          </div>
+        </button>
+        <ChangePassword 
+          isOpen={isPasswordDialogOpen} 
+          onClose={() => setIsPasswordDialogOpen(false)} 
+        />
+      </>
     );
   }
 
@@ -103,12 +125,20 @@ const UserMenu: React.FC<UserMenuProps> = ({
             <User className="mr-2 h-4 w-4" />
             <span>Meu Perfil</span>
           </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleOpenPasswordDialog}>
+            <Key className="mr-2 h-4 w-4" />
+            <span>Alterar Senha</span>
+          </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sair</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ChangePassword 
+        isOpen={isPasswordDialogOpen} 
+        onClose={() => setIsPasswordDialogOpen(false)} 
+      />
     </div>
   );
 };
