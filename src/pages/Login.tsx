@@ -37,7 +37,13 @@ const Login = () => {
       
       <div className="max-w-md w-full space-y-8 px-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">FastMoney</h1>
+          <div className="flex flex-col items-center justify-center">
+            <img 
+              src="/lovable-uploads/3a262449-875c-4837-8e65-b5e7328baf27.png" 
+              alt="FastMoney Logo" 
+              className="h-32 w-auto mb-4"
+            />
+          </div>
           <p className="mt-2 text-white/80">
             Gerencie suas contas a pagar de forma simples e eficiente
           </p>
