@@ -246,9 +246,14 @@ const BillForm = () => {
       
       <main className="container mx-auto px-4 pt-20 pb-12 animate-fade-in">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold tracking-tight mb-6">
-            {isEditMode ? 'Editar Conta' : 'Nova Conta'}
-          </h1>
+          <div className="flex flex-col text-left mb-6">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {isEditMode ? 'Editar Conta' : 'Nova Conta'}
+            </h1>
+            <p className="text-gray-500 mt-1">
+              {isEditMode ? 'Atualize os detalhes da conta' : 'Preencha os detalhes da nova conta a pagar'}
+            </p>
+          </div>
           
           {error && (
             <Alert variant="destructive" className="mb-6">
