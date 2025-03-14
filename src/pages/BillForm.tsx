@@ -203,26 +203,26 @@ const BillForm = () => {
       }
       
       toast.custom(() => (
-        <div className="w-full min-w-[300px] md:min-w-[420px] bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
+        <div className="w-full min-w-[350px] md:min-w-[450px] bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-6 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
           <div className="flex-1 w-0 flex items-center">
-            <div className="w-12 h-12 flex-shrink-0">
+            <div className="w-16 h-16 flex-shrink-0">
               <LottieSuccess 
                 animationData={successAnimation} 
                 loop={false}
               />
             </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-green-800 dark:text-green-300">
+            <div className="ml-4 flex-1">
+              <p className="text-lg font-medium text-green-800 dark:text-green-300">
                 Conta salva com sucesso!
               </p>
             </div>
           </div>
           <button 
             onClick={() => toast.dismiss()} 
-            className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
           >
             <span className="sr-only">Fechar</span>
-            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -557,3 +557,4 @@ const BillForm = () => {
 };
 
 export default BillForm;
+
