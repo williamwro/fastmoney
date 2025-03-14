@@ -86,6 +86,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ isOpen, onClose }) => {
 
       toast.success('Senha alterada com sucesso');
       form.reset();
+      // Properly close the dialog to ensure the UI remains responsive
       onClose();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao alterar senha');
@@ -94,12 +95,21 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  // Improved dialog change handler
   const handleDialogChange = (open: boolean) => {
     if (!open) {
-      onClose();
-      // Reset form when dialog is closed
+      // Reset form and clear loading state
       form.reset();
+      setIsLoading(false);
+      onClose();
     }
+  };
+
+  // Use event handler to make sure dialog closes properly
+  const handleCancel = () => {
+    form.reset();
+    setIsLoading(false);
+    onClose();
   };
 
   return (
@@ -167,7 +177,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ isOpen, onClose }) => {
             />
 
             <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading}>

@@ -54,7 +54,11 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleOpenPasswordDialog = () => {
     setIsPasswordDialogOpen(true);
-    if (closeMenu) closeMenu();
+    if (closeMenu && mobile) closeMenu();
+  };
+
+  const handleClosePasswordDialog = () => {
+    setIsPasswordDialogOpen(false);
   };
 
   if (!isAuthenticated) {
@@ -101,7 +105,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         </button>
         <ChangePassword 
           isOpen={isPasswordDialogOpen} 
-          onClose={() => setIsPasswordDialogOpen(false)} 
+          onClose={handleClosePasswordDialog} 
         />
       </>
     );
@@ -137,7 +141,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
       </DropdownMenu>
       <ChangePassword 
         isOpen={isPasswordDialogOpen} 
-        onClose={() => setIsPasswordDialogOpen(false)} 
+        onClose={handleClosePasswordDialog} 
       />
     </div>
   );
