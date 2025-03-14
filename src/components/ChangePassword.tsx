@@ -94,8 +94,16 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+      // Reset form when dialog is closed
+      form.reset();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Alterar Senha</DialogTitle>
