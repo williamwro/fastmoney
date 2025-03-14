@@ -33,6 +33,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const billSchema = z.object({
   vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
   amount: z.string().refine(val => {
+    if (val === '') return true;
     return !isNaN(parseFloat(val)) && parseFloat(val) > 0;
   }, {
     message: 'O valor deve ser um número maior que zero',
@@ -101,7 +102,7 @@ const BillForm = () => {
     resolver: zodResolver(billSchema),
     defaultValues: {
       vendorName: '',
-      amount: '0',
+      amount: '',
       dueDate: new Date().toISOString().split('T')[0],
       category: '',
       id_categoria: null,
@@ -130,7 +131,7 @@ const BillForm = () => {
     try {
       const formattedBill = {
         vendorName: values.vendorName,
-        amount: parseFloat(values.amount),
+        amount: values.amount === '' ? 0 : parseFloat(values.amount),
         dueDate: values.dueDate,
         category: values.category,
         id_categoria: values.id_categoria,
@@ -221,7 +222,7 @@ const BillForm = () => {
                         <FormLabel>Valor</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="0" 
+                            placeholder="" 
                             {...field} 
                             type="number"
                             step="0.01"
