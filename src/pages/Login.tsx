@@ -77,11 +77,9 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 px-4">
         <div className="text-center">
           <div className="flex flex-col items-center justify-center">
-            <img 
-              src="/lovable-uploads/9559e314-9d48-4a7d-8a4a-23f526440f0a.png" 
-              alt="FastMoney Logo" 
-              className="h-32 w-auto mb-4"
-            />
+            <span className="font-bold text-4xl bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent mb-4">
+              FastMoney
+            </span>
           </div>
           <p className="mt-2 text-white/80">
             Gerencie suas contas a pagar de forma simples e eficiente
@@ -134,11 +132,9 @@ const Login = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-4">
-            <img 
-              src="/lovable-uploads/9559e314-9d48-4a7d-8a4a-23f526440f0a.png" 
-              alt="FastMoney Logo"
-              className="h-20 w-auto"
-            />
+            <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+              FastMoney
+            </span>
           </div>
           <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={handleDismiss}>
@@ -156,4 +152,3 @@ const Login = () => {
 };
 
 export default Login;
-
