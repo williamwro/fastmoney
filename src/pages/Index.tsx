@@ -7,6 +7,7 @@ import NavLinks from '@/components/navbar/NavLinks';
 import UserMenu from '@/components/navbar/UserMenu';
 import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, Navigate } from 'react-router-dom';
@@ -32,10 +33,10 @@ const Index = () => {
   
   if (authLoading || billsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
-          <div className="h-10 w-36 bg-gray-200 rounded"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="h-10 w-36 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
         </div>
       </div>
     );
@@ -47,8 +48,8 @@ const Index = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="w-full bg-white py-2 px-4 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="w-full bg-white dark:bg-gray-900 py-2 px-4 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Brand />
@@ -57,11 +58,14 @@ const Index = () => {
             </div>
           </div>
           
-          <UserMenu 
-            user={user} 
-            logout={logout} 
-            isAuthenticated={isAuthenticated} 
-          />
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <UserMenu 
+              user={user} 
+              logout={logout} 
+              isAuthenticated={isAuthenticated} 
+            />
+          </div>
         </div>
       </div>
       
@@ -70,7 +74,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div className="text-left">
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-gray-500 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
                 Gerencie suas contas a pagar de forma eficiente
               </p>
             </div>
@@ -89,11 +93,11 @@ const Index = () => {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-medium text-red-600">
+                  <CardTitle className="text-lg font-medium text-red-600 dark:text-red-500">
                     Contas Vencidas
                   </CardTitle>
                   <Link to="/bills?status=unpaid">
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 p-0">
+                    <Button variant="ghost" size="sm" className="text-red-600 dark:text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 p-0">
                       <span className="mr-1">Ver todas</span>
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -105,7 +109,7 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {overdueBills.length === 0 ? (
-                  <div className="text-center py-6 text-gray-500">
+                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
                     Não há contas vencidas. Continue assim!
                   </div>
                 ) : (
@@ -119,11 +123,11 @@ const Index = () => {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-medium text-amber-600">
+                  <CardTitle className="text-lg font-medium text-amber-600 dark:text-amber-500">
                     Vencendo em Breve
                   </CardTitle>
                   <Link to="/bills?status=unpaid">
-                    <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 p-0">
+                    <Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-0">
                       <span className="mr-1">Ver todas</span>
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -135,7 +139,7 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {dueSoonBills.length === 0 ? (
-                  <div className="text-center py-6 text-gray-500">
+                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
                     Não há contas vencendo em breve.
                   </div>
                 ) : (
