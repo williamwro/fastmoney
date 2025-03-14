@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -153,7 +152,6 @@ const BillForm = () => {
     }
   }, [bill, form]);
 
-  // Watch form values to handle conditional fields
   const hasInstallments = form.watch('hasInstallments');
   
   const onSubmit = async (values: BillFormValues) => {
@@ -161,15 +159,12 @@ const BillForm = () => {
     
     try {
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
-        // Handle installments
         const installmentsCount = parseInt(values.installmentsCount);
         const totalAmount = parseFloat(values.installmentsTotal);
         const installmentAmount = totalAmount / installmentsCount;
         const firstDueDate = new Date(values.dueDate);
         
-        // Create an array of installment bills
         const installmentPromises = Array.from({ length: installmentsCount }).map((_, index) => {
-          // Calculate due date for each installment (add 30 days for each installment after the first)
           const dueDate = new Date(firstDueDate);
           dueDate.setDate(dueDate.getDate() + (index * 30));
           
@@ -186,10 +181,8 @@ const BillForm = () => {
           return addBill(installmentBill);
         });
         
-        // Wait for all bills to be added
         await Promise.all(installmentPromises);
       } else {
-        // Handle single bill
         const formattedBill = {
           vendorName: values.vendorName,
           amount: values.amount === '' ? 0 : parseFloat(values.amount),
@@ -227,10 +220,10 @@ const BillForm = () => {
 
   if (authLoading || (isEditMode && billsLoading) || loadingCategories) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
-          <div className="h-10 w-36 bg-gray-200 rounded"></div>
-          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          <div className="h-10 w-36 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
         </div>
       </div>
     );
@@ -241,7 +234,7 @@ const BillForm = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-20 pb-12 animate-fade-in">
@@ -250,7 +243,7 @@ const BillForm = () => {
             <h1 className="text-3xl font-bold tracking-tight">
               {isEditMode ? 'Editar Conta' : 'Nova Conta'}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
               {isEditMode ? 'Atualize os detalhes da conta' : 'Preencha os detalhes da nova conta a pagar'}
             </p>
           </div>
@@ -263,7 +256,7 @@ const BillForm = () => {
             </Alert>
           )}
           
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg border p-6 shadow-sm">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border dark:border-gray-700 p-6 shadow-sm">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
