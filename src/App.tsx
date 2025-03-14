@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { BillProvider } from './context/BillContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/ProtectedRoute';
 import Index from './pages/Index';
@@ -18,65 +19,67 @@ function App() {
   return (
     <AuthProvider>
       <BillProvider>
-        <Router>
-          <Routes>
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            {/* Auth route removed */}
-            <Route 
-              path="/bills" 
-              element={
-                <ProtectedRoute>
-                  <Bills />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/bills/new" 
-              element={
-                <ProtectedRoute>
-                  <BillForm />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/bills/:id/edit" 
-              element={
-                <ProtectedRoute>
-                  <BillForm />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/users" 
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/categories" 
-              element={
-                <ProtectedRoute>
-                  <Categories />
-                </ProtectedRoute>
-              } 
-            />
-            {/* Redirect /auth to /login */}
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster />
+        <ThemeProvider>
+          <Router>
+            <Routes>
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              {/* Auth route removed */}
+              <Route 
+                path="/bills" 
+                element={
+                  <ProtectedRoute>
+                    <Bills />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bills/new" 
+                element={
+                  <ProtectedRoute>
+                    <BillForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bills/:id/edit" 
+                element={
+                  <ProtectedRoute>
+                    <BillForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/users" 
+                element={
+                  <ProtectedRoute>
+                    <Users />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/categories" 
+                element={
+                  <ProtectedRoute>
+                    <Categories />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* Redirect /auth to /login */}
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster />
+        </ThemeProvider>
       </BillProvider>
     </AuthProvider>
   );
