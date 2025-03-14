@@ -201,8 +201,8 @@ const BillForm = () => {
         }
       }
       
-      toast.custom((t) => (
-        <div className={`${t.visible ? 'animate-scale-in' : 'animate-scale-out'} w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800`}>
+      toast.custom(() => (
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
           <div className="flex-1 w-0 flex items-center">
             <div className="w-12 h-12 flex-shrink-0">
               <LottieSuccess 
@@ -217,7 +217,7 @@ const BillForm = () => {
             </div>
           </div>
           <button 
-            onClick={() => toast.dismiss(t)} 
+            onClick={() => toast.dismiss()} 
             className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
           >
             <span className="sr-only">Fechar</span>
