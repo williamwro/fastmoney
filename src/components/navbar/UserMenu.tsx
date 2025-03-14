@@ -80,6 +80,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
     );
   }
 
+  // Extract display name from user metadata or email
   const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário';
 
   if (mobile) {

@@ -9,7 +9,7 @@ type MobileMenuProps = {
   isOpen: boolean;
   closeMenu: () => void;
   isAuthenticated: boolean;
-  user: { name: string } | null;
+  user: any | null;
   logout: () => Promise<void>;
 };
 

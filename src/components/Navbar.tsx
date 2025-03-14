@@ -22,12 +22,6 @@ const Navbar: React.FC = () => {
     setIsOpen(false);
   };
   
-  // Transform the user object to match the expected shape with name property
-  const userWithName = user ? {
-    ...user,
-    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User'
-  } : null;
-  
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 fixed w-full z-10 top-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +36,7 @@ const Navbar: React.FC = () => {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <UserMenu 
-              user={userWithName} 
+              user={user} 
               logout={logout} 
               isAuthenticated={isAuthenticated} 
             />
@@ -57,7 +51,7 @@ const Navbar: React.FC = () => {
         isOpen={isOpen} 
         closeMenu={closeMenu} 
         isAuthenticated={isAuthenticated}
-        user={userWithName}
+        user={user}
         logout={logout}
       />
     </nav>
