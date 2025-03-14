@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart2, Receipt, Users, Tag } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface NavLinksProps {
   isAuthenticated?: boolean;
@@ -16,12 +17,17 @@ const NavLinks: React.FC<NavLinksProps> = ({
   closeMenu 
 }) => {
   const location = useLocation();
+  const { user } = useAuth();
+  
+  // Check if current user is the admin
+  const isAdmin = user?.email === 'william@makecard.com.br';
   
   // Only show these links when authenticated
   const authenticatedLinks = [
     { name: 'Dashboard', href: '/', icon: <BarChart2 className="size-4" /> },
     { name: 'Contas', href: '/bills', icon: <Receipt className="size-4" /> },
-    { name: 'Usuários', href: '/users', icon: <Users className="size-4" /> },
+    // Only show the Users link if the user is admin
+    ...(isAdmin ? [{ name: 'Usuários', href: '/users', icon: <Users className="size-4" /> }] : []),
     { name: 'Categorias', href: '/categories', icon: <Tag className="size-4" /> }
   ];
   
