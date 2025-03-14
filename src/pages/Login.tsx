@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -77,9 +78,11 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 px-4">
         <div className="text-center">
           <div className="flex flex-col items-center justify-center">
-            <span className="font-bold text-4xl bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent mb-4">
-              FastMoney
-            </span>
+            <img 
+              src="/lovable-uploads/33692494-af2f-4fdf-9f67-b4d711e23f02.png" 
+              alt="FastMoney Logo" 
+              className="h-32 w-auto mb-4"
+            />
           </div>
           <p className="mt-2 text-white/80">
             Gerencie suas contas a pagar de forma simples e eficiente
@@ -132,9 +135,11 @@ const Login = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-4">
-            <span className="font-bold text-3xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-              FastMoney
-            </span>
+            <img 
+              src="/lovable-uploads/33692494-af2f-4fdf-9f67-b4d711e23f02.png" 
+              alt="FastMoney Logo"
+              className="h-20 w-auto"
+            />
           </div>
           <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={handleDismiss}>

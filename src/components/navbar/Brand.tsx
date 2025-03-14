@@ -6,9 +6,11 @@ const Brand: React.FC = () => {
   return (
     <div className="flex-shrink-0 flex items-center w-auto">
       <Link to="/" className="flex items-center">
-        <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-          FastMoney
-        </span>
+        <img 
+          src="/lovable-uploads/33692494-af2f-4fdf-9f67-b4d711e23f02.png" 
+          alt="FastMoney Logo" 
+          className="h-8 w-auto"
+        />
       </Link>
     </div>
   );
