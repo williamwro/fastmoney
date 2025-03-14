@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import UserManagement from '@/components/users/UserManagement';
 import { Navigate } from 'react-router-dom';
@@ -7,12 +7,23 @@ import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
 import UserMenu from '@/components/navbar/UserMenu';
 import ThemeToggle from '@/components/ThemeToggle';
+import MobileMenuButton from '@/components/navbar/MobileMenuButton';
+import MobileMenu from '@/components/navbar/MobileMenu';
 
 const Users = () => {
   const { user, isLoading, logout, isAuthenticated } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Check if current user is the authorized admin
   const isAuthorizedAdmin = user?.email === 'william@makecard.com.br';
+  
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
   
   if (isLoading) {
     return (
@@ -36,20 +47,32 @@ const Users = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Brand />
-            <div className="ml-6">
+            <div className="hidden md:flex ml-6">
               <NavLinks isAuthenticated={isAuthenticated} />
             </div>
           </div>
           
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <UserMenu 
-              user={user} 
-              logout={logout} 
-              isAuthenticated={isAuthenticated} 
-            />
+            <div className="hidden md:block">
+              <UserMenu 
+                user={user} 
+                logout={logout} 
+                isAuthenticated={isAuthenticated} 
+              />
+            </div>
+            <MobileMenuButton isOpen={isMenuOpen} toggleMenu={toggleMenu} />
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        <MobileMenu 
+          isOpen={isMenuOpen} 
+          closeMenu={closeMenu} 
+          isAuthenticated={isAuthenticated}
+          user={user}
+          logout={logout}
+        />
       </div>
       
       <main className="container mx-auto px-4 pt-6 pb-12 animate-fade-in">

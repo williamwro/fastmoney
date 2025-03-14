@@ -15,11 +15,14 @@ import { PlusCircle, ArrowRight, AlertCircle, Smartphone, QrCode } from 'lucide-
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import MobileMenuButton from '@/components/navbar/MobileMenuButton';
+import MobileMenu from '@/components/navbar/MobileMenu';
 
 const Index = () => {
   const { isLoading: authLoading, isAuthenticated, user, logout } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
   const [showQrCode, setShowQrCode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const overdueBills = getOverdueBills().slice(0, 3);
@@ -37,6 +40,14 @@ const Index = () => {
       });
     }
   }, [overdueBills.length]);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
   
   if (authLoading || billsLoading) {
     return (
@@ -60,17 +71,17 @@ const Index = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Brand />
-            <div className="ml-6">
+            <div className="hidden md:flex ml-6">
               <NavLinks isAuthenticated={isAuthenticated} />
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {/* Abrir no App button */}
             <Button 
               variant="outline" 
               onClick={() => setShowQrCode(true)}
-              className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
+              className="flex items-center gap-1 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
               size={isMobile ? "sm" : "default"}
             >
               <Smartphone className="h-4 w-4" />
@@ -78,13 +89,25 @@ const Index = () => {
               <QrCode className="h-4 w-4" />
             </Button>
             <ThemeToggle />
-            <UserMenu 
-              user={user} 
-              logout={logout} 
-              isAuthenticated={isAuthenticated} 
-            />
+            <div className="hidden md:block">
+              <UserMenu 
+                user={user} 
+                logout={logout} 
+                isAuthenticated={isAuthenticated} 
+              />
+            </div>
+            <MobileMenuButton isOpen={isMenuOpen} toggleMenu={toggleMenu} />
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        <MobileMenu 
+          isOpen={isMenuOpen} 
+          closeMenu={closeMenu} 
+          isAuthenticated={isAuthenticated}
+          user={user}
+          logout={logout}
+        />
       </div>
       
       <main className="container mx-auto px-4 pt-6 pb-12 animate-fade-in">

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
@@ -11,11 +11,22 @@ import Brand from '@/components/navbar/Brand';
 import NavLinks from '@/components/navbar/NavLinks';
 import UserMenu from '@/components/navbar/UserMenu';
 import ThemeToggle from '@/components/ThemeToggle';
+import MobileMenuButton from '@/components/navbar/MobileMenuButton';
+import MobileMenu from '@/components/navbar/MobileMenu';
 
 const Bills = () => {
   const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
   const { isLoading: billsLoading } = useBills();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
   
   useEffect(() => {
     // Check if we have status param in URL
@@ -46,20 +57,32 @@ const Bills = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Brand />
-            <div className="ml-6">
+            <div className="hidden md:flex ml-6">
               <NavLinks isAuthenticated={isAuthenticated} />
             </div>
           </div>
           
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <UserMenu 
-              user={user} 
-              logout={logout} 
-              isAuthenticated={isAuthenticated} 
-            />
+            <div className="hidden md:block">
+              <UserMenu 
+                user={user} 
+                logout={logout} 
+                isAuthenticated={isAuthenticated} 
+              />
+            </div>
+            <MobileMenuButton isOpen={isMenuOpen} toggleMenu={toggleMenu} />
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        <MobileMenu 
+          isOpen={isMenuOpen} 
+          closeMenu={closeMenu} 
+          isAuthenticated={isAuthenticated}
+          user={user}
+          logout={logout}
+        />
       </div>
       
       <main className="container mx-auto px-4 pt-6 pb-12 animate-fade-in">
@@ -72,7 +95,7 @@ const Bills = () => {
               </p>
             </div>
             
-            <div className="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+            <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
               <Button
                 variant="outline"
                 className="flex items-center gap-1"

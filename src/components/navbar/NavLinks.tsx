@@ -39,7 +39,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
   const links = isAuthenticated ? authenticatedLinks : publicLinks;
 
   return (
-    <nav className={mobile ? "space-y-0.5" : "flex space-x-4"}>
+    <nav className={mobile ? "space-y-0.5 w-full" : "flex space-x-4"}>
       {links.map((link) => {
         // Determine if the link is active
         const isActive = location.pathname === link.href || 
@@ -51,7 +51,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
             to={link.href}
             className={cn(
               mobile 
-                ? "group flex items-center rounded-md px-3 py-2 text-sm font-medium" 
+                ? "group flex items-center rounded-md px-3 py-3 text-sm font-medium w-full" 
                 : "inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2",
               isActive
                 ? mobile 

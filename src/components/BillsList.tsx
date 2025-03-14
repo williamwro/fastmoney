@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/hooks/useCategoryManagement';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BillsList: React.FC = () => {
   const { filterBills, bills, isLoading } = useBills();
@@ -26,6 +28,7 @@ const BillsList: React.FC = () => {
   const [filteredBills, setFilteredBills] = useState(bills);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const fetchCategories = async () => {
@@ -166,7 +169,7 @@ const BillsList: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-1">
                 <Filter className="h-4 w-4 mr-1" />
-                <span>Categoria</span>
+                <span className={isMobile ? "" : "inline"}>Categoria</span>
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </DropdownMenuTrigger>

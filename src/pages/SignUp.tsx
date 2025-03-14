@@ -29,7 +29,7 @@ const SignUp = () => {
         <ThemeToggle />
       </div>
       
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 px-4">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">FastMoney</h1>
           <p className="mt-2 text-white/80">
@@ -51,7 +51,7 @@ const SignUp = () => {
         </div>
       </div>
       
-      <footer className="absolute bottom-4 text-center text-white/60 text-xs">
+      <footer className="absolute bottom-4 text-center text-white/60 text-xs w-full px-4">
         &copy; {new Date().getFullYear()} FastMoney - Todos os direitos reservados
       </footer>
     </div>
