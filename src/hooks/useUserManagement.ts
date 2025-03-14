@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ type Profile = {
 };
 
 export const useUserManagement = () => {
-  const { signup } = useAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
@@ -52,6 +53,13 @@ export const useUserManagement = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate password match for new users
+    if (!isEditing && password !== confirmPassword) {
+      toast.error('As senhas não coincidem');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isEditing && editUserId) {
         const { error: profileError } = await supabase
@@ -64,15 +72,33 @@ export const useUserManagement = () => {
         toast.success('Usuário atualizado com sucesso');
         fetchProfiles();
       } else {
-        await signup(name, email, password);
-        toast.success('Usuário criado com sucesso');
+        // Creating a new user through Supabase Auth
+        const { data, error } = await supabase.auth.signUp({
+          email, 
+          password,
+          options: {
+            data: {
+              name
+            }
+          }
+        });
+
+        if (error) throw error;
+        
+        toast.success('Usuário criado com sucesso. Verifique o email para confirmar o cadastro.');
         fetchProfiles();
       }
       
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao processar usuário:', error);
-      toast.error(isEditing ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário');
+      
+      // More descriptive error messages based on the error
+      if (error.message?.includes('already registered')) {
+        toast.error('Este email já está registrado no sistema');
+      } else {
+        toast.error(isEditing ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário');
+      }
     } finally {
       setIsLoading(false);
     }
