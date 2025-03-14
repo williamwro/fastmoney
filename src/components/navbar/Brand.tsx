@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { LOGO_PATH } from '@/assets/logo';
 
 const Brand: React.FC = () => {
   return (
     <div className="flex-shrink-0 flex items-center w-auto">
       <Link to="/" className="flex items-center">
         <img 
-          src="/lovable-uploads/33692494-af2f-4fdf-9f67-b4d711e23f02.png" 
+          src={LOGO_PATH} 
           alt="FastMoney Logo" 
-          className="h-8 w-auto"
+          className="h-7 w-auto"
         />
       </Link>
     </div>
