@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Plus, Minus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Bill, useBills } from '@/context/BillContext';
 import { Category } from '@/hooks/useCategoryManagement';
@@ -18,7 +19,8 @@ import {
   FormField, 
   FormItem, 
   FormLabel, 
-  FormMessage 
+  FormMessage,
+  FormDescription 
 } from '@/components/ui/form';
 import {
   Select,
@@ -27,6 +29,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Switch } from "@/components/ui/switch";
 import { getCategoryInfo } from '@/utils/formatters';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -45,6 +54,21 @@ const billSchema = z.object({
   id_categoria: z.string().nullable(),
   status: z.enum(['paid', 'unpaid']),
   notes: z.string().optional(),
+  // New installment fields
+  hasInstallments: z.boolean().default(false),
+  installmentsCount: z.string().refine(val => {
+    if (val === '') return true;
+    const num = parseInt(val);
+    return !isNaN(num) && num > 0 && num <= 48;
+  }, {
+    message: 'Número de parcelas deve ser um número entre 1 e 48',
+  }).optional(),
+  installmentsTotal: z.string().refine(val => {
+    if (val === '') return true;
+    return !isNaN(parseFloat(val)) && parseFloat(val) > 0;
+  }, {
+    message: 'Valor total deve ser um número maior que zero',
+  }).optional(),
 });
 
 type BillFormValues = z.infer<typeof billSchema>;
@@ -108,6 +132,9 @@ const BillForm = () => {
       id_categoria: null,
       status: 'unpaid',
       notes: '',
+      hasInstallments: false,
+      installmentsCount: '',
+      installmentsTotal: '',
     },
   });
   
@@ -121,28 +148,63 @@ const BillForm = () => {
         id_categoria: bill.id_categoria,
         status: bill.status,
         notes: bill.notes || '',
+        hasInstallments: false,
       });
     }
   }, [bill, form]);
+
+  // Watch form values to handle conditional fields
+  const hasInstallments = form.watch('hasInstallments');
   
   const onSubmit = async (values: BillFormValues) => {
     setIsSubmitting(true);
     
     try {
-      const formattedBill = {
-        vendorName: values.vendorName,
-        amount: values.amount === '' ? 0 : parseFloat(values.amount),
-        dueDate: values.dueDate,
-        category: values.category,
-        id_categoria: values.id_categoria,
-        status: values.status,
-        notes: values.notes,
-      };
-      
-      if (isEditMode && id) {
-        updateBill(id, formattedBill);
+      if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
+        // Handle installments
+        const installmentsCount = parseInt(values.installmentsCount);
+        const totalAmount = parseFloat(values.installmentsTotal);
+        const installmentAmount = totalAmount / installmentsCount;
+        const firstDueDate = new Date(values.dueDate);
+        
+        // Create an array of installment bills
+        const installmentPromises = Array.from({ length: installmentsCount }).map((_, index) => {
+          // Calculate due date for each installment (add 30 days for each installment after the first)
+          const dueDate = new Date(firstDueDate);
+          dueDate.setDate(dueDate.getDate() + (index * 30));
+          
+          const installmentBill = {
+            vendorName: `${values.vendorName} - Parcela ${index + 1}/${installmentsCount}`,
+            amount: installmentAmount,
+            dueDate: dueDate.toISOString().split('T')[0],
+            category: values.category,
+            id_categoria: values.id_categoria,
+            status: values.status,
+            notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
+          };
+          
+          return addBill(installmentBill);
+        });
+        
+        // Wait for all bills to be added
+        await Promise.all(installmentPromises);
       } else {
-        addBill(formattedBill);
+        // Handle single bill
+        const formattedBill = {
+          vendorName: values.vendorName,
+          amount: values.amount === '' ? 0 : parseFloat(values.amount),
+          dueDate: values.dueDate,
+          category: values.category,
+          id_categoria: values.id_categoria,
+          status: values.status,
+          notes: values.notes,
+        };
+        
+        if (isEditMode && id) {
+          updateBill(id, formattedBill);
+        } else {
+          addBill(formattedBill);
+        }
       }
       
       navigate('/bills');
@@ -213,40 +275,42 @@ const BillForm = () => {
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valor</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="" 
-                            {...field} 
-                            type="number"
-                            step="0.01"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="dueDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Vencimento</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {!hasInstallments && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="" 
+                              {...field} 
+                              type="number"
+                              step="0.01"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de Vencimento</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
@@ -307,6 +371,103 @@ const BillForm = () => {
                     )}
                   />
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="hasInstallments"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Parcelamento</FormLabel>
+                        <FormDescription>
+                          Dividir esta conta em parcelas mensais
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isEditMode}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                {hasInstallments && !isEditMode && (
+                  <div className="space-y-4 rounded-lg border p-4 bg-slate-50">
+                    <h3 className="font-medium text-lg">Configuração das Parcelas</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="installmentsCount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quantidade de Parcelas</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="48"
+                                placeholder="Ex: 12"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="installmentsTotal"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor Total</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="Valor total da conta"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data do Primeiro Vencimento</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="text-sm text-muted-foreground mt-2">
+                      <p>As parcelas serão criadas com 30 dias de intervalo entre cada vencimento.</p>
+                      
+                      {form.watch('installmentsCount') && form.watch('installmentsTotal') && (
+                        <div className="mt-2 p-2 bg-blue-50 rounded-md">
+                          <p className="font-medium text-blue-800">
+                            Valor de cada parcela: R$ 
+                            {(parseFloat(form.watch('installmentsTotal') || '0') / 
+                              parseInt(form.watch('installmentsCount') || '1')).toFixed(2)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
                 <FormField
                   control={form.control}
