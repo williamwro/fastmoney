@@ -121,19 +121,19 @@ const UserMenu: React.FC<UserMenuProps> = ({
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-white">
-          <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-          <DropdownMenuLabel className="font-normal text-xs text-gray-500">{user?.email}</DropdownMenuLabel>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel className="font-semibold text-foreground">Minha Conta</DropdownMenuLabel>
+          <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">{user?.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="cursor-pointer" disabled>
+          <DropdownMenuItem className="cursor-pointer text-foreground" disabled>
             <User className="mr-2 h-4 w-4" />
             <span>Meu Perfil</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" onClick={handleOpenPasswordDialog}>
+          <DropdownMenuItem className="cursor-pointer text-foreground" onClick={handleOpenPasswordDialog}>
             <Key className="mr-2 h-4 w-4" />
             <span>Alterar Senha</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+          <DropdownMenuItem className="cursor-pointer text-foreground" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sair</span>
           </DropdownMenuItem>
