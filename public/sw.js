@@ -1,7 +1,7 @@
 
 // Service Worker com estratégia de cache e atualizações offline-first
 
-const CACHE_NAME = "bill-craft-v2";
+const CACHE_NAME = "bill-craft-v3";
 const ASSETS = [
   "/",
   "/index.html",
@@ -54,7 +54,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Estratégia Stale-while-revalidate para melhor desempenho
+// Melhor estratégia para cache primeiro, depois rede
 self.addEventListener("fetch", (event) => {
   // Ignorar solicitações que não começam com http/https
   if (!event.request.url.startsWith('http')) return;
@@ -66,35 +66,72 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Para navegação (páginas), vamos usar Network First com fallback para cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match(event.request)
+            .then(cachedResponse => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              return caches.match('/offline.html');
+            });
+        })
+    );
+    return;
+  }
+
+  // Para recursos estáticos, usamos Cache First
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // Usar cache se disponível, mas sempre tentar atualizar em segundo plano
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          // Verificar se recebemos uma resposta válida
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+    caches.match(event.request)
+      .then(cachedResponse => {
+        if (cachedResponse) {
+          // Se temos no cache, começamos a tentar atualizar em segundo plano
+          fetch(event.request)
+            .then(networkResponse => {
+              if (networkResponse && networkResponse.status === 200) {
+                const respToCache = networkResponse.clone();
+                caches.open(CACHE_NAME)
+                  .then(cache => {
+                    cache.put(event.request, respToCache);
+                  });
+              }
+            })
+            .catch(() => console.log('[ServiceWorker] Fetch failed, serving from cache'));
+          
+          return cachedResponse;
+        }
+
+        // Se não temos no cache, buscamos da rede
+        return fetch(event.request)
+          .then(networkResponse => {
+            if (!networkResponse || networkResponse.status !== 200) {
+              return networkResponse;
+            }
+
+            // Fazemos uma cópia para o cache
             const respToCache = networkResponse.clone();
-            
-            // Atualizar o cache de forma assíncrona
             caches.open(CACHE_NAME)
-              .then((cache) => {
+              .then(cache => {
                 cache.put(event.request, respToCache);
               });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // Se a rede falhar e for uma solicitação de página, exiba a página offline
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
-          }
-          
-          // Para outros recursos (imagens, scripts, etc.) que falharam, retorne um placeholder ou nulo
-          return null;
-        });
 
-      return cachedResponse || fetchPromise;
-    })
+            return networkResponse;
+          })
+          .catch(error => {
+            console.error('[ServiceWorker] Fetch failed:', error);
+            // Para imagens, podemos tentar retornar um placeholder
+            if (event.request.url.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+              return caches.match('/placeholder.svg');
+            }
+            return new Response('Network error', { 
+              status: 408, 
+              headers: { 'Content-Type': 'text/plain' } 
+            });
+          });
+      })
   );
 });
 

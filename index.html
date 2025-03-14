@@ -8,18 +8,27 @@
     <meta name="description" content="Gerencie suas contas e finanças com facilidade" />
     <meta name="author" content="Lovable" />
     <meta name="theme-color" content="#3b82f6" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Bill Craft" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Bill Craft" />
+    
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <meta property="og:image" content="/og-image.png" />
     
     <!-- Para iOS específico -->
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png" />
+    
+    <!-- Smart App Banners -->
+    <meta name="apple-itunes-app" content="app-id=myAppStoreID">
+    
+    <!-- Safari Web App -->
+    <link rel="mask-icon" href="/icons/icon-192x192.png" color="#3b82f6">
   </head>
 
   <body>
@@ -51,17 +60,32 @@
               // Armazenar o evento para uso posterior
               window.deferredPrompt = e;
               console.info('Install prompt available');
+              
+              // Disparar um evento personalizado para informar a aplicação
+              const event = new CustomEvent('pwaInstallable');
+              window.dispatchEvent(event);
             });
             
             // Detectar quando o app é instalado
             window.addEventListener('appinstalled', () => {
               window.deferredPrompt = null;
               console.info('PWA installed successfully');
+              
+              // Registrar a instalação (poderia enviar para analytics)
+              const event = new CustomEvent('pwaInstalled');
+              window.dispatchEvent(event);
             });
           } catch (error) {
             console.error('Service Worker registration failed:', error);
           }
         });
+        
+        // Verificar se está rodando como PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            (window.navigator as any).standalone === true) {
+          console.info('Running in PWA mode');
+          document.documentElement.classList.add('pwa-mode');
+        }
       }
     </script>
   </body>

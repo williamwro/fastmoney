@@ -4,9 +4,15 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
 import ThemeToggle from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { usePWAInstall } from '@/hooks/use-pwa-install';
+import { Download } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { canInstall, promptInstall, isPWASupported } = usePWAInstall();
+  const isMobile = useIsMobile();
   
   if (isLoading) {
     return (
@@ -36,6 +42,21 @@ const Login = () => {
             Gerencie suas contas a pagar de forma simples e eficiente
           </p>
         </div>
+        
+        {isMobile && isPWASupported && canInstall && (
+          <div className="mt-4">
+            <Button 
+              onClick={promptInstall}
+              className="w-full py-2 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600"
+            >
+              <Download size={18} />
+              Instalar Aplicativo
+            </Button>
+            <p className="text-xs text-white/70 text-center mt-1">
+              Instale para usar offline e ter melhor experiência
+            </p>
+          </div>
+        )}
         
         <div className="mt-8">
           <AuthForm type="login" />
