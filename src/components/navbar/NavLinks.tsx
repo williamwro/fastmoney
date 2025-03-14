@@ -56,16 +56,17 @@ const NavLinks: React.FC<NavLinksProps> = ({
               isActive
                 ? mobile 
                   ? "bg-accent text-accent-foreground"
-                  : "border-blue-500 text-gray-900"
+                  : "border-blue-500 text-foreground dark:text-gray-100"
                 : mobile
                   ? "transparent hover:bg-muted text-muted-foreground hover:text-foreground"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
             )}
             onClick={closeMenu}
           >
             <span className={cn(
               "text-muted-foreground group-hover:text-foreground",
-              mobile ? "mr-3" : "mr-2"
+              mobile ? "mr-3" : "mr-2",
+              isActive && "text-accent-foreground"
             )}>
               {link.icon}
             </span>
