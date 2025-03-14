@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -128,7 +129,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setBills(prevBills => [...prevBills, newBill]);
-      toast.success('Conta adicionada com sucesso');
+      // Removed the toast.success here to avoid duplicate notifications
     } catch (error) {
       console.error('Error adding bill:', error);
       toast.error('Falha ao adicionar conta');
