@@ -3,7 +3,7 @@ import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, AlertCircle, Plus, Minus, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Plus, Minus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Bill, useBills } from '@/context/BillContext';
 import { Category } from '@/hooks/useCategoryManagement';
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from "sonner";
+import LottieSuccess from '@/components/LottieSuccess';
 import { 
   Form, 
   FormControl, 
@@ -200,16 +201,39 @@ const BillForm = () => {
         }
       }
       
-      toast.success("Conta salva com sucesso!", {
-        position: "top-center",
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-scale-in' : 'animate-scale-out'} w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-4 mb-4 border border-green-100 dark:border-green-800`}>
+          <div className="flex-1 w-0 flex items-center">
+            <div className="w-12 h-12 flex-shrink-0">
+              <LottieSuccess 
+                animationData={require('@/assets/success-animation.json')} 
+                loop={false}
+              />
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                Conta salva com sucesso!
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => toast.dismiss(t.id)} 
+            className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+          >
+            <span className="sr-only">Fechar</span>
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      ), {
         duration: 3000,
-        icon: <CheckCircle className="h-5 w-5 text-green-500 animate-bounce" />,
-        className: "rounded-lg border border-green-100 bg-white text-green-800 shadow-md dark:border-green-800 dark:bg-gray-800 dark:text-green-400",
+        position: 'top-center',
       });
       
       setTimeout(() => {
         navigate('/bills');
-      }, 1000);
+      }, 2000);
     } catch (error) {
       console.error('Error submitting form:', error);
       setError('Ocorreu um erro ao salvar a conta. Tente novamente.');
