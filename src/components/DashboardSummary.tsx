@@ -5,11 +5,13 @@ import { formatCurrency } from '@/utils/formatters';
 import { useBills } from '@/context/BillContext';
 import { AlertTriangle, Calendar, CreditCard, Wallet, CheckCircle, Clock, QrCode, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardSummary: React.FC = () => {
   const { bills, getTotalDue, getOverdueBills, getDueSoonBills } = useBills();
   const [showQrCode, setShowQrCode] = useState(false);
+  const isMobile = useIsMobile();
   
   const totalUnpaid = getTotalDue();
   const totalPaid = bills
@@ -17,6 +19,9 @@ const DashboardSummary: React.FC = () => {
     .reduce((sum, bill) => sum + bill.amount, 0);
   const overdueBills = getOverdueBills();
   const dueSoonBills = getDueSoonBills();
+  
+  // Use a real app URL that will open in mobile browsers or the app
+  const appUrl = "https://billcraft.app/download";
   
   return (
     <>
@@ -83,11 +88,12 @@ const DashboardSummary: React.FC = () => {
       </div>
 
       {/* QR Code button */}
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center mt-6">
         <Button 
           variant="outline" 
           onClick={() => setShowQrCode(true)}
-          className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
+          size={isMobile ? "sm" : "default"}
         >
           <Smartphone className="h-4 w-4" />
           <span>Abrir no App</span>
@@ -100,24 +106,23 @@ const DashboardSummary: React.FC = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Escaneie o QR Code</DialogTitle>
+            <DialogDescription>
+              Use a câmera do seu celular para escanear o código QR e abrir o aplicativo BillCraft
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center p-6">
             <div className="bg-white p-4 rounded-md shadow-md">
-              <svg
+              {/* Using a real QR code that encodes the app URL */}
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appUrl)}`}
+                alt="QR Code para o app BillCraft" 
+                width="200" 
+                height="200"
                 className="w-64 h-64"
-                viewBox="0 0 200 200"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect width="200" height="200" fill="white" />
-                <path
-                  d="M50 50H80V80H50V50ZM120 50H150V80H120V50ZM50 120H80V150H50V120ZM90 50H110V60H90V50ZM90 70H110V80H90V70ZM90 90H110V100H90V90ZM90 110H110V120H90V110ZM90 130H110V140H90V130ZM90 150H110V160H90V150ZM120 90H130V100H120V90ZM140 90H150V100H140V90ZM120 110H130V120H120V110ZM140 110H150V120H140V110ZM120 130H130V140H120V130ZM140 130H150V140H140V130ZM120 150H130V160H120V150ZM140 150H150V160H140V150Z"
-                  fill="black"
-                />
-              </svg>
+              />
             </div>
             <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-              Use a câmera do seu celular para escanear o código QR e abrir o aplicativo BillCraft
+              Ou acesse diretamente: <a href={appUrl} className="text-blue-600 dark:text-blue-400 underline">{appUrl}</a>
             </p>
           </div>
         </DialogContent>
