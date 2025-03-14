@@ -217,7 +217,7 @@ const BillForm = () => {
             </div>
           </div>
           <button 
-            onClick={() => toast.dismiss(t.id)} 
+            onClick={() => toast.dismiss(t)} 
             className="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
           >
             <span className="sr-only">Fechar</span>
