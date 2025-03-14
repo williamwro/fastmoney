@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, User, Key } from 'lucide-react';
@@ -20,6 +19,7 @@ type UserMenuProps = {
   isAuthenticated: boolean;
   mobile?: boolean;
   closeMenu?: () => void;
+  onOpenPasswordDialog?: () => void;
 };
 
 const UserMenu: React.FC<UserMenuProps> = ({ 
@@ -27,7 +27,8 @@ const UserMenu: React.FC<UserMenuProps> = ({
   logout, 
   isAuthenticated,
   mobile = false,
-  closeMenu
+  closeMenu,
+  onOpenPasswordDialog
 }) => {
   const navigate = useNavigate();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -53,8 +54,12 @@ const UserMenu: React.FC<UserMenuProps> = ({
   };
 
   const handleOpenPasswordDialog = () => {
-    setIsPasswordDialogOpen(true);
-    if (closeMenu && mobile) closeMenu();
+    if (onOpenPasswordDialog) {
+      onOpenPasswordDialog();
+      if (closeMenu && mobile) closeMenu();
+    } else {
+      setIsPasswordDialogOpen(true);
+    }
   };
 
   const handleClosePasswordDialog = () => {
@@ -80,7 +85,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
     );
   }
 
-  // Extract display name from user metadata or email
   const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário';
 
   if (mobile) {
@@ -104,10 +108,13 @@ const UserMenu: React.FC<UserMenuProps> = ({
             <span className="ml-2">Sair</span>
           </div>
         </button>
-        <ChangePassword 
-          isOpen={isPasswordDialogOpen} 
-          onClose={handleClosePasswordDialog} 
-        />
+        
+        {!onOpenPasswordDialog && (
+          <ChangePassword 
+            isOpen={isPasswordDialogOpen} 
+            onClose={handleClosePasswordDialog} 
+          />
+        )}
       </>
     );
   }

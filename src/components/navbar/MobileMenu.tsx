@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import NavLinks from './NavLinks';
 import UserMenu from './UserMenu';
+import ChangePassword from '@/components/ChangePassword';
 
 type MobileMenuProps = {
   isOpen: boolean;
@@ -20,6 +21,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   user,
   logout
 }) => {
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  
+  const handleOpenPasswordDialog = () => {
+    setIsPasswordDialogOpen(true);
+  };
+
+  const handleClosePasswordDialog = () => {
+    setIsPasswordDialogOpen(false);
+  };
+
   if (!isOpen) return null;
   
   return (
@@ -49,9 +60,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           logout={logout} 
           isAuthenticated={isAuthenticated} 
           mobile={true} 
-          closeMenu={closeMenu} 
+          closeMenu={closeMenu}
+          onOpenPasswordDialog={handleOpenPasswordDialog}
         />
       </div>
+      
+      <ChangePassword 
+        isOpen={isPasswordDialogOpen} 
+        onClose={handleClosePasswordDialog} 
+      />
     </div>
   );
 };
