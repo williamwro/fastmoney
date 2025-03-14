@@ -20,8 +20,8 @@ const DashboardSummary: React.FC = () => {
   const overdueBills = getOverdueBills();
   const dueSoonBills = getDueSoonBills();
   
-  // Use a real app URL that will open in mobile browsers or the app
-  const appUrl = "https://billcraft.app/download";
+  // Updated to the correct app URL that will open in mobile browsers or the app
+  const appUrl = "https://bill-craft.lovable.app/";
   
   return (
     <>
