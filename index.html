@@ -1,17 +1,25 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>bill-craft</title>
-    <meta name="description" content="Gerencie suas contas e finanças" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Bill Craft</title>
+    <meta name="description" content="Gerencie suas contas e finanças com facilidade" />
     <meta name="author" content="Lovable" />
     <meta name="theme-color" content="#3b82f6" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Bill Craft" />
     <meta property="og:image" content="/og-image.png" />
+    
+    <!-- Para iOS específico -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png" />
   </head>
 
   <body>
@@ -21,14 +29,40 @@
     <script type="module" src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-              console.error('Service Worker registration failed:', error);
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
             });
+            console.info('Service Worker registered with scope:', registration.scope);
+            
+            // Verificar atualizações do service worker
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.info('Service Worker update found!');
+              
+              newWorker.addEventListener('statechange', () => {
+                console.info('Service Worker state changed:', newWorker.state);
+              });
+            });
+            
+            // Verificar se deve exibir prompt de instalação
+            window.addEventListener('beforeinstallprompt', (e) => {
+              // Prevenir o comportamento padrão
+              e.preventDefault();
+              // Armazenar o evento para uso posterior
+              window.deferredPrompt = e;
+              console.info('Install prompt available');
+            });
+            
+            // Detectar quando o app é instalado
+            window.addEventListener('appinstalled', () => {
+              window.deferredPrompt = null;
+              console.info('PWA installed successfully');
+            });
+          } catch (error) {
+            console.error('Service Worker registration failed:', error);
+          }
         });
       }
     </script>

@@ -12,45 +12,80 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
-      padding: 0 20px;
+      padding: 20px;
       text-align: center;
-      color: #333;
       background-color: #f9fafb;
+      color: #1f2937;
     }
     .container {
       max-width: 500px;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    h1 {
-      font-size: 2rem;
+    .icon {
+      font-size: 4rem;
       margin-bottom: 1rem;
       color: #3b82f6;
     }
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-      line-height: 1.5;
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
     }
-    button {
+    p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+    .button {
+      display: inline-block;
       background-color: #3b82f6;
       color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color 0.2s;
     }
-    button:hover {
+    .button:hover {
       background-color: #2563eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #111827;
+        color: #f9fafb;
+      }
+      .container {
+        background-color: #1f2937;
+      }
+      p {
+        color: #9ca3af;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="icon">📶</div>
     <h1>Você está offline</h1>
-    <p>Parece que você está sem conexão com a internet no momento. Verifique sua conexão e tente novamente.</p>
-    <button onclick="window.location.reload()">Tentar novamente</button>
+    <p>Parece que você está sem conexão com a internet no momento. Algumas funcionalidades do Bill Craft podem não estar disponíveis.</p>
+    <a href="/" class="button">Tentar novamente</a>
   </div>
+  <script>
+    // Verificar periodicamente se a conexão foi restaurada
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+    
+    // Também tentar recarregar quando a conexão for detectada
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
 </body>
 </html>
