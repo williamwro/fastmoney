@@ -19,8 +19,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
-        name: 'Bill Craft',
-        short_name: 'Bill Craft',
+        name: 'FastMoney',
+        short_name: 'FastMoney',
         description: 'Gerencie suas contas e finanças',
         theme_color: '#3b82f6',
         background_color: '#ffffff',
