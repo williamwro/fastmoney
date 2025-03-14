@@ -29,9 +29,6 @@
     
     <!-- Safari Web App -->
     <link rel="mask-icon" href="/icons/icon-192x192.png" color="#3b82f6">
-
-    <!-- Required Lovable script -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   </head>
 
   <body>
@@ -85,7 +82,7 @@
         
         // Verificar se está rodando como PWA
         if (window.matchMedia('(display-mode: standalone)').matches || 
-            (window.navigator as any).standalone === true) {
+            (window.navigator).standalone === true) {
           console.info('Running in PWA mode');
           document.documentElement.classList.add('pwa-mode');
         }

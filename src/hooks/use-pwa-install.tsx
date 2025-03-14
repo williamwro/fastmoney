@@ -20,15 +20,14 @@ export function usePWAInstall(): PWAInstallHookReturn {
     // Check if the app is already installed (standalone mode)
     const isInStandaloneMode = () => 
       window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator as any).standalone || 
+      (window.navigator as any).standalone === true || 
       document.referrer.includes('android-app://');
     
     setIsStandalone(isInStandaloneMode());
     
     // Check if PWA is supported
     const isPWASupportedCheck = 'serviceWorker' in navigator && 
-                               'PushManager' in window &&
-                               (isMobile || !window.matchMedia('(display-mode: browser)').matches);
+                               window.location.protocol === 'https:';
     
     setIsPWASupported(isPWASupportedCheck);
 
@@ -60,6 +59,16 @@ export function usePWAInstall(): PWAInstallHookReturn {
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Check if we need to manually trigger the install prompt
+    const checkManualInstall = () => {
+      // For iOS devices that don't support beforeinstallprompt
+      if (isPWASupportedCheck && isMobile && !isInStandaloneMode() && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        setCanInstall(true);
+      }
+    };
+    
+    checkManualInstall();
+
     // Cleanup
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -68,29 +77,29 @@ export function usePWAInstall(): PWAInstallHookReturn {
   }, [isMobile]);
 
   const promptInstall = async (): Promise<void> => {
-    if (!deferredPrompt.current) {
-      console.log('No installation prompt available');
-      return;
-    }
-
-    // Show the install prompt
-    deferredPrompt.current.prompt();
-    
-    // Wait for the user to respond to the prompt
-    try {
-      const choiceResult = await deferredPrompt.current.userChoice;
+    if (deferredPrompt.current) {
+      // Show the install prompt
+      deferredPrompt.current.prompt();
       
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the installation');
-      } else {
-        console.log('User dismissed the installation');
+      // Wait for the user to respond to the prompt
+      try {
+        const choiceResult = await deferredPrompt.current.userChoice;
+        
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the installation');
+        } else {
+          console.log('User dismissed the installation');
+        }
+        
+        // We no longer need the prompt
+        deferredPrompt.current = null;
+        setCanInstall(false);
+      } catch (error) {
+        console.error('Error during PWA installation:', error);
       }
-      
-      // We no longer need the prompt
-      deferredPrompt.current = null;
-      setCanInstall(false);
-    } catch (error) {
-      console.error('Error during PWA installation:', error);
+    } else if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      // For iOS, we need to show manual instructions
+      alert('Para instalar este aplicativo no seu dispositivo iOS:\n\n1. Toque no ícone de compartilhamento (📤)\n2. Role para baixo e toque em "Adicionar à Tela de Início" (➕)\n3. Toque em "Adicionar" no canto superior direito');
     }
   };
 

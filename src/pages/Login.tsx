@@ -6,12 +6,12 @@ import AuthForm from '@/components/AuthForm';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
-import { Download } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { canInstall, promptInstall, isPWASupported } = usePWAInstall();
+  const { canInstall, promptInstall, isPWASupported, isStandalone } = usePWAInstall();
   const isMobile = useIsMobile();
   
   if (isLoading) {
@@ -43,7 +43,7 @@ const Login = () => {
           </p>
         </div>
         
-        {isMobile && isPWASupported && canInstall && (
+        {isMobile && isPWASupported && canInstall && !isStandalone && (
           <div className="mt-4">
             <Button 
               onClick={promptInstall}
@@ -54,6 +54,18 @@ const Login = () => {
             </Button>
             <p className="text-xs text-white/70 text-center mt-1">
               Instale para usar offline e ter melhor experiência
+            </p>
+          </div>
+        )}
+        
+        {isMobile && !canInstall && isPWASupported && !isStandalone && (
+          <div className="mt-4 p-3 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+            <div className="flex items-center gap-2 text-white">
+              <Smartphone size={20} />
+              <p className="text-sm font-medium">Adicione à tela inicial</p>
+            </div>
+            <p className="text-xs text-white/70 mt-1">
+              Use o botão de compartilhamento (iOS) ou o menu "Adicionar à tela inicial" (Android) para instalar este app
             </p>
           </div>
         )}
