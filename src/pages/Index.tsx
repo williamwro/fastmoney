@@ -177,7 +177,7 @@ const Index = () => {
           <DialogHeader>
             <DialogTitle>Escaneie o QR Code</DialogTitle>
             <DialogDescription>
-              Use a câmera do seu celular para escanear o código QR e abrir o aplicativo BillCraft
+              Use a câmera do seu celular para escanear o código QR e abrir o aplicativo FastMoney
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center p-6">
@@ -185,7 +185,7 @@ const Index = () => {
               {/* Using a real QR code that encodes the app URL */}
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appUrl)}`}
-                alt="QR Code para o app BillCraft" 
+                alt="QR Code para o app FastMoney" 
                 width="200" 
                 height="200"
                 className="w-64 h-64"
