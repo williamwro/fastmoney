@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import AuthForm from '@/components/AuthForm';
@@ -8,11 +7,51 @@ import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { Download, Smartphone } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const { canInstall, promptInstall, isPWASupported, isStandalone } = usePWAInstall();
   const isMobile = useIsMobile();
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    if (isMobile && isPWASupported && canInstall && !isStandalone) {
+      const hasSeenPrompt = localStorage.getItem('pwaPromptSeen');
+      if (!hasSeenPrompt) {
+        setShowInstallDialog(true);
+      }
+    }
+  }, [isMobile, isPWASupported, canInstall, isStandalone]);
+  
+  const handleInstall = async () => {
+    try {
+      await promptInstall();
+      setShowInstallDialog(false);
+      localStorage.setItem('pwaPromptSeen', 'true');
+    } catch (error) {
+      console.error('Installation failed:', error);
+      toast({
+        title: "Instalação não concluída",
+        description: "Tente instalar manualmente usando o menu do navegador",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleDismiss = () => {
+    setShowInstallDialog(false);
+    localStorage.setItem('pwaPromptSeen', 'true');
+  };
   
   if (isLoading) {
     return (
@@ -52,7 +91,7 @@ const Login = () => {
         {isMobile && isPWASupported && canInstall && !isStandalone && (
           <div className="mt-4">
             <Button 
-              onClick={promptInstall}
+              onClick={() => setShowInstallDialog(true)}
               className="w-full py-2 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600"
             >
               <Download size={18} />
@@ -84,8 +123,37 @@ const Login = () => {
       <footer className="absolute bottom-4 text-center text-white/60 text-xs w-full px-4">
         &copy; {new Date().getFullYear()} TecWeb - Todos os direitos reservados
       </footer>
+      
+      <Dialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Instalar FastMoney</DialogTitle>
+            <DialogDescription>
+              Deseja instalar o FastMoney na tela principal do seu dispositivo?
+              Isso permitirá que você use o aplicativo mesmo offline e com uma experiência aprimorada.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <img 
+              src="/lovable-uploads/9559e314-9d48-4a7d-8a4a-23f526440f0a.png" 
+              alt="FastMoney Logo"
+              className="h-20 w-auto"
+            />
+          </div>
+          <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={handleDismiss}>
+              Agora não
+            </Button>
+            <Button type="button" onClick={handleInstall} className="bg-green-500 hover:bg-green-600">
+              <Download className="mr-2 h-4 w-4" />
+              Instalar Agora
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default Login;
+
