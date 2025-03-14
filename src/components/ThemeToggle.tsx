@@ -9,20 +9,23 @@ const ThemeToggle: React.FC = () => {
 
   return (
     <Button 
-      variant="ghost" 
+      variant="outline" 
       size="sm" 
       onClick={toggleTheme} 
       aria-label="Alternar tema"
-      className="w-9 px-0"
+      className="w-auto px-3 gap-2"
     >
       {theme === 'light' ? (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <>
+          <Moon className="h-[1.2rem] w-[1.2rem]" />
+          <span className="hidden sm:inline">Modo Escuro</span>
+        </>
       ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <>
+          <Sun className="h-[1.2rem] w-[1.2rem]" />
+          <span className="hidden sm:inline">Modo Claro</span>
+        </>
       )}
-      <span className="sr-only">
-        {theme === 'light' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
-      </span>
     </Button>
   );
 };
