@@ -9,8 +9,8 @@ import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { PlusCircle, ArrowRight } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
+import { PlusCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -39,6 +39,11 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+  
+  // Redirect unauthenticated users to the login page
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
   }
   
   return (

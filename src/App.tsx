@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { BillProvider } from './context/BillContext';
 import { Toaster } from './components/ui/sonner';
@@ -21,7 +21,14 @@ function App() {
       <BillProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth" element={<Auth />} />
