@@ -27,14 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getCategoryInfo, formatBrazilianCurrency, brazilianCurrencyToNumber } from '@/utils/formatters';
+import { getCategoryInfo } from '@/utils/formatters';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const billSchema = z.object({
   vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
   amount: z.string().refine(val => {
-    const numericValue = brazilianCurrencyToNumber(val);
-    return !isNaN(parseFloat(numericValue)) && parseFloat(numericValue) > 0;
+    return !isNaN(parseFloat(val)) && parseFloat(val) > 0;
   }, {
     message: 'O valor deve ser um número maior que zero',
   }),
@@ -102,7 +101,7 @@ const BillForm = () => {
     resolver: zodResolver(billSchema),
     defaultValues: {
       vendorName: '',
-      amount: 'R$ 0,00',
+      amount: '0',
       dueDate: new Date().toISOString().split('T')[0],
       category: '',
       id_categoria: null,
@@ -115,7 +114,7 @@ const BillForm = () => {
     if (bill) {
       form.reset({
         vendorName: bill.vendorName,
-        amount: formatBrazilianCurrency(bill.amount.toString()),
+        amount: bill.amount.toString(),
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
@@ -131,7 +130,7 @@ const BillForm = () => {
     try {
       const formattedBill = {
         vendorName: values.vendorName,
-        amount: parseFloat(brazilianCurrencyToNumber(values.amount)),
+        amount: parseFloat(values.amount),
         dueDate: values.dueDate,
         category: values.category,
         id_categoria: values.id_categoria,
@@ -222,17 +221,10 @@ const BillForm = () => {
                         <FormLabel>Valor</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="R$ 0,00" 
+                            placeholder="0" 
                             {...field} 
-                            onChange={(e) => {
-                              const numericValue = e.target.value.replace(/[^\d,]/g, '');
-                              if (numericValue === '') {
-                                field.onChange('R$ 0,00');
-                              } else {
-                                const formatted = formatBrazilianCurrency(numericValue);
-                                field.onChange(formatted);
-                              }
-                            }}
+                            type="number"
+                            step="0.01"
                           />
                         </FormControl>
                         <FormMessage />
