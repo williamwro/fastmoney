@@ -31,7 +31,7 @@ const Login = () => {
       
       <div className="max-w-md w-full space-y-8 px-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">FastMoney</h1>
+          <h1 className="text-3xl font-bold text-white">Bill Craft</h1>
           <p className="mt-2 text-white/80">
             Gerencie suas contas a pagar de forma simples e eficiente
           </p>
