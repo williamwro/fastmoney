@@ -43,7 +43,7 @@ const Login = () => {
       </div>
       
       <footer className="absolute bottom-4 text-center text-white/60 text-xs w-full px-4">
-        &copy; {new Date().getFullYear()} FastMoney - Todos os direitos reservados
+        &copy; {new Date().getFullYear()} TecWeb - Todos os direitos reservados
       </footer>
     </div>
   );
