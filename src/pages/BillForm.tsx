@@ -3,7 +3,7 @@ import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, AlertCircle, Plus, Minus } from 'lucide-react';
+import { Loader2, AlertCircle, Plus, Minus, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Bill, useBills } from '@/context/BillContext';
 import { Category } from '@/hooks/useCategoryManagement';
@@ -12,6 +12,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from "sonner";
 import { 
   Form, 
   FormControl, 
@@ -53,7 +54,6 @@ const billSchema = z.object({
   id_categoria: z.string().nullable(),
   status: z.enum(['paid', 'unpaid']),
   notes: z.string().optional(),
-  // New installment fields
   hasInstallments: z.boolean().default(false),
   installmentsCount: z.string().refine(val => {
     if (val === '') return true;
@@ -200,10 +200,25 @@ const BillForm = () => {
         }
       }
       
-      navigate('/bills');
+      toast.success("Conta salva com sucesso!", {
+        position: "top-center",
+        duration: 3000,
+        icon: <CheckCircle className="h-5 w-5 text-green-500 animate-bounce" />,
+        className: "rounded-lg border border-green-100 bg-white text-green-800 shadow-md dark:border-green-800 dark:bg-gray-800 dark:text-green-400",
+      });
+      
+      setTimeout(() => {
+        navigate('/bills');
+      }, 1000);
     } catch (error) {
       console.error('Error submitting form:', error);
       setError('Ocorreu um erro ao salvar a conta. Tente novamente.');
+      
+      toast.error("Erro ao salvar conta", {
+        description: "Ocorreu um erro ao salvar a conta. Tente novamente.",
+        position: "top-center",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
