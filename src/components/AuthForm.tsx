@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -76,7 +77,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
   
   return (
-    <Card className="w-full bg-white shadow-md">
+    <Card className="w-full bg-gray-50 shadow-md">
       <CardContent className="pt-6">
         <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
         
@@ -92,7 +93,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input className="pl-10" placeholder="Seu nome" {...field} />
+                        <Input className="pl-10 bg-white" placeholder="Seu nome" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -110,7 +111,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10" type="email" placeholder="seu@email.com" {...field} />
+                      <Input className="pl-10 bg-white" type="email" placeholder="seu@email.com" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -127,7 +128,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10" type="password" placeholder="********" {...field} />
+                      <Input className="pl-10 bg-white" type="password" placeholder="********" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -145,7 +146,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input className="pl-10" type="password" placeholder="********" {...field} />
+                        <Input className="pl-10 bg-white" type="password" placeholder="********" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
