@@ -39,7 +39,7 @@ const Login = () => {
         <div className="text-center">
           <div className="flex flex-col items-center justify-center">
             <img 
-              src="/lovable-uploads/3a262449-875c-4837-8e65-b5e7328baf27.png" 
+              src="/lovable-uploads/cc85aa3d-d2b3-4013-a83b-9d98030f0c56.png" 
               alt="FastMoney Logo" 
               className="h-32 w-auto mb-4"
             />
