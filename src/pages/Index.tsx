@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
 import Brand from '@/components/navbar/Brand';
@@ -11,15 +11,22 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, Navigate } from 'react-router-dom';
-import { PlusCircle, ArrowRight, AlertCircle } from 'lucide-react';
+import { PlusCircle, ArrowRight, AlertCircle, Smartphone, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const { isLoading: authLoading, isAuthenticated, user, logout } = useAuth();
   const { getOverdueBills, getDueSoonBills, isLoading: billsLoading } = useBills();
+  const [showQrCode, setShowQrCode] = useState(false);
+  const isMobile = useIsMobile();
   
   const overdueBills = getOverdueBills().slice(0, 3);
   const dueSoonBills = getDueSoonBills().slice(0, 3);
+  
+  // App URL for QR code
+  const appUrl = "https://bill-craft.lovable.app/";
   
   useEffect(() => {
     if (overdueBills.length > 0) {
@@ -59,6 +66,17 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Abrir no App button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setShowQrCode(true)}
+              className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
+              size={isMobile ? "sm" : "default"}
+            >
+              <Smartphone className="h-4 w-4" />
+              <span className="hidden sm:inline">Abrir no App</span>
+              <QrCode className="h-4 w-4" />
+            </Button>
             <ThemeToggle />
             <UserMenu 
               user={user} 
@@ -152,6 +170,33 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQrCode} onOpenChange={setShowQrCode}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Escaneie o QR Code</DialogTitle>
+            <DialogDescription>
+              Use a câmera do seu celular para escanear o código QR e abrir o aplicativo BillCraft
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-6">
+            <div className="bg-white p-4 rounded-md shadow-md">
+              {/* Using a real QR code that encodes the app URL */}
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appUrl)}`}
+                alt="QR Code para o app BillCraft" 
+                width="200" 
+                height="200"
+                className="w-64 h-64"
+              />
+            </div>
+            <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+              Ou acesse diretamente: <a href={appUrl} className="text-blue-600 dark:text-blue-400 underline">{appUrl}</a>
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
