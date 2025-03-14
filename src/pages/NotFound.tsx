@@ -16,7 +16,7 @@ const NotFound = () => {
 
   // If user tries to navigate directly to this component, redirect appropriately
   if (location.pathname === "/404") {
-    return isAuthenticated ? <Navigate to="/" /> : <Navigate to="/auth" />;
+    return isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />;
   }
 
   return (
@@ -26,7 +26,7 @@ const NotFound = () => {
         <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
         {/* Use Link with conditional destination based on auth status */}
         <Link 
-          to={isAuthenticated ? "/" : "/auth"} 
+          to={isAuthenticated ? "/" : "/login"} 
           className="text-blue-500 hover:text-blue-700 underline"
         >
           Return to Home

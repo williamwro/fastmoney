@@ -7,7 +7,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import Auth from './pages/Auth';
 import Bills from './pages/Bills';
 import BillForm from './pages/BillForm';
 import Users from './pages/Users';
@@ -31,7 +30,7 @@ function App() {
             />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/auth" element={<Auth />} />
+            {/* Auth route removed */}
             <Route 
               path="/bills" 
               element={
@@ -72,6 +71,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* Redirect /auth to /login */}
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
