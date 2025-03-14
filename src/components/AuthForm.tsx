@@ -77,9 +77,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
   
   return (
-    <Card className="w-full bg-gray-50 shadow-md">
+    <Card className="w-full bg-gray-50 dark:bg-gray-800 shadow-md">
       <CardContent className="pt-6">
-        <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">{title}</h2>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -89,11 +89,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel className="text-gray-700 dark:text-gray-200">Nome</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input className="pl-10 bg-white" placeholder="Seu nome" {...field} />
+                        <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" placeholder="Seu nome" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -107,11 +107,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-gray-700 dark:text-gray-200">Email</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 bg-white" type="email" placeholder="seu@email.com" {...field} />
+                      <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="email" placeholder="seu@email.com" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -124,11 +124,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Senha</FormLabel>
+                  <FormLabel className="text-gray-700 dark:text-gray-200">Senha</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 bg-white" type="password" placeholder="********" {...field} />
+                      <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="password" placeholder="********" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -142,11 +142,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormLabel className="text-gray-700 dark:text-gray-200">Confirmar Senha</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input className="pl-10 bg-white" type="password" placeholder="********" {...field} />
+                        <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="password" placeholder="********" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
