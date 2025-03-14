@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -8,6 +7,7 @@ import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -69,7 +69,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         navigate('/');
       }
     } catch (error) {
-      // Error is already handled by auth context
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -77,71 +76,54 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
   
   return (
-    <div className="w-full">
-      <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {!isLogin && (
+    <Card className="w-full bg-white shadow-md">
+      <CardContent className="pt-6">
+        <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {!isLogin && (
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input className="pl-10" placeholder="Seu nome" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
             <FormField
               control={form.control}
-              name="name"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10" placeholder="Seu nome" {...field} />
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input className="pl-10" type="email" placeholder="seu@email.com" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          )}
-          
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input className="pl-10" type="email" placeholder="seu@email.com" {...field} />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Senha</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input className="pl-10" type="password" placeholder="********" {...field} />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          {!isLogin && (
+            
             <FormField
               control={form.control}
-              name="confirmPassword"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirmar Senha</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -152,21 +134,40 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                 </FormItem>
               )}
             />
-          )}
-          
-          <Button 
-            type="submit" 
-            className="w-full mt-6 bg-blue-500 hover:bg-blue-600"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : null}
-            {buttonText}
-          </Button>
-        </form>
-      </Form>
-    </div>
+            
+            {!isLogin && (
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input className="pl-10" type="password" placeholder="********" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full mt-6 bg-blue-500 hover:bg-blue-600"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              {buttonText}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
