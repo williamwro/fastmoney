@@ -121,19 +121,37 @@ const BillBasicFields = ({
         </div>
       )}
       
-      <FormField
-        control={control}
-        name="numero_nota_fiscal"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Número da Nota Fiscal</FormLabel>
-            <FormControl>
-              <Input placeholder="Ex: NF-e 123456" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {!hasInstallments && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name="datapagamento"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data de Pagamento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={control}
+            name="numero_nota_fiscal"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número da Nota Fiscal</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: NF-e 123456" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField

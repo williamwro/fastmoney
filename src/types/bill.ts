@@ -14,6 +14,7 @@ export const billSchema = z.object({
   dueDate: z.string().refine(val => !isNaN(Date.parse(val)), {
     message: 'Data de vencimento inválida',
   }),
+  datapagamento: z.string().optional().nullable(),
   category: z.string(),
   id_categoria: z.string().nullable(),
   status: z.enum(['paid', 'unpaid']),
