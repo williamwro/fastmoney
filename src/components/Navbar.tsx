@@ -10,9 +10,16 @@ import MobileMenuButton from './navbar/MobileMenuButton';
 import MobileMenu from './navbar/MobileMenu';
 import ThemeToggle from './ThemeToggle';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  isAuthenticated?: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isAuthenticated: propIsAuthenticated }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated: contextIsAuthenticated } = useAuth();
+  
+  // Use the prop if provided, otherwise use the context value
+  const isAuthenticated = propIsAuthenticated !== undefined ? propIsAuthenticated : contextIsAuthenticated;
   
   const toggleMenu = () => {
     setIsOpen(!isOpen);

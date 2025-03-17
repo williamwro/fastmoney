@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import UserManagement from '@/components/users/UserManagement';
@@ -48,7 +47,7 @@ const Users = () => {
           <div className="flex items-center">
             <Brand />
             <div className="hidden md:flex ml-6">
-              <NavLinks isAuthenticated={isAuthenticated} />
+              <NavLinks />
             </div>
           </div>
           

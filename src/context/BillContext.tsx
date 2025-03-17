@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,7 @@ export type Bill = {
   dueDate: string;
   category: string;
   id_categoria: string | null;
+  id_depositante: string | null;
   status: 'paid' | 'unpaid';
   notes?: string;
   createdAt: string;
@@ -65,6 +65,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
           dueDate: bill.due_date,
           category: bill.category,
           id_categoria: bill.id_categoria,
+          id_depositante: bill.id_depositante,
           status: bill.status as 'paid' | 'unpaid',
           notes: bill.notes,
           createdAt: bill.created_at,
@@ -100,6 +101,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         due_date: billInput.dueDate,
         category: billInput.category,
         id_categoria: billInput.id_categoria,
+        id_depositante: billInput.id_depositante,
         status: billInput.status,
         notes: billInput.notes,
         user_id: user.id
@@ -122,6 +124,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         dueDate: data.due_date,
         category: data.category,
         id_categoria: data.id_categoria,
+        id_depositante: data.id_depositante,
         status: data.status as 'paid' | 'unpaid',
         notes: data.notes,
         createdAt: data.created_at,
@@ -129,7 +132,6 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setBills(prevBills => [...prevBills, newBill]);
-      // Removed the toast.success here to avoid duplicate notifications
     } catch (error) {
       console.error('Error adding bill:', error);
       toast.error('Falha ao adicionar conta');
@@ -150,6 +152,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (billUpdates.dueDate) dbUpdates.due_date = billUpdates.dueDate;
       if (billUpdates.category) dbUpdates.category = billUpdates.category;
       if (billUpdates.id_categoria !== undefined) dbUpdates.id_categoria = billUpdates.id_categoria;
+      if (billUpdates.id_depositante !== undefined) dbUpdates.id_depositante = billUpdates.id_depositante;
       if (billUpdates.status) dbUpdates.status = billUpdates.status;
       if (billUpdates.notes !== undefined) dbUpdates.notes = billUpdates.notes;
       

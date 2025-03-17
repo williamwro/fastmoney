@@ -12,6 +12,7 @@ type MobileMenuProps = {
   isAuthenticated: boolean;
   user: any | null;
   logout: () => Promise<void>;
+  onOpenPasswordDialog?: () => void;
 };
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ 
@@ -19,12 +20,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   closeMenu, 
   isAuthenticated,
   user,
-  logout
+  logout,
+  onOpenPasswordDialog
 }) => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   
   const handleOpenPasswordDialog = () => {
-    setIsPasswordDialogOpen(true);
+    if (onOpenPasswordDialog) {
+      onOpenPasswordDialog();
+    } else {
+      setIsPasswordDialogOpen(true);
+    }
   };
 
   const handleClosePasswordDialog = () => {
@@ -65,10 +71,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         />
       </div>
       
-      <ChangePassword 
-        isOpen={isPasswordDialogOpen} 
-        onClose={handleClosePasswordDialog} 
-      />
+      {!onOpenPasswordDialog && (
+        <ChangePassword 
+          isOpen={isPasswordDialogOpen} 
+          onClose={handleClosePasswordDialog} 
+        />
+      )}
     </div>
   );
 };

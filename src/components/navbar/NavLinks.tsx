@@ -4,8 +4,17 @@ import { NavLink } from 'react-router-dom';
 import { Building2, ReceiptText, Gem, BarcodeIcon, Users, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-const NavLinks: React.FC = () => {
-  const { isAdmin } = useAuth();
+interface NavLinksProps {
+  isAuthenticated?: boolean;
+  mobile?: boolean;
+  closeMenu?: () => void;
+}
+
+const NavLinks: React.FC<NavLinksProps> = ({ isAuthenticated, mobile, closeMenu }) => {
+  const { user } = useAuth();
+  
+  // Check if user is admin (using the email as a simple check)
+  const isAdmin = user?.email === 'william@makecard.com.br';
 
   return (
     <ul className="flex flex-col space-y-1 lg:space-y-0 lg:flex-row lg:space-x-2">
@@ -19,6 +28,7 @@ const NavLinks: React.FC = () => {
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
             }`
           }
+          onClick={closeMenu}
         >
           <Gem className="mr-2 h-4 w-4" />
           Dashboard
@@ -34,6 +44,7 @@ const NavLinks: React.FC = () => {
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
             }`
           }
+          onClick={closeMenu}
         >
           <ReceiptText className="mr-2 h-4 w-4" />
           Contas a Pagar
@@ -49,6 +60,7 @@ const NavLinks: React.FC = () => {
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
             }`
           }
+          onClick={closeMenu}
         >
           <BarcodeIcon className="mr-2 h-4 w-4" />
           Categorias
@@ -64,6 +76,7 @@ const NavLinks: React.FC = () => {
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
             }`
           }
+          onClick={closeMenu}
         >
           <Building2 className="mr-2 h-4 w-4" />
           Depositantes
@@ -81,6 +94,7 @@ const NavLinks: React.FC = () => {
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
               }`
             }
+            onClick={closeMenu}
           >
             <Users className="mr-2 h-4 w-4" />
             Usuários

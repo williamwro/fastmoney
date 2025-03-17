@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -44,7 +43,7 @@ const Categories = () => {
           <div className="flex items-center">
             <Brand />
             <div className="hidden md:flex ml-6">
-              <NavLinks isAuthenticated={isAuthenticated} />
+              <NavLinks />
             </div>
           </div>
           

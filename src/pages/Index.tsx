@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useBills } from '@/context/BillContext';
@@ -28,7 +27,6 @@ const Index = () => {
   const overdueBills = getOverdueBills().slice(0, 3);
   const dueSoonBills = getDueSoonBills().slice(0, 3);
   
-  // App URL for QR code
   const appUrl = "https://bill-craft.lovable.app/";
   
   useEffect(() => {
@@ -60,7 +58,6 @@ const Index = () => {
     );
   }
   
-  // Redirect unauthenticated users to the login page
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
@@ -72,12 +69,11 @@ const Index = () => {
           <div className="flex items-center">
             <Brand />
             <div className="hidden md:flex ml-6">
-              <NavLinks isAuthenticated={isAuthenticated} />
+              <NavLinks />
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Abrir no App button */}
             <Button 
               variant="outline" 
               onClick={() => setShowQrCode(true)}
@@ -100,7 +96,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Mobile menu */}
         <MobileMenu 
           isOpen={isMenuOpen} 
           closeMenu={closeMenu} 
@@ -194,7 +189,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* QR Code Dialog */}
       <Dialog open={showQrCode} onOpenChange={setShowQrCode}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -205,7 +199,6 @@ const Index = () => {
           </DialogHeader>
           <div className="flex flex-col items-center justify-center p-6">
             <div className="bg-white p-4 rounded-md shadow-md">
-              {/* Using a real QR code that encodes the app URL */}
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appUrl)}`}
                 alt="QR Code para o app FastMoney" 

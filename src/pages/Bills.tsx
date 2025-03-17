@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -29,7 +28,6 @@ const Bills = () => {
   };
   
   useEffect(() => {
-    // Check if we have status param in URL
     const statusParam = searchParams.get('status');
     if (statusParam === 'paid' || statusParam === 'unpaid') {
       // This will be handled by the BillsList component
@@ -58,7 +56,7 @@ const Bills = () => {
           <div className="flex items-center">
             <Brand />
             <div className="hidden md:flex ml-6">
-              <NavLinks isAuthenticated={isAuthenticated} />
+              <NavLinks />
             </div>
           </div>
           
@@ -75,7 +73,6 @@ const Bills = () => {
           </div>
         </div>
         
-        {/* Mobile menu */}
         <MobileMenu 
           isOpen={isMenuOpen} 
           closeMenu={closeMenu} 

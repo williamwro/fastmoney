@@ -23,7 +23,7 @@ import DepositorForm from '@/pages/DepositorForm';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider>
       <AuthProvider>
         <BillProvider>
           <Router>
@@ -83,7 +83,7 @@ function App() {
               } />
               
               <Route path="/users" element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute adminOnly={true}>
                   <Users />
                 </ProtectedRoute>
               } />
