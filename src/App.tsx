@@ -7,6 +7,7 @@ import { BillProvider } from '@/context/BillContext';
 import { DepositorProvider } from '@/context/DepositorContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Toaster } from '@/components/ui/sonner';
+import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 
 // Pages
 import Index from '@/pages/Index';
@@ -94,6 +95,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
             </Router>
+            <PwaInstallPrompt />
             <Toaster position="top-center" />
           </DepositorProvider>
         </BillProvider>
