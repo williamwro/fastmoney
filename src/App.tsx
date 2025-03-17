@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -52,7 +51,7 @@ function App() {
                 </ProtectedRoute>
               } />
               
-              <Route path="/bills/:id" element={
+              <Route path="/bills/:id/edit" element={
                 <ProtectedRoute>
                   <BillForm />
                 </ProtectedRoute>

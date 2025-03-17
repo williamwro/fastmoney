@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Category } from '@/hooks/useCategoryManagement';
 import { getCategoryInfo } from '@/utils/formatters';
+import { formatBrazilianCurrency, brazilianCurrencyToNumber } from '@/utils/formatters';
 
 interface BillBasicFieldsProps {
   control: Control<BillFormValues>;
@@ -28,6 +29,28 @@ const BillBasicFields = ({
   handleCategoryChange,
   hasInstallments 
 }: BillBasicFieldsProps) => {
+  const [displayValue, setDisplayValue] = useState('');
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove non-numeric characters
+    const rawValue = e.target.value.replace(/[^\d]/g, '');
+    
+    // Format as currency
+    let formattedValue = '';
+    if (rawValue) {
+      // Convert to number with decimal places
+      const numberValue = parseInt(rawValue) / 100;
+      formattedValue = numberValue.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    } else {
+      formattedValue = '';
+    }
+    
+    setDisplayValue(formattedValue);
+  };
+
   return (
     <>
       {!hasInstallments && (
@@ -40,10 +63,15 @@ const BillBasicFields = ({
                 <FormLabel>Valor</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="" 
-                    {...field} 
-                    type="number"
-                    step="0.01"
+                    placeholder="0,00" 
+                    value={displayValue}
+                    onChange={(e) => {
+                      handleAmountChange(e);
+                      // Update the actual form field value
+                      field.onChange(e.target.value ? e.target.value.replace(',', '.') : '');
+                    }}
+                    type="text"
+                    inputMode="numeric"
                   />
                 </FormControl>
                 <FormMessage />

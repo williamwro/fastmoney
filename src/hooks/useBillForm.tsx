@@ -108,7 +108,7 @@ export const useBillForm = () => {
     if (bill) {
       form.reset({
         id_depositante: bill.id_depositante || '',
-        amount: bill.amount.toString(),
+        amount: bill.amount.toString().replace('.', ','),
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
@@ -152,9 +152,14 @@ export const useBillForm = () => {
         throw new Error('Depositante não encontrado');
       }
 
+      // Convert amount string with comma to number with dot
+      const amountValue = typeof values.amount === 'string' 
+        ? parseFloat(values.amount.replace(',', '.')) 
+        : values.amount;
+
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         const installmentsCount = parseInt(values.installmentsCount);
-        const totalAmount = parseFloat(values.installmentsTotal);
+        const totalAmount = parseFloat(String(values.installmentsTotal).replace(',', '.'));
         const installmentAmount = totalAmount / installmentsCount;
         const firstDueDate = new Date(values.dueDate);
         
@@ -183,7 +188,7 @@ export const useBillForm = () => {
         const formattedBill = {
           // Use depositor name as vendor name
           vendorName: depositor.descri,
-          amount: values.amount === '' ? 0 : parseFloat(values.amount),
+          amount: values.amount === '' ? 0 : amountValue,
           dueDate: values.dueDate,
           category: values.category,
           id_categoria: values.id_categoria,
