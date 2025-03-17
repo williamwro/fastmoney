@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -103,7 +104,13 @@ export const useBillForm = () => {
   
   useEffect(() => {
     if (bill) {
-      const formattedAmount = bill.amount.toString().replace('.', ',');
+      // Ensure amount is properly formatted with comma as decimal separator for display
+      let formattedAmount = '';
+      if (typeof bill.amount === 'number') {
+        formattedAmount = bill.amount.toString().replace('.', ',');
+      } else if (typeof bill.amount === 'string') {
+        formattedAmount = bill.amount.replace('.', ',');
+      }
       
       form.reset({
         id_depositante: bill.id_depositante || '',
@@ -150,9 +157,12 @@ export const useBillForm = () => {
         throw new Error('Depositante não encontrado');
       }
 
+      // Convert amount from Brazilian format to decimal format for database storage
       let amountValue: number;
       if (typeof values.amount === 'string') {
-        amountValue = parseFloat(values.amount.replace(/\./g, '').replace(',', '.'));
+        // First replace all dots (thousand separators) with nothing, then replace comma with dot
+        const sanitizedAmount = values.amount.replace(/\./g, '').replace(',', '.');
+        amountValue = parseFloat(sanitizedAmount);
       } else {
         amountValue = values.amount || 0;
       }
