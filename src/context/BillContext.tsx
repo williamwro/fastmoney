@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -54,7 +53,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data, error } = await supabase
           .from('bills')
           .select('*')
-          .order('due_date', { ascending: true });
+          .order('created_at', { ascending: false });
 
         if (error) {
           throw error;
@@ -136,7 +135,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatedAt: data.updated_at
       };
 
-      setBills(prevBills => [...prevBills, newBill]);
+      setBills(prevBills => [newBill, ...prevBills]);
     } catch (error) {
       console.error('Error adding bill:', error);
       toast.error('Falha ao adicionar conta');
@@ -173,8 +172,8 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      setBills(prevBills => 
-        prevBills.map(bill => 
+      setBills(prevBills => {
+        const updatedBills = prevBills.map(bill => 
           bill.id === id 
             ? { 
                 ...bill, 
@@ -182,8 +181,14 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 updatedAt: data.updated_at 
               } 
             : bill
-        )
-      );
+        );
+        
+        return updatedBills.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+      });
 
       toast.success('Conta atualizada com sucesso');
     } catch (error) {

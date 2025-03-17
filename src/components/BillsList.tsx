@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -56,7 +55,14 @@ const BillsList: React.FC = () => {
   
   useEffect(() => {
     const filtered = filterBills(status, categoryFilter, searchQuery);
-    setFilteredBills(filtered);
+    
+    const sortedBills = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    });
+    
+    setFilteredBills(sortedBills);
   }, [bills, status, categoryFilter, searchQuery, filterBills]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
