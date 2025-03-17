@@ -32,7 +32,7 @@ const DepositorSelector = ({
       name="id_depositante"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Depositante / Fornecedor</FormLabel>
+          <FormLabel>Fornecedor</FormLabel>
           <div className="flex gap-2">
             <div className="flex-1">
               <Select
@@ -42,7 +42,7 @@ const DepositorSelector = ({
                 placeholder="Selecione ou digite para buscar"
                 isClearable
                 isSearchable
-                noOptionsMessage={() => "Nenhum depositante encontrado"}
+                noOptionsMessage={() => "Nenhum fornecedor encontrado"}
                 classNames={{
                   control: (state) => 
                     `flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background ${state.isFocused ? 'ring-2 ring-ring ring-offset-2' : ''}`,
@@ -63,7 +63,7 @@ const DepositorSelector = ({
             >
               <Link to="/depositors/new">
                 <Plus className="h-4 w-4" />
-                <span className="sr-only">Novo Depositante</span>
+                <span className="sr-only">Novo Fornecedor</span>
               </Link>
             </Button>
           </div>

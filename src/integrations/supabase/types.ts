@@ -14,6 +14,7 @@ export type Database = {
           amount: number
           category: string
           created_at: string | null
+          datapagamento: string | null
           due_date: string
           id: string
           id_categoria: string | null
@@ -29,6 +30,7 @@ export type Database = {
           amount: number
           category: string
           created_at?: string | null
+          datapagamento?: string | null
           due_date: string
           id?: string
           id_categoria?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           amount?: number
           category?: string
           created_at?: string | null
+          datapagamento?: string | null
           due_date?: string
           id?: string
           id_categoria?: string | null
