@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Category } from '@/hooks/useCategoryManagement';
 import { getCategoryInfo } from '@/utils/formatters';
-import { formatBrazilianCurrency, brazilianCurrencyToNumber } from '@/utils/formatters';
 
 interface BillBasicFieldsProps {
   control: Control<BillFormValues>;
@@ -30,21 +29,6 @@ const BillBasicFields = ({
   hasInstallments 
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
-
-  // Format incoming values for display
-  useEffect(() => {
-    const subscription = control._formValues.subscribe(values => {
-      if (values.amount && typeof values.amount === 'string') {
-        // Handle the initial value coming from form
-        const numericValue = values.amount.replace(/\./g, ',');
-        if (numericValue !== displayValue && numericValue.includes(',')) {
-          setDisplayValue(numericValue);
-        }
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [control._formValues, displayValue]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;

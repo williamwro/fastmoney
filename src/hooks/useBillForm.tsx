@@ -221,7 +221,7 @@ export const useBillForm = () => {
         }
       }
       
-      toast.custom(() => (
+      toast.custom((t) => (
         <div className="w-full min-w-[350px] md:min-w-[450px] bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 p-6 mb-4 border border-green-100 dark:border-green-800 animate-in slide-in-from-bottom-5">
           <div className="flex-1 w-0 flex items-center">
             <div className="w-16 h-16 flex-shrink-0">
@@ -237,7 +237,7 @@ export const useBillForm = () => {
             </div>
           </div>
           <button 
-            onClick={() => toast.dismiss()} 
+            onClick={() => toast.dismiss(t)} 
             className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
           >
             <span className="sr-only">Fechar</span>

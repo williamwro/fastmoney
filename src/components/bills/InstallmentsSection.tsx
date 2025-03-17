@@ -40,7 +40,7 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
       />
       
       {hasInstallments && !isEditMode && (
-        <div className="space-y-4 rounded-lg border p-4 bg-slate-50">
+        <div className="space-y-4 rounded-lg border p-4 bg-slate-50 dark:bg-slate-800 dark:border-slate-700">
           <h3 className="font-medium text-lg">Configuração das Parcelas</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,8 +102,8 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
             <p>As parcelas serão criadas com 30 dias de intervalo entre cada vencimento.</p>
             
             {watch('installmentsCount') && watch('installmentsTotal') && (
-              <div className="mt-2 p-2 bg-blue-50 rounded-md">
-                <p className="font-medium text-blue-800">
+              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+                <p className="font-medium text-blue-800 dark:text-blue-300">
                   Valor de cada parcela: R$ 
                   {(parseFloat(watch('installmentsTotal') || '0') / 
                     parseInt(watch('installmentsCount') || '1')).toFixed(2)}
