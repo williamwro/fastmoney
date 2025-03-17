@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface FormActionsProps {
   isSubmitting: boolean;
@@ -11,6 +11,10 @@ interface FormActionsProps {
 
 const FormActions = ({ isSubmitting, isEditMode }: FormActionsProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Determine if we're on a receivable route
+  const isReceivable = location.pathname.includes('/receitas');
   
   return (
     <div className="flex justify-end space-x-2 pt-4">
@@ -24,6 +28,7 @@ const FormActions = ({ isSubmitting, isEditMode }: FormActionsProps) => {
       <Button 
         type="submit" 
         disabled={isSubmitting}
+        className={isReceivable ? "bg-green-500 hover:bg-green-600" : ""}
       >
         {isSubmitting ? (
           <>
