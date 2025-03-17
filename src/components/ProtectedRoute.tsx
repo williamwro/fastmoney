@@ -4,11 +4,11 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  element: React.ReactNode;
   adminOnly?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, adminOnly = false }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   
   // Check if user is an admin (using the admin email as a simple check)
@@ -34,7 +34,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return <>{element}</>;
 };
 
 export default ProtectedRoute;
