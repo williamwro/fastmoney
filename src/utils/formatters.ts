@@ -6,6 +6,8 @@ export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 }
 
@@ -112,12 +114,12 @@ export function getCategoryInfo(category: string): {
  */
 export function formatBrazilianCurrency(value: string): string {
   // Remove non-numeric characters except for the last decimal point
-  let numericValue = value.replace(/[^\d.]/g, '');
+  let numericValue = value.replace(/[^\d,]/g, '');
   
-  // Ensure only one decimal point
-  const parts = numericValue.split('.');
+  // Ensure only one comma for decimal
+  const parts = numericValue.split(',');
   if (parts.length > 2) {
-    numericValue = parts[0] + '.' + parts.slice(1).join('');
+    numericValue = parts[0] + ',' + parts.slice(1).join('');
   }
   
   // Format the value
@@ -125,12 +127,15 @@ export function formatBrazilianCurrency(value: string): string {
   
   if (numericValue) {
     // Convert to number and format to BRL
-    const number = parseFloat(numericValue);
-    if (!isNaN(number)) {
+    // First replace comma with dot for proper parsing
+    const parsedValue = parseFloat(numericValue.replace(',', '.'));
+    if (!isNaN(parsedValue)) {
       formattedValue = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
-      }).format(number);
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(parsedValue);
     }
   } else {
     formattedValue = 'R$ 0,00';
@@ -146,5 +151,6 @@ export function formatBrazilianCurrency(value: string): string {
 export function brazilianCurrencyToNumber(value: string): string {
   // Strip currency symbol and separators, replace comma with dot
   return value.replace(/[^\d,]/g, '')
-    .replace(',', '.');
+    .replace(/\./g, '')  // Remove thousand separators (dots)
+    .replace(',', '.');  // Replace decimal comma with dot
 }

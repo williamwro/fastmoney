@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Category } from '@/hooks/useCategoryManagement';
 import { getCategoryInfo } from '@/utils/formatters';
+import { formatBrazilianCurrency } from '@/utils/formatters';
 
 interface BillBasicFieldsProps {
   control: Control<BillFormValues>;
@@ -30,14 +31,33 @@ const BillBasicFields = ({
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
 
+  // Initialize displayValue from form when component mounts
+  useEffect(() => {
+    const subscription = control._formState.mount.subscribe(() => {
+      const value = control._getWatch('amount');
+      if (value && typeof value === 'string') {
+        // Format the amount for display with proper thousands separators and comma
+        const formattedValue = value.replace(/\./g, ',');
+        setDisplayValue(formattedValue);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [control]);
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;
     
     // Remove anything that's not a digit, comma, or dot
     input = input.replace(/[^\d,.]/g, '');
     
-    // Replace dots with nothing (remove them)
+    // Convert to Brazilian format:
+    // 1. First, replace all commas with a temporary character
+    input = input.replace(/,/g, 'T');
+    // 2. Remove all dots (thousand separators in Brazilian format)
     input = input.replace(/\./g, '');
+    // 3. Replace the temporary character back to comma
+    input = input.replace(/T/g, ',');
     
     // Ensure there's only one comma
     const parts = input.split(',');

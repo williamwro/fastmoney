@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,7 +54,6 @@ export const useBillForm = () => {
       if (foundBill) {
         setBill(foundBill);
         
-        // If the bill has a depositor, find it
         if (foundBill.id_depositante) {
           const findDepositor = depositors.find(d => d.id === foundBill.id_depositante);
           if (findDepositor) {
@@ -93,7 +91,6 @@ export const useBillForm = () => {
     fetchCategories();
   }, []);
 
-  // Create options for react-select from depositors
   useEffect(() => {
     if (depositors && depositors.length > 0) {
       const options = depositors.map(depositor => ({
@@ -146,18 +143,13 @@ export const useBillForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Find the depositor to get its name
       const depositor = depositors.find(d => d.id === values.id_depositante);
       if (!depositor) {
         throw new Error('Depositante não encontrado');
       }
 
-      // Convert amount string with comma to number with dot
-      // Make sure we preserve the exact numeric value
       let amountValue: number;
       if (typeof values.amount === 'string') {
-        // Properly convert Brazilian currency format (2.536,36) to number (2536.36)
-        // First remove all dots (thousand separators) then replace comma with dot
         amountValue = parseFloat(values.amount.replace(/\./g, '').replace(',', '.'));
       } else {
         amountValue = values.amount || 0;
@@ -166,7 +158,6 @@ export const useBillForm = () => {
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         const installmentsCount = parseInt(values.installmentsCount);
         
-        // Convert installmentsTotal from Brazilian format to standard decimal
         let totalAmount: number;
         if (typeof values.installmentsTotal === 'string') {
           totalAmount = parseFloat(values.installmentsTotal.replace(/\./g, '').replace(',', '.'));
@@ -182,7 +173,6 @@ export const useBillForm = () => {
           dueDate.setDate(dueDate.getDate() + (index * 30));
           
           const installmentBill = {
-            // Use depositor name as vendor name
             vendorName: `${depositor.descri} - Parcela ${index + 1}/${installmentsCount}`,
             amount: installmentAmount,
             dueDate: dueDate.toISOString().split('T')[0],
@@ -200,7 +190,6 @@ export const useBillForm = () => {
         await Promise.all(installmentPromises);
       } else {
         const formattedBill = {
-          // Use depositor name as vendor name
           vendorName: depositor.descri,
           amount: isNaN(amountValue) ? 0 : amountValue,
           dueDate: values.dueDate,
