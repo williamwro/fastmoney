@@ -8,6 +8,7 @@ export type Bill = {
   vendorName: string;
   amount: number;
   dueDate: string;
+  datapagamento: string | null;
   category: string;
   id_categoria: string | null;
   id_depositante: string | null;
@@ -64,6 +65,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
           vendorName: bill.vendor_name,
           amount: Number(bill.amount),
           dueDate: bill.due_date,
+          datapagamento: bill.datapagamento,
           category: bill.category,
           id_categoria: bill.id_categoria,
           id_depositante: bill.id_depositante,
@@ -154,6 +156,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (billUpdates.vendorName) dbUpdates.vendor_name = billUpdates.vendorName;
       if (billUpdates.amount !== undefined) dbUpdates.amount = billUpdates.amount;
       if (billUpdates.dueDate) dbUpdates.due_date = billUpdates.dueDate;
+      if (billUpdates.datapagamento !== undefined) dbUpdates.datapagamento = billUpdates.datapagamento;
       if (billUpdates.category) dbUpdates.category = billUpdates.category;
       if (billUpdates.id_categoria !== undefined) dbUpdates.id_categoria = billUpdates.id_categoria;
       if (billUpdates.id_depositante !== undefined) dbUpdates.id_depositante = billUpdates.id_depositante;
