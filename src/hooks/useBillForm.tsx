@@ -153,13 +153,27 @@ export const useBillForm = () => {
       }
 
       // Convert amount string with comma to number with dot
-      const amountValue = typeof values.amount === 'string' 
-        ? parseFloat(values.amount.replace(',', '.')) 
-        : values.amount;
+      // Make sure we preserve the exact numeric value
+      let amountValue: number;
+      if (typeof values.amount === 'string') {
+        // Properly convert Brazilian currency format (2.536,36) to number (2536.36)
+        // First remove all dots (thousand separators) then replace comma with dot
+        amountValue = parseFloat(values.amount.replace(/\./g, '').replace(',', '.'));
+      } else {
+        amountValue = values.amount || 0;
+      }
 
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         const installmentsCount = parseInt(values.installmentsCount);
-        const totalAmount = parseFloat(String(values.installmentsTotal).replace(',', '.'));
+        
+        // Convert installmentsTotal from Brazilian format to standard decimal
+        let totalAmount: number;
+        if (typeof values.installmentsTotal === 'string') {
+          totalAmount = parseFloat(values.installmentsTotal.replace(/\./g, '').replace(',', '.'));
+        } else {
+          totalAmount = values.installmentsTotal || 0;
+        }
+        
         const installmentAmount = totalAmount / installmentsCount;
         const firstDueDate = new Date(values.dueDate);
         
@@ -188,7 +202,7 @@ export const useBillForm = () => {
         const formattedBill = {
           // Use depositor name as vendor name
           vendorName: depositor.descri,
-          amount: values.amount === '' ? 0 : amountValue,
+          amount: isNaN(amountValue) ? 0 : amountValue,
           dueDate: values.dueDate,
           category: values.category,
           id_categoria: values.id_categoria,
@@ -197,6 +211,8 @@ export const useBillForm = () => {
           numero_nota_fiscal: values.numero_nota_fiscal,
           notes: values.notes,
         };
+
+        console.log('Saving bill with amount:', amountValue);
         
         if (isEditMode && id) {
           updateBill(id, formattedBill);

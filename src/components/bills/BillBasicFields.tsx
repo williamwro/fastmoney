@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,24 +31,43 @@ const BillBasicFields = ({
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove non-numeric characters
-    const rawValue = e.target.value.replace(/[^\d]/g, '');
+  // Format incoming values for display
+  useEffect(() => {
+    const subscription = control._formValues.subscribe(values => {
+      if (values.amount && typeof values.amount === 'string') {
+        // Handle the initial value coming from form
+        const numericValue = values.amount.replace(/\./g, ',');
+        if (numericValue !== displayValue && numericValue.includes(',')) {
+          setDisplayValue(numericValue);
+        }
+      }
+    });
     
-    // Format as currency
-    let formattedValue = '';
-    if (rawValue) {
-      // Convert to number with decimal places
-      const numberValue = parseInt(rawValue) / 100;
-      formattedValue = numberValue.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    } else {
-      formattedValue = '';
+    return () => subscription.unsubscribe();
+  }, [control._formValues, displayValue]);
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let input = e.target.value;
+    
+    // Remove anything that's not a digit, comma, or dot
+    input = input.replace(/[^\d,.]/g, '');
+    
+    // Replace dots with nothing (remove them)
+    input = input.replace(/\./g, '');
+    
+    // Ensure there's only one comma
+    const parts = input.split(',');
+    if (parts.length > 2) {
+      input = parts[0] + ',' + parts.slice(1).join('');
     }
     
-    setDisplayValue(formattedValue);
+    // Update the display value
+    setDisplayValue(input);
+    
+    // Convert to a proper numeric format for the form value (replace comma with dot)
+    const formValue = input.replace(',', '.');
+    
+    return { displayValue: input, formValue };
   };
 
   return (
@@ -66,9 +85,9 @@ const BillBasicFields = ({
                     placeholder="0,00" 
                     value={displayValue}
                     onChange={(e) => {
-                      handleAmountChange(e);
-                      // Update the actual form field value
-                      field.onChange(e.target.value ? e.target.value.replace(',', '.') : '');
+                      const { formValue } = handleAmountChange(e);
+                      // Update the actual form field value with dot as decimal separator
+                      field.onChange(formValue);
                     }}
                     type="text"
                     inputMode="numeric"
