@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -14,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Category } from '@/hooks/useCategoryManagement';
 import { getCategoryInfo } from '@/utils/formatters';
+import { useLocation } from 'react-router-dom';
 
 interface BillBasicFieldsProps {
   control: Control<BillFormValues>;
@@ -29,6 +29,12 @@ const BillBasicFields = ({
   hasInstallments 
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
+  const location = useLocation();
+  
+  // Determine if we're on a receivable route
+  const isReceivable = location.pathname.includes('/receitas');
+  const billType = isReceivable ? 'receber' : 'pagar';
+  const billTypeLabel = isReceivable ? 'A Receber' : 'A Pagar';
   
   // Watch for amount changes using useWatch hook
   const amount = useWatch({
@@ -82,27 +88,24 @@ const BillBasicFields = ({
       <FormField
         control={control}
         name="tipo"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tipo de Conta</FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value || 'pagar'}
-              value={field.value || 'pagar'}
-            >
+        render={({ field }) => {
+          // Set the field value based on the route
+          field.onChange(billType);
+          
+          return (
+            <FormItem>
+              <FormLabel>Tipo de Conta</FormLabel>
               <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
+                <Input 
+                  value={billTypeLabel}
+                  readOnly
+                  className="bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                />
               </FormControl>
-              <SelectContent>
-                <SelectItem value="pagar">A Pagar</SelectItem>
-                <SelectItem value="receber">A Receber</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
+              <FormMessage />
+            </FormItem>
+          );
+        }}
       />
       
       {!hasInstallments && (
