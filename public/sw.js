@@ -1,7 +1,7 @@
 
 // Service Worker com estratégia de cache e atualizações offline-first
 
-const CACHE_NAME = "bill-craft-v4";
+const CACHE_NAME = "fastmoney-v1";
 const ASSETS = [
   "/",
   "/index.html",

@@ -64,20 +64,6 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshot1.jpg",
-      "sizes": "1280x720",
-      "type": "image/jpeg",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot2.jpg",
-      "sizes": "750x1334",
-      "type": "image/jpeg",
-      "form_factor": "narrow"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Adicionar Conta",
