@@ -19,10 +19,11 @@ export type Database = {
           id_categoria: string | null
           id_depositante: string | null
           notes: string | null
+          numero_nota_fiscal: string | null
           status: string
           updated_at: string | null
           user_id: string
-          vendor_name: string
+          vendor_name: string | null
         }
         Insert: {
           amount: number
@@ -33,10 +34,11 @@ export type Database = {
           id_categoria?: string | null
           id_depositante?: string | null
           notes?: string | null
+          numero_nota_fiscal?: string | null
           status: string
           updated_at?: string | null
           user_id: string
-          vendor_name: string
+          vendor_name?: string | null
         }
         Update: {
           amount?: number
@@ -47,10 +49,11 @@ export type Database = {
           id_categoria?: string | null
           id_depositante?: string | null
           notes?: string | null
+          numero_nota_fiscal?: string | null
           status?: string
           updated_at?: string | null
           user_id?: string
-          vendor_name?: string
+          vendor_name?: string | null
         }
         Relationships: [
           {

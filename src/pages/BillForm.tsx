@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from "sonner";
 import LottieSuccess from '@/components/LottieSuccess';
 import successAnimation from '@/assets/success-animation.json';
+import Select from 'react-select';
 import { 
   Form, 
   FormControl, 
@@ -27,7 +28,7 @@ import {
   FormDescription 
 } from '@/components/ui/form';
 import {
-  Select,
+  Select as ShadcnSelect,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -50,7 +51,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 
 const billSchema = z.object({
-  vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
+  id_depositante: z.string({
+    required_error: "O depositante é obrigatório",
+  }),
   amount: z.string().refine(val => {
     if (val === '') return true;
     return !isNaN(parseFloat(val)) && parseFloat(val) > 0;
@@ -62,9 +65,9 @@ const billSchema = z.object({
   }),
   category: z.string(),
   id_categoria: z.string().nullable(),
-  id_depositante: z.string().nullable().optional(),
   status: z.enum(['paid', 'unpaid']),
   notes: z.string().optional(),
+  numero_nota_fiscal: z.string().optional(),
   hasInstallments: z.boolean().default(false),
   installmentsCount: z.string().refine(val => {
     if (val === '') return true;
@@ -92,6 +95,12 @@ const BillFormWrapper = () => {
   );
 };
 
+// Interface for the react-select options
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 const BillForm = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { bills, getBill, addBill, updateBill, isLoading: billsLoading } = useBills();
@@ -104,6 +113,7 @@ const BillForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [selectedDepositor, setSelectedDepositor] = useState<Depositor | null>(null);
+  const [depositorOptions, setDepositorOptions] = useState<SelectOption[]>([]);
   
   const isEditMode = !!id;
   
@@ -150,18 +160,29 @@ const BillForm = () => {
 
     fetchCategories();
   }, []);
+
+  // Create options for react-select from depositors
+  useEffect(() => {
+    if (depositors && depositors.length > 0) {
+      const options = depositors.map(depositor => ({
+        value: depositor.id,
+        label: depositor.descri
+      }));
+      setDepositorOptions(options);
+    }
+  }, [depositors]);
   
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
     defaultValues: {
-      vendorName: '',
+      id_depositante: '',
       amount: '',
       dueDate: new Date().toISOString().split('T')[0],
       category: '',
       id_categoria: null,
-      id_depositante: null,
       status: 'unpaid',
       notes: '',
+      numero_nota_fiscal: '',
       hasInstallments: false,
       installmentsCount: '',
       installmentsTotal: '',
@@ -171,14 +192,14 @@ const BillForm = () => {
   useEffect(() => {
     if (bill) {
       form.reset({
-        vendorName: bill.vendorName,
+        id_depositante: bill.id_depositante || '',
         amount: bill.amount.toString(),
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
-        id_depositante: bill.id_depositante,
         status: bill.status,
         notes: bill.notes || '',
+        numero_nota_fiscal: bill.numero_nota_fiscal || '',
         hasInstallments: false,
       });
     }
@@ -190,6 +211,12 @@ const BillForm = () => {
     setIsSubmitting(true);
     
     try {
+      // Find the depositor to get its name
+      const depositor = depositors.find(d => d.id === values.id_depositante);
+      if (!depositor) {
+        throw new Error('Depositante não encontrado');
+      }
+
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         const installmentsCount = parseInt(values.installmentsCount);
         const totalAmount = parseFloat(values.installmentsTotal);
@@ -201,13 +228,15 @@ const BillForm = () => {
           dueDate.setDate(dueDate.getDate() + (index * 30));
           
           const installmentBill = {
-            vendorName: `${values.vendorName} - Parcela ${index + 1}/${installmentsCount}`,
+            // Use depositor name as vendor name
+            vendorName: `${depositor.descri} - Parcela ${index + 1}/${installmentsCount}`,
             amount: installmentAmount,
             dueDate: dueDate.toISOString().split('T')[0],
             category: values.category,
             id_categoria: values.id_categoria,
             id_depositante: values.id_depositante,
             status: values.status,
+            numero_nota_fiscal: values.numero_nota_fiscal,
             notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
           };
           
@@ -217,13 +246,15 @@ const BillForm = () => {
         await Promise.all(installmentPromises);
       } else {
         const formattedBill = {
-          vendorName: values.vendorName,
+          // Use depositor name as vendor name
+          vendorName: depositor.descri,
           amount: values.amount === '' ? 0 : parseFloat(values.amount),
           dueDate: values.dueDate,
           category: values.category,
           id_categoria: values.id_categoria,
           id_depositante: values.id_depositante,
           status: values.status,
+          numero_nota_fiscal: values.numero_nota_fiscal,
           notes: values.notes,
         };
         
@@ -290,13 +321,15 @@ const BillForm = () => {
     }
   };
 
-  const handleDepositorChange = (depositorId: string) => {
-    const depositor = depositors.find(d => d.id === depositorId);
-    if (depositor) {
-      form.setValue('id_depositante', depositorId);
-      setSelectedDepositor(depositor);
+  const handleDepositorChange = (option: SelectOption | null) => {
+    if (option) {
+      const depositor = depositors.find(d => d.id === option.value);
+      if (depositor) {
+        form.setValue('id_depositante', option.value);
+        setSelectedDepositor(depositor);
+      }
     } else {
-      form.setValue('id_depositante', null);
+      form.setValue('id_depositante', '');
       setSelectedDepositor(null);
     }
   };
@@ -344,43 +377,31 @@ const BillForm = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="vendorName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do Fornecedor</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Empresa de Energia" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
                   name="id_depositante"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Depositante</FormLabel>
+                      <FormLabel>Depositante / Fornecedor</FormLabel>
                       <div className="flex gap-2">
-                        <Select 
-                          onValueChange={handleDepositorChange} 
-                          defaultValue={field.value || undefined}
-                          value={field.value || undefined}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Selecione um depositante" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {depositors.map(depositor => (
-                              <SelectItem key={depositor.id} value={depositor.id}>
-                                {depositor.descri}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex-1">
+                          <Select
+                            options={depositorOptions}
+                            value={depositorOptions.find(option => option.value === field.value) || null}
+                            onChange={handleDepositorChange}
+                            placeholder="Selecione ou digite para buscar"
+                            isClearable
+                            isSearchable
+                            noOptionsMessage={() => "Nenhum depositante encontrado"}
+                            classNames={{
+                              control: (state) => 
+                                `flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background ${state.isFocused ? 'ring-2 ring-ring ring-offset-2' : ''}`,
+                              placeholder: () => "text-muted-foreground",
+                              input: () => "text-sm",
+                              menu: () => "bg-white dark:bg-gray-800 mt-1 shadow-lg rounded-md border",
+                              option: (state) => 
+                                `px-3 py-2 ${state.isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''}`,
+                            }}
+                          />
+                        </div>
                         
                         <Button
                           type="button"
@@ -448,6 +469,20 @@ const BillForm = () => {
                   </div>
                 )}
                 
+                <FormField
+                  control={form.control}
+                  name="numero_nota_fiscal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número da Nota Fiscal</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: NF-e 123456" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -455,7 +490,7 @@ const BillForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Categoria</FormLabel>
-                        <Select 
+                        <ShadcnSelect 
                           onValueChange={(value) => handleCategoryChange(value)} 
                           defaultValue={field.value || undefined}
                           value={field.value || undefined}
@@ -475,7 +510,7 @@ const BillForm = () => {
                               </SelectItem>
                             ))}
                           </SelectContent>
-                        </Select>
+                        </ShadcnSelect>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -487,7 +522,7 @@ const BillForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select 
+                        <ShadcnSelect 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
                           value={field.value}
@@ -501,7 +536,7 @@ const BillForm = () => {
                             <SelectItem value="unpaid">Pendente</SelectItem>
                             <SelectItem value="paid">Pago</SelectItem>
                           </SelectContent>
-                        </Select>
+                        </ShadcnSelect>
                         <FormMessage />
                       </FormItem>
                     )}

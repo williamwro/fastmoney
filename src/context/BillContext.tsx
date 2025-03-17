@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +14,7 @@ export type Bill = {
   id_depositante: string | null;
   status: 'paid' | 'unpaid';
   notes?: string;
+  numero_nota_fiscal?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -68,6 +70,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id_depositante: bill.id_depositante,
           status: bill.status as 'paid' | 'unpaid',
           notes: bill.notes,
+          numero_nota_fiscal: bill.numero_nota_fiscal,
           createdAt: bill.created_at,
           updatedAt: bill.updated_at
         }));
@@ -104,6 +107,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id_depositante: billInput.id_depositante,
         status: billInput.status,
         notes: billInput.notes,
+        numero_nota_fiscal: billInput.numero_nota_fiscal,
         user_id: user.id
       };
 
@@ -127,6 +131,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id_depositante: data.id_depositante,
         status: data.status as 'paid' | 'unpaid',
         notes: data.notes,
+        numero_nota_fiscal: data.numero_nota_fiscal,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -155,6 +160,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (billUpdates.id_depositante !== undefined) dbUpdates.id_depositante = billUpdates.id_depositante;
       if (billUpdates.status) dbUpdates.status = billUpdates.status;
       if (billUpdates.notes !== undefined) dbUpdates.notes = billUpdates.notes;
+      if (billUpdates.numero_nota_fiscal !== undefined) dbUpdates.numero_nota_fiscal = billUpdates.numero_nota_fiscal;
       
       const { data, error } = await supabase
         .from('bills')
