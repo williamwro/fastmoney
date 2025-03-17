@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Control, UseFormWatch, useWatch } from 'react-hook-form';
+import { Control, UseFormWatch } from 'react-hook-form';
 import { BillFormValues } from '@/types/bill';
 
 interface InstallmentsSectionProps {
@@ -34,7 +34,10 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
           total = installmentsTotal;
         }
         
-        if (isNaN(total)) return;
+        if (isNaN(total)) {
+          setInstallmentValue('0,00');
+          return;
+        }
         
         const value = total / count;
         // Format to Brazilian currency format
@@ -48,7 +51,7 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
     }
   }, [installmentsCount, installmentsTotal]);
   
-  // Formats input to currency as user types
+  // Formats input to Brazilian currency as user types
   const formatCurrency = (value: string) => {
     // Remove any non-numeric character except comma
     let onlyNumbers = value.replace(/[^\d,]/g, '');
@@ -58,6 +61,14 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
     if (commaCount > 1) {
       const parts = onlyNumbers.split(',');
       onlyNumbers = parts[0] + ',' + parts.slice(1).join('');
+    }
+    
+    // Limit to two decimal places
+    if (onlyNumbers.includes(',')) {
+      const [whole, decimal] = onlyNumbers.split(',');
+      if (decimal && decimal.length > 2) {
+        onlyNumbers = `${whole},${decimal.slice(0, 2)}`;
+      }
     }
     
     return onlyNumbers;
@@ -127,6 +138,7 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
                         const formattedValue = formatCurrency(e.target.value);
                         field.onChange(formattedValue);
                       }}
+                      inputMode="numeric"
                     />
                   </FormControl>
                   <FormMessage />
@@ -152,7 +164,7 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
           <div className="text-sm text-muted-foreground mt-2">
             <p>As parcelas serão criadas com 30 dias de intervalo entre cada vencimento.</p>
             
-            {installmentsCount && installmentsTotal && (
+            {installmentsCount && installmentsTotal && parseFloat(installmentsTotal.replace(/\./g, '').replace(',', '.')) > 0 && (
               <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-md">
                 <p className="font-medium text-blue-800 dark:text-blue-300">
                   Valor de cada parcela: R$ {installmentValue}

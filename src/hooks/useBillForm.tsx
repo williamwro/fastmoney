@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -146,15 +147,32 @@ export const useBillForm = () => {
     }
   };
 
+  // Improved function to parse Brazilian formatted numbers
   const parseAmount = (amountStr: string): number => {
-    const sanitizedAmount = amountStr.trim().replace(/\./g, '').replace(',', '.');
-    const parsedAmount = parseFloat(sanitizedAmount);
-        
-    if (isNaN(parsedAmount)) {
+    if (!amountStr || typeof amountStr !== 'string') {
+      console.error('Invalid amount format:', amountStr);
       throw new Error('Valor inválido');
     }
-        
-    return Number(parsedAmount.toFixed(2));
+    
+    // First, clean the string (remove spaces, R$, etc)
+    const cleanStr = amountStr.trim().replace(/[^\d,]/g, '');
+    
+    if (!cleanStr) {
+      console.error('Amount is empty after cleaning');
+      throw new Error('Valor inválido');
+    }
+    
+    // Replace comma with dot for JavaScript parsing
+    const dotStr = cleanStr.replace(',', '.');
+    const parsedAmount = parseFloat(dotStr);
+    
+    if (isNaN(parsedAmount)) {
+      console.error('Failed to parse amount:', amountStr, '→', cleanStr, '→', dotStr);
+      throw new Error('Valor inválido');
+    }
+    
+    // Round to 2 decimal places to avoid floating point issues
+    return Math.round(parsedAmount * 100) / 100;
   };
   
   const onSubmit = async (values: BillFormValues) => {
@@ -166,6 +184,7 @@ export const useBillForm = () => {
         throw new Error('Depositante não encontrado');
       }
 
+      // Process regular bill amount
       let amountValue: number;
       try {
         if (typeof values.amount === 'string') {
@@ -179,15 +198,23 @@ export const useBillForm = () => {
         throw new Error('Valor inválido. Verifique o formato do valor.');
       }
       
+      // Process installment bills
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         try {
           const installmentsCount = parseInt(values.installmentsCount);
           
+          // Parse installment total amount specifically
           let totalAmount: number;
           if (typeof values.installmentsTotal === 'string') {
             totalAmount = parseAmount(values.installmentsTotal);
           } else {
             totalAmount = values.installmentsTotal || 0;
+          }
+          
+          console.log('Creating installments with total:', totalAmount, 'count:', installmentsCount);
+          
+          if (totalAmount <= 0 || installmentsCount <= 0) {
+            throw new Error('Valores de parcelamento inválidos');
           }
           
           const installmentAmount = totalAmount / installmentsCount;
