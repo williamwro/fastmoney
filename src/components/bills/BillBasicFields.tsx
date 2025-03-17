@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Control } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 import { BillFormValues } from '@/types/bill';
 import { 
   Select,
@@ -30,20 +30,21 @@ const BillBasicFields = ({
   hasInstallments 
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
+  
+  // Watch for amount changes using useWatch hook instead of the deprecated mount subscription
+  const amount = useWatch({
+    control,
+    name: "amount"
+  });
 
-  // Initialize displayValue from form when component mounts
+  // Update displayValue when amount changes
   useEffect(() => {
-    const subscription = control._formState.mount.subscribe(() => {
-      const value = control._getWatch('amount');
-      if (value && typeof value === 'string') {
-        // Format the amount for display with proper thousands separators and comma
-        const formattedValue = value.replace(/\./g, ',');
-        setDisplayValue(formattedValue);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [control]);
+    if (amount && typeof amount === 'string') {
+      // Format the amount for display with proper thousands separators and comma
+      const formattedValue = amount.replace(/\./g, ',');
+      setDisplayValue(formattedValue);
+    }
+  }, [amount]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;
