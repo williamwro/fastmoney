@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Control, UseFormWatch } from 'react-hook-form';
+import { Control, UseFormWatch, useWatch } from 'react-hook-form';
 import { BillFormValues } from '@/types/bill';
 
 interface InstallmentsSectionProps {
@@ -14,6 +14,54 @@ interface InstallmentsSectionProps {
 
 const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSectionProps) => {
   const hasInstallments = watch('hasInstallments');
+  const installmentsCount = watch('installmentsCount');
+  const installmentsTotal = watch('installmentsTotal');
+  const [installmentValue, setInstallmentValue] = useState<string>('0,00');
+  
+  // Calculate installment value when count or total changes
+  useEffect(() => {
+    if (installmentsCount && installmentsTotal) {
+      try {
+        const count = parseInt(installmentsCount);
+        if (count <= 0) return;
+        
+        let total: number;
+        if (typeof installmentsTotal === 'string') {
+          // Convert from Brazilian format (1.234,56) to number
+          const sanitizedTotal = installmentsTotal.replace(/\./g, '').replace(',', '.');
+          total = parseFloat(sanitizedTotal);
+        } else {
+          total = installmentsTotal;
+        }
+        
+        if (isNaN(total)) return;
+        
+        const value = total / count;
+        // Format to Brazilian currency format
+        setInstallmentValue(value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      } catch (e) {
+        console.error('Error calculating installment value:', e);
+        setInstallmentValue('0,00');
+      }
+    } else {
+      setInstallmentValue('0,00');
+    }
+  }, [installmentsCount, installmentsTotal]);
+  
+  // Formats input to currency as user types
+  const formatCurrency = (value: string) => {
+    // Remove any non-numeric character except comma
+    let onlyNumbers = value.replace(/[^\d,]/g, '');
+    
+    // Ensure only one comma
+    const commaCount = (onlyNumbers.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      const parts = onlyNumbers.split(',');
+      onlyNumbers = parts[0] + ',' + parts.slice(1).join('');
+    }
+    
+    return onlyNumbers;
+  };
   
   return (
     <>
@@ -72,10 +120,13 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
                   <FormLabel>Valor Total</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
+                      type="text"
                       placeholder="Valor total da conta"
-                      {...field}
+                      value={field.value}
+                      onChange={(e) => {
+                        const formattedValue = formatCurrency(e.target.value);
+                        field.onChange(formattedValue);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -101,12 +152,10 @@ const InstallmentsSection = ({ control, watch, isEditMode }: InstallmentsSection
           <div className="text-sm text-muted-foreground mt-2">
             <p>As parcelas serão criadas com 30 dias de intervalo entre cada vencimento.</p>
             
-            {watch('installmentsCount') && watch('installmentsTotal') && (
+            {installmentsCount && installmentsTotal && (
               <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-md">
                 <p className="font-medium text-blue-800 dark:text-blue-300">
-                  Valor de cada parcela: R$ 
-                  {(parseFloat(watch('installmentsTotal') || '0') / 
-                    parseInt(watch('installmentsCount') || '1')).toFixed(2)}
+                  Valor de cada parcela: R$ {installmentValue}
                 </p>
               </div>
             )}

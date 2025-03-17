@@ -145,6 +145,17 @@ export const useBillForm = () => {
       setSelectedDepositor(null);
     }
   };
+
+  const parseAmount = (amountStr: string): number => {
+    const sanitizedAmount = amountStr.trim().replace(/\./g, '').replace(',', '.');
+    const parsedAmount = parseFloat(sanitizedAmount);
+        
+    if (isNaN(parsedAmount)) {
+      throw new Error('Valor inválido');
+    }
+        
+    return Number(parsedAmount.toFixed(2));
+  };
   
   const onSubmit = async (values: BillFormValues) => {
     setIsSubmitting(true);
@@ -156,54 +167,56 @@ export const useBillForm = () => {
       }
 
       let amountValue: number;
-      if (typeof values.amount === 'string') {
-        const sanitizedAmount = values.amount.trim().replace(/\./g, '').replace(',', '.');
-        amountValue = parseFloat(sanitizedAmount);
-        
-        if (isNaN(amountValue)) {
-          throw new Error('Valor inválido');
+      try {
+        if (typeof values.amount === 'string') {
+          amountValue = parseAmount(values.amount);
+        } else {
+          amountValue = values.amount || 0;
         }
-        
-        amountValue = Number(amountValue.toFixed(2));
-      } else {
-        amountValue = values.amount || 0;
+        console.log('Saving bill with amount:', amountValue);
+      } catch (error) {
+        console.error('Error parsing amount:', error);
+        throw new Error('Valor inválido. Verifique o formato do valor.');
       }
-
-      console.log('Saving bill with amount:', amountValue);
       
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
-        const installmentsCount = parseInt(values.installmentsCount);
-        
-        let totalAmount: number;
-        if (typeof values.installmentsTotal === 'string') {
-          totalAmount = parseFloat(values.installmentsTotal.replace(/\./g, '').replace(',', '.'));
-        } else {
-          totalAmount = values.installmentsTotal || 0;
+        try {
+          const installmentsCount = parseInt(values.installmentsCount);
+          
+          let totalAmount: number;
+          if (typeof values.installmentsTotal === 'string') {
+            totalAmount = parseAmount(values.installmentsTotal);
+          } else {
+            totalAmount = values.installmentsTotal || 0;
+          }
+          
+          const installmentAmount = totalAmount / installmentsCount;
+          const firstDueDate = new Date(values.dueDate);
+          
+          const installmentPromises = Array.from({ length: installmentsCount }).map((_, index) => {
+            const dueDate = new Date(firstDueDate);
+            dueDate.setDate(dueDate.getDate() + (index * 30));
+            
+            const installmentBill = {
+              vendorName: `${depositor.descri} - Parcela ${index + 1}/${installmentsCount}`,
+              amount: Number(installmentAmount.toFixed(2)),
+              dueDate: dueDate.toISOString().split('T')[0],
+              category: values.category,
+              id_categoria: values.id_categoria,
+              id_depositante: values.id_depositante,
+              status: values.status,
+              numero_nota_fiscal: values.numero_nota_fiscal,
+              notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
+            };
+            
+            return addBill(installmentBill);
+          });
+          
+          await Promise.all(installmentPromises);
+        } catch (error) {
+          console.error('Error creating installments:', error);
+          throw new Error('Erro ao criar parcelas. Verifique os valores informados.');
         }
-        
-        const installmentAmount = totalAmount / installmentsCount;
-        const firstDueDate = new Date(values.dueDate);
-        
-        const installmentPromises = Array.from({ length: installmentsCount }).map((_, index) => {
-          const dueDate = new Date(firstDueDate);
-          dueDate.setDate(dueDate.getDate() + (index * 30));
-          
-          const installmentBill = {
-            vendorName: `${depositor.descri} - Parcela ${index + 1}/${installmentsCount}`,
-            amount: installmentAmount,
-            dueDate: dueDate.toISOString().split('T')[0],
-            category: values.category,
-            id_categoria: values.id_categoria,
-            id_depositante: values.id_depositante,
-            status: values.status,
-            numero_nota_fiscal: values.numero_nota_fiscal,
-            notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
-          };
-          
-          return addBill(installmentBill);
-        });
-        
-        await Promise.all(installmentPromises);
       } else {
         const formattedBill = {
           vendorName: depositor.descri,
@@ -259,10 +272,11 @@ export const useBillForm = () => {
       }, 2000);
     } catch (error) {
       console.error('Error submitting form:', error);
-      setError('Ocorreu um erro ao salvar a conta. Tente novamente.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a conta. Tente novamente.';
+      setError(errorMessage);
       
       toast.error("Erro ao salvar conta", {
-        description: "Ocorreu um erro ao salvar a conta. Tente novamente.",
+        description: errorMessage,
         position: "top-center",
         duration: 5000,
       });
