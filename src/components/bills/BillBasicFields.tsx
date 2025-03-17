@@ -31,7 +31,7 @@ const BillBasicFields = ({
 }: BillBasicFieldsProps) => {
   const [displayValue, setDisplayValue] = useState('');
   
-  // Watch for amount changes using useWatch hook instead of the deprecated mount subscription
+  // Watch for amount changes using useWatch hook
   const amount = useWatch({
     control,
     name: "amount"

@@ -103,9 +103,11 @@ export const useBillForm = () => {
   
   useEffect(() => {
     if (bill) {
+      const formattedAmount = bill.amount.toString().replace('.', ',');
+      
       form.reset({
         id_depositante: bill.id_depositante || '',
-        amount: bill.amount.toString().replace('.', ','),
+        amount: formattedAmount,
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
@@ -155,6 +157,12 @@ export const useBillForm = () => {
         amountValue = values.amount || 0;
       }
 
+      if (isNaN(amountValue)) {
+        throw new Error('Valor inválido');
+      }
+
+      console.log('Saving bill with amount:', amountValue);
+      
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         const installmentsCount = parseInt(values.installmentsCount);
         
@@ -191,7 +199,7 @@ export const useBillForm = () => {
       } else {
         const formattedBill = {
           vendorName: depositor.descri,
-          amount: isNaN(amountValue) ? 0 : amountValue,
+          amount: amountValue,
           dueDate: values.dueDate,
           category: values.category,
           id_categoria: values.id_categoria,
@@ -201,8 +209,6 @@ export const useBillForm = () => {
           notes: values.notes,
         };
 
-        console.log('Saving bill with amount:', amountValue);
-        
         if (isEditMode && id) {
           updateBill(id, formattedBill);
         } else {
