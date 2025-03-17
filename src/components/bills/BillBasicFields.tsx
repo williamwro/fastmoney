@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Category } from '@/hooks/useCategoryManagement';
 import { getCategoryInfo } from '@/utils/formatters';
-import { formatBrazilianCurrency } from '@/utils/formatters';
 
 interface BillBasicFieldsProps {
   control: Control<BillFormValues>;
@@ -39,10 +38,12 @@ const BillBasicFields = ({
 
   // Update displayValue when amount changes
   useEffect(() => {
-    if (amount && typeof amount === 'string') {
-      // Format the amount for display with proper thousands separators and comma
-      const formattedValue = amount.replace(/\./g, ',');
+    if (amount) {
+      // Format the amount for display
+      const formattedValue = amount.toString().replace(/\./g, ',');
       setDisplayValue(formattedValue);
+    } else {
+      setDisplayValue('');
     }
   }, [amount]);
 
@@ -52,27 +53,28 @@ const BillBasicFields = ({
     // Remove anything that's not a digit, comma, or dot
     input = input.replace(/[^\d,.]/g, '');
     
-    // Convert to Brazilian format:
-    // 1. First, replace all commas with a temporary character
-    input = input.replace(/,/g, 'T');
-    // 2. Remove all dots (thousand separators in Brazilian format)
+    // Handle decimal separator for Brazilian format
+    // 1. First, replace dots (thousand separators) with nothing
     input = input.replace(/\./g, '');
-    // 3. Replace the temporary character back to comma
-    input = input.replace(/T/g, ',');
     
-    // Ensure there's only one comma
+    // 2. Ensure only one comma for decimal separator
     const parts = input.split(',');
     if (parts.length > 2) {
       input = parts[0] + ',' + parts.slice(1).join('');
     }
     
+    // 3. If there's a comma, ensure no more than 2 digits after it
+    if (input.includes(',')) {
+      const [whole, decimal] = input.split(',');
+      if (decimal && decimal.length > 2) {
+        input = `${whole},${decimal.slice(0, 2)}`;
+      }
+    }
+    
     // Update the display value
     setDisplayValue(input);
     
-    // Convert to a proper numeric format for the form value (replace comma with dot)
-    const formValue = input.replace(',', '.');
-    
-    return { displayValue: input, formValue };
+    return input;
   };
 
   return (
@@ -90,9 +92,9 @@ const BillBasicFields = ({
                     placeholder="0,00" 
                     value={displayValue}
                     onChange={(e) => {
-                      const { formValue } = handleAmountChange(e);
-                      // Update the actual form field value with dot as decimal separator
-                      field.onChange(formValue);
+                      const formattedValue = handleAmountChange(e);
+                      // Update the form field value
+                      field.onChange(formattedValue);
                     }}
                     type="text"
                     inputMode="numeric"

@@ -105,7 +105,9 @@ export const useBillForm = () => {
     if (bill) {
       let formattedAmount = '';
       if (bill.amount !== undefined && bill.amount !== null) {
-        formattedAmount = String(bill.amount).replace('.', ',');
+        formattedAmount = typeof bill.amount === 'number' 
+          ? bill.amount.toString().replace('.', ',') 
+          : String(bill.amount).replace('.', ',');
       }
       
       form.reset({
@@ -155,14 +157,16 @@ export const useBillForm = () => {
 
       let amountValue: number;
       if (typeof values.amount === 'string') {
-        const sanitizedAmount = values.amount.replace(/\./g, '').replace(',', '.');
+        const sanitizedAmount = values.amount.trim().replace(/\./g, '').replace(',', '.');
         amountValue = parseFloat(sanitizedAmount);
+        
+        if (isNaN(amountValue)) {
+          throw new Error('Valor inválido');
+        }
+        
+        amountValue = Number(amountValue.toFixed(2));
       } else {
         amountValue = values.amount || 0;
-      }
-
-      if (isNaN(amountValue)) {
-        throw new Error('Valor inválido');
       }
 
       console.log('Saving bill with amount:', amountValue);
