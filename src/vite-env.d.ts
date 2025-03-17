@@ -4,7 +4,9 @@
 
 declare global {
   interface Window {
-    exportBillsToPDF?: () => void;
-    exportReceivablesToPDF?: () => void;
+    exportBillsToPDF: () => void;
+    exportReceivablesToPDF: () => void;
   }
 }
+
+export {};
