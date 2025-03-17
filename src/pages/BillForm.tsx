@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -7,6 +8,7 @@ import { Loader2, AlertCircle, Plus, Minus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Bill, useBills } from '@/context/BillContext';
 import { Category } from '@/hooks/useCategoryManagement';
+import { DepositorProvider, useDepositors, Depositor } from '@/context/DepositorContext';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
@@ -37,9 +39,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { getCategoryInfo } from '@/utils/formatters';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
 
 const billSchema = z.object({
   vendorName: z.string().min(3, { message: 'O nome do fornecedor deve ter pelo menos 3 caracteres' }),
@@ -54,6 +62,7 @@ const billSchema = z.object({
   }),
   category: z.string(),
   id_categoria: z.string().nullable(),
+  id_depositante: z.string().nullable().optional(),
   status: z.enum(['paid', 'unpaid']),
   notes: z.string().optional(),
   hasInstallments: z.boolean().default(false),
@@ -74,9 +83,19 @@ const billSchema = z.object({
 
 type BillFormValues = z.infer<typeof billSchema>;
 
+// This wrapper is needed since we're using the DepositorProvider
+const BillFormWrapper = () => {
+  return (
+    <DepositorProvider>
+      <BillForm />
+    </DepositorProvider>
+  );
+};
+
 const BillForm = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { bills, getBill, addBill, updateBill, isLoading: billsLoading } = useBills();
+  const { depositors, isLoading: depositorsLoading } = useDepositors();
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +103,7 @@ const BillForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [selectedDepositor, setSelectedDepositor] = useState<Depositor | null>(null);
   
   const isEditMode = !!id;
   
@@ -92,11 +112,19 @@ const BillForm = () => {
       const foundBill = getBill(id);
       if (foundBill) {
         setBill(foundBill);
+        
+        // If the bill has a depositor, find it
+        if (foundBill.id_depositante) {
+          const findDepositor = depositors.find(d => d.id === foundBill.id_depositante);
+          if (findDepositor) {
+            setSelectedDepositor(findDepositor);
+          }
+        }
       } else {
         setError('Conta não encontrada');
       }
     }
-  }, [id, getBill, isEditMode, billsLoading]);
+  }, [id, getBill, isEditMode, billsLoading, depositors]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -131,6 +159,7 @@ const BillForm = () => {
       dueDate: new Date().toISOString().split('T')[0],
       category: '',
       id_categoria: null,
+      id_depositante: null,
       status: 'unpaid',
       notes: '',
       hasInstallments: false,
@@ -147,6 +176,7 @@ const BillForm = () => {
         dueDate: bill.dueDate.split('T')[0],
         category: bill.category,
         id_categoria: bill.id_categoria,
+        id_depositante: bill.id_depositante,
         status: bill.status,
         notes: bill.notes || '',
         hasInstallments: false,
@@ -176,6 +206,7 @@ const BillForm = () => {
             dueDate: dueDate.toISOString().split('T')[0],
             category: values.category,
             id_categoria: values.id_categoria,
+            id_depositante: values.id_depositante,
             status: values.status,
             notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
           };
@@ -191,6 +222,7 @@ const BillForm = () => {
           dueDate: values.dueDate,
           category: values.category,
           id_categoria: values.id_categoria,
+          id_depositante: values.id_depositante,
           status: values.status,
           notes: values.notes,
         };
@@ -258,7 +290,18 @@ const BillForm = () => {
     }
   };
 
-  if (authLoading || (isEditMode && billsLoading) || loadingCategories) {
+  const handleDepositorChange = (depositorId: string) => {
+    const depositor = depositors.find(d => d.id === depositorId);
+    if (depositor) {
+      form.setValue('id_depositante', depositorId);
+      setSelectedDepositor(depositor);
+    } else {
+      form.setValue('id_depositante', null);
+      setSelectedDepositor(null);
+    }
+  };
+
+  if (authLoading || (isEditMode && billsLoading) || loadingCategories || depositorsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
         <div className="animate-pulse space-y-2 flex flex-col items-center">
@@ -308,6 +351,61 @@ const BillForm = () => {
                       <FormControl>
                         <Input placeholder="Ex: Empresa de Energia" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="id_depositante"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Depositante</FormLabel>
+                      <div className="flex gap-2">
+                        <Select 
+                          onValueChange={handleDepositorChange} 
+                          defaultValue={field.value || undefined}
+                          value={field.value || undefined}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Selecione um depositante" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {depositors.map(depositor => (
+                              <SelectItem key={depositor.id} value={depositor.id}>
+                                {depositor.descri}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          asChild
+                        >
+                          <Link to="/depositors/new">
+                            <Plus className="h-4 w-4" />
+                            <span className="sr-only">Novo Depositante</span>
+                          </Link>
+                        </Button>
+                      </div>
+                      
+                      {selectedDepositor && (
+                        <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm">
+                          <div className="font-medium">{selectedDepositor.descri}</div>
+                          {selectedDepositor.cidade && selectedDepositor.uf && (
+                            <div className="text-muted-foreground mt-1">
+                              {selectedDepositor.cidade}, {selectedDepositor.uf}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <FormMessage />
                     </FormItem>
                   )}
@@ -556,5 +654,4 @@ const BillForm = () => {
   );
 };
 
-export default BillForm;
-
+export default BillFormWrapper;

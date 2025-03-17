@@ -17,6 +17,7 @@ export type Database = {
           due_date: string
           id: string
           id_categoria: string | null
+          id_depositante: string | null
           notes: string | null
           status: string
           updated_at: string | null
@@ -30,6 +31,7 @@ export type Database = {
           due_date: string
           id?: string
           id_categoria?: string | null
+          id_depositante?: string | null
           notes?: string | null
           status: string
           updated_at?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           due_date?: string
           id?: string
           id_categoria?: string | null
+          id_depositante?: string | null
           notes?: string | null
           status?: string
           updated_at?: string | null
@@ -55,6 +58,13 @@ export type Database = {
             columns: ["id_categoria"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bills_id_depositante_fkey"
+            columns: ["id_depositante"]
+            isOneToOne: false
+            referencedRelation: "depositantes"
             referencedColumns: ["id"]
           },
           {
@@ -83,6 +93,54 @@ export type Database = {
           created_at?: string
           id?: string
           nome_categoria?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      depositantes: {
+        Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          cpf: string | null
+          created_at: string
+          descri: string
+          endereco: string | null
+          id: string
+          ie: string | null
+          num: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          cpf?: string | null
+          created_at?: string
+          descri: string
+          endereco?: string | null
+          id?: string
+          ie?: string | null
+          num?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          cpf?: string | null
+          created_at?: string
+          descri?: string
+          endereco?: string | null
+          id?: string
+          ie?: string | null
+          num?: string | null
+          uf?: string | null
           updated_at?: string
         }
         Relationships: []

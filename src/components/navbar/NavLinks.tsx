@@ -1,80 +1,93 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { BarChart2, Receipt, Users, Tag } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Building2, ReceiptText, Gem, BarcodeIcon, Users, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-interface NavLinksProps {
-  isAuthenticated?: boolean;
-  mobile?: boolean;
-  closeMenu?: () => void;
-}
-
-const NavLinks: React.FC<NavLinksProps> = ({ 
-  isAuthenticated = false, 
-  mobile = false, 
-  closeMenu 
-}) => {
-  const location = useLocation();
-  const { user } = useAuth();
-  
-  // Check if current user is the admin
-  const isAdmin = user?.email === 'william@makecard.com.br';
-  
-  // Only show these links when authenticated
-  const authenticatedLinks = [
-    { name: 'Dashboard', href: '/', icon: <BarChart2 className="size-4" /> },
-    { name: 'Contas', href: '/bills', icon: <Receipt className="size-4" /> },
-    // Only show the Users link if the user is admin
-    ...(isAdmin ? [{ name: 'Usuários', href: '/users', icon: <Users className="size-4" /> }] : []),
-    { name: 'Categorias', href: '/categories', icon: <Tag className="size-4" /> }
-  ];
-  
-  // Show these links always
-  const publicLinks = [
-    { name: 'Dashboard', href: '/', icon: <BarChart2 className="size-4" /> }
-  ];
-  
-  const links = isAuthenticated ? authenticatedLinks : publicLinks;
+const NavLinks: React.FC = () => {
+  const { isAdmin } = useAuth();
 
   return (
-    <nav className={mobile ? "space-y-0.5 w-full" : "flex space-x-4"}>
-      {links.map((link) => {
-        // Determine if the link is active
-        const isActive = location.pathname === link.href || 
-                        (link.href !== '/' && location.pathname.startsWith(link.href));
-        
-        return (
-          <Link
-            key={link.name}
-            to={link.href}
-            className={cn(
-              mobile 
-                ? "group flex items-center rounded-md px-3 py-3 text-sm font-medium w-full" 
-                : "inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2",
+    <ul className="flex flex-col space-y-1 lg:space-y-0 lg:flex-row lg:space-x-2">
+      <li>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
               isActive
-                ? mobile 
-                  ? "bg-accent text-accent-foreground"
-                  : "border-blue-500 text-foreground dark:text-gray-100"
-                : mobile
-                  ? "transparent hover:bg-muted text-muted-foreground hover:text-foreground"
-                  : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
-            )}
-            onClick={closeMenu}
+                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+            }`
+          }
+        >
+          <Gem className="mr-2 h-4 w-4" />
+          Dashboard
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/bills"
+          className={({ isActive }) =>
+            `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+              isActive
+                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+            }`
+          }
+        >
+          <ReceiptText className="mr-2 h-4 w-4" />
+          Contas a Pagar
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/categories"
+          className={({ isActive }) =>
+            `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+              isActive
+                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+            }`
+          }
+        >
+          <BarcodeIcon className="mr-2 h-4 w-4" />
+          Categorias
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/depositors"
+          className={({ isActive }) =>
+            `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+              isActive
+                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+            }`
+          }
+        >
+          <Building2 className="mr-2 h-4 w-4" />
+          Depositantes
+        </NavLink>
+      </li>
+      
+      {isAdmin && (
+        <li>
+          <NavLink
+            to="/users"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                isActive
+                  ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+              }`
+            }
           >
-            <span className={cn(
-              "text-muted-foreground group-hover:text-foreground",
-              mobile ? "mr-3" : "mr-2",
-              isActive && "text-accent-foreground"
-            )}>
-              {link.icon}
-            </span>
-            {link.name}
-          </Link>
-        );
-      })}
-    </nav>
+            <Users className="mr-2 h-4 w-4" />
+            Usuários
+          </NavLink>
+        </li>
+      )}
+    </ul>
   );
 };
 
