@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -88,24 +89,31 @@ const BillBasicFields = ({
       <FormField
         control={control}
         name="tipo"
-        render={({ field }) => {
-          // Set the field value based on the route
-          field.onChange(billType);
-          
-          return (
-            <FormItem>
-              <FormLabel>Tipo de Conta</FormLabel>
-              <FormControl>
-                <Input 
-                  value={billTypeLabel}
-                  readOnly
-                  className="bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de Conta</FormLabel>
+            <FormControl>
+              <Input 
+                value={billTypeLabel}
+                readOnly
+                className="bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                {...field}
+                onChange={(e) => {
+                  // Don't update the field value here as it would cause an infinite loop
+                  // The field value is updated in the useEffect below
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      {/* Set the tipo value based on the route without causing re-renders */}
+      <input 
+        type="hidden" 
+        {...control.register("tipo")} 
+        value={billType} 
       />
       
       {!hasInstallments && (
