@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +14,7 @@ export type Bill = {
   id_categoria: string | null;
   id_depositante: string | null;
   status: 'paid' | 'unpaid';
+  tipo: 'pagar' | 'receber';
   notes?: string;
   numero_nota_fiscal?: string;
   createdAt: string;
@@ -29,10 +31,10 @@ type BillContextType = {
   updateBill: (id: string, bill: Partial<BillInput>) => Promise<void>;
   deleteBill: (id: string) => Promise<void>;
   markBillAsPaid: (id: string) => Promise<void>;
-  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: string | 'all', search?: string) => Bill[];
-  getTotalDue: () => number;
-  getOverdueBills: () => Bill[];
-  getDueSoonBills: () => Bill[];
+  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: string | 'all', search?: string, tipo?: 'pagar' | 'receber' | 'all') => Bill[];
+  getTotalDue: (tipo?: 'pagar' | 'receber') => number;
+  getOverdueBills: (tipo?: 'pagar' | 'receber') => Bill[];
+  getDueSoonBills: (tipo?: 'pagar' | 'receber') => Bill[];
 };
 
 const BillContext = createContext<BillContextType | undefined>(undefined);
@@ -70,6 +72,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id_categoria: bill.id_categoria,
           id_depositante: bill.id_depositante,
           status: bill.status as 'paid' | 'unpaid',
+          tipo: bill.tipo as 'pagar' | 'receber',
           notes: bill.notes,
           numero_nota_fiscal: bill.numero_nota_fiscal,
           createdAt: bill.created_at,
@@ -108,6 +111,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id_categoria: billInput.id_categoria,
         id_depositante: billInput.id_depositante,
         status: billInput.status,
+        tipo: billInput.tipo,
         notes: billInput.notes,
         numero_nota_fiscal: billInput.numero_nota_fiscal,
         user_id: user.id
@@ -133,6 +137,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id_categoria: data.id_categoria,
         id_depositante: data.id_depositante,
         status: data.status as 'paid' | 'unpaid',
+        tipo: data.tipo as 'pagar' | 'receber',
         notes: data.notes,
         numero_nota_fiscal: data.numero_nota_fiscal,
         createdAt: data.created_at,
@@ -163,6 +168,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (billUpdates.id_categoria !== undefined) dbUpdates.id_categoria = billUpdates.id_categoria;
       if (billUpdates.id_depositante !== undefined) dbUpdates.id_depositante = billUpdates.id_depositante;
       if (billUpdates.status) dbUpdates.status = billUpdates.status;
+      if (billUpdates.tipo) dbUpdates.tipo = billUpdates.tipo;
       if (billUpdates.notes !== undefined) dbUpdates.notes = billUpdates.notes;
       if (billUpdates.numero_nota_fiscal !== undefined) dbUpdates.numero_nota_fiscal = billUpdates.numero_nota_fiscal;
       
@@ -234,31 +240,33 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const filterBills = (
     status: 'paid' | 'unpaid' | 'all' = 'all', 
     category: string | 'all' = 'all',
-    search: string = ''
+    search: string = '',
+    tipo: 'pagar' | 'receber' | 'all' = 'all'
   ) => {
     return bills.filter(bill => {
       const matchesStatus = status === 'all' || bill.status === status;
       const matchesCategory = category === 'all' || bill.category === category;
+      const matchesTipo = tipo === 'all' || bill.tipo === tipo;
       const matchesSearch = search === '' || 
         bill.vendorName.toLowerCase().includes(search.toLowerCase()) ||
         (bill.notes && bill.notes.toLowerCase().includes(search.toLowerCase()));
       
-      return matchesStatus && matchesCategory && matchesSearch;
+      return matchesStatus && matchesCategory && matchesTipo && matchesSearch;
     });
   };
 
-  const getTotalDue = () => {
+  const getTotalDue = (tipo: 'pagar' | 'receber' = 'pagar') => {
     return bills
-      .filter(bill => bill.status === 'unpaid')
+      .filter(bill => bill.status === 'unpaid' && bill.tipo === tipo)
       .reduce((total, bill) => total + bill.amount, 0);
   };
 
-  const getOverdueBills = () => {
+  const getOverdueBills = (tipo: 'pagar' | 'receber' = 'pagar') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     return bills.filter(bill => {
-      if (bill.status === 'paid') return false;
+      if (bill.status === 'paid' || bill.tipo !== tipo) return false;
       
       const dueDate = new Date(bill.dueDate);
       dueDate.setHours(0, 0, 0, 0);
@@ -267,7 +275,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const getDueSoonBills = () => {
+  const getDueSoonBills = (tipo: 'pagar' | 'receber' = 'pagar') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -275,7 +283,7 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     inSevenDays.setDate(today.getDate() + 7);
     
     return bills.filter(bill => {
-      if (bill.status === 'paid') return false;
+      if (bill.status === 'paid' || bill.tipo !== tipo) return false;
       
       const dueDate = new Date(bill.dueDate);
       dueDate.setHours(0, 0, 0, 0);

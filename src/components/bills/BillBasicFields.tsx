@@ -79,6 +79,32 @@ const BillBasicFields = ({
 
   return (
     <>
+      <FormField
+        control={control}
+        name="tipo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de Conta</FormLabel>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || 'pagar'}
+              value={field.value || 'pagar'}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="pagar">A Pagar</SelectItem>
+                <SelectItem value="receber">A Receber</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
       {!hasInstallments && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField

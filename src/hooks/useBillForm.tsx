@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { Bill, useBills } from '@/context/BillContext';
@@ -21,6 +20,7 @@ export const useBillForm = () => {
   const { bills, getBill, addBill, updateBill, isLoading: billsLoading } = useBills();
   const { depositors, isLoading: depositorsLoading } = useDepositors();
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bill, setBill] = useState<Bill | null>(null);
@@ -32,6 +32,8 @@ export const useBillForm = () => {
   
   const isEditMode = !!id;
   
+  const defaultTipo = location.pathname.includes('/receitas') ? 'receber' : 'pagar';
+  
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billSchema),
     defaultValues: {
@@ -42,6 +44,7 @@ export const useBillForm = () => {
       category: '',
       id_categoria: null,
       status: 'unpaid',
+      tipo: defaultTipo,
       notes: '',
       numero_nota_fiscal: '',
       hasInstallments: false,
@@ -120,12 +123,13 @@ export const useBillForm = () => {
         category: bill.category,
         id_categoria: bill.id_categoria,
         status: bill.status,
+        tipo: bill.tipo || defaultTipo,
         notes: bill.notes || '',
         numero_nota_fiscal: bill.numero_nota_fiscal || '',
         hasInstallments: false,
       });
     }
-  }, [bill, form]);
+  }, [bill, form, defaultTipo]);
 
   const handleCategoryChange = (categoryId: string) => {
     const selectedCategory = categories.find(cat => cat.id === categoryId);
@@ -149,14 +153,12 @@ export const useBillForm = () => {
     }
   };
 
-  // Improved function to parse Brazilian formatted numbers
   const parseAmount = (amountStr: string): number => {
     if (!amountStr || typeof amountStr !== 'string') {
       console.error('Invalid amount format:', amountStr);
       throw new Error('Valor inválido');
     }
     
-    // First, clean the string (remove spaces, R$, etc)
     const cleanStr = amountStr.trim().replace(/[^\d,]/g, '');
     
     if (!cleanStr) {
@@ -164,7 +166,6 @@ export const useBillForm = () => {
       throw new Error('Valor inválido');
     }
     
-    // Replace comma with dot for JavaScript parsing
     const dotStr = cleanStr.replace(',', '.');
     const parsedAmount = parseFloat(dotStr);
     
@@ -173,10 +174,9 @@ export const useBillForm = () => {
       throw new Error('Valor inválido');
     }
     
-    // Round to 2 decimal places to avoid floating point issues
     return Math.round(parsedAmount * 100) / 100;
   };
-  
+
   const onSubmit = async (values: BillFormValues) => {
     setIsSubmitting(true);
     
@@ -186,7 +186,6 @@ export const useBillForm = () => {
         throw new Error('Depositante não encontrado');
       }
 
-      // Process regular bill amount
       let amountValue: number;
       try {
         if (typeof values.amount === 'string') {
@@ -200,12 +199,10 @@ export const useBillForm = () => {
         throw new Error('Valor inválido. Verifique o formato do valor.');
       }
       
-      // Process installment bills
       if (values.hasInstallments && values.installmentsCount && values.installmentsTotal) {
         try {
           const installmentsCount = parseInt(values.installmentsCount);
           
-          // Parse installment total amount specifically
           let totalAmount: number;
           if (typeof values.installmentsTotal === 'string') {
             totalAmount = parseAmount(values.installmentsTotal);
@@ -235,6 +232,7 @@ export const useBillForm = () => {
               id_categoria: values.id_categoria,
               id_depositante: values.id_depositante,
               status: values.status,
+              tipo: values.tipo,
               numero_nota_fiscal: values.numero_nota_fiscal,
               notes: values.notes ? `${values.notes} - Parcela ${index + 1} de ${installmentsCount}` : `Parcela ${index + 1} de ${installmentsCount}`,
             };
@@ -257,6 +255,7 @@ export const useBillForm = () => {
           id_categoria: values.id_categoria,
           id_depositante: values.id_depositante,
           status: values.status,
+          tipo: values.tipo,
           numero_nota_fiscal: values.numero_nota_fiscal,
           notes: values.notes,
         };
@@ -299,7 +298,8 @@ export const useBillForm = () => {
       });
       
       setTimeout(() => {
-        navigate('/bills');
+        const redirectPath = values.tipo === 'receber' ? '/receitas' : '/bills';
+        navigate(redirectPath);
       }, 2000);
     } catch (error) {
       console.error('Error submitting form:', error);

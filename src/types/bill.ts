@@ -18,6 +18,7 @@ export const billSchema = z.object({
   category: z.string(),
   id_categoria: z.string().nullable(),
   status: z.enum(['paid', 'unpaid']),
+  tipo: z.enum(['pagar', 'receber']).default('pagar'),
   notes: z.string().optional(),
   numero_nota_fiscal: z.string().optional(),
   hasInstallments: z.boolean().default(false),

@@ -22,6 +22,7 @@ export type Database = {
           notes: string | null
           numero_nota_fiscal: string | null
           status: string
+          tipo: string
           updated_at: string | null
           user_id: string
           vendor_name: string | null
@@ -38,6 +39,7 @@ export type Database = {
           notes?: string | null
           numero_nota_fiscal?: string | null
           status: string
+          tipo?: string
           updated_at?: string | null
           user_id: string
           vendor_name?: string | null
@@ -54,6 +56,7 @@ export type Database = {
           notes?: string | null
           numero_nota_fiscal?: string | null
           status?: string
+          tipo?: string
           updated_at?: string | null
           user_id?: string
           vendor_name?: string | null
