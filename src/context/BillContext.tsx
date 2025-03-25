@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -31,7 +30,7 @@ type BillContextType = {
   updateBill: (id: string, bill: Partial<BillInput>) => Promise<void>;
   deleteBill: (id: string) => Promise<void>;
   markBillAsPaid: (id: string) => Promise<void>;
-  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: string | 'all', search?: string, tipo?: 'pagar' | 'receber' | 'all') => Bill[];
+  filterBills: (status?: 'paid' | 'unpaid' | 'all', category?: string | 'all', search?: string, tipo?: 'pagar' | 'receber' | 'all', startDate?: string, endDate?: string) => Bill[];
   getTotalDue: (tipo?: 'pagar' | 'receber') => number;
   getOverdueBills: (tipo?: 'pagar' | 'receber') => Bill[];
   getDueSoonBills: (tipo?: 'pagar' | 'receber') => Bill[];
@@ -241,7 +240,9 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     status: 'paid' | 'unpaid' | 'all' = 'all', 
     category: string | 'all' = 'all',
     search: string = '',
-    tipo: 'pagar' | 'receber' | 'all' = 'all'
+    tipo: 'pagar' | 'receber' | 'all' = 'all',
+    startDate: string = '',
+    endDate: string = ''
   ) => {
     return bills.filter(bill => {
       const matchesStatus = status === 'all' || bill.status === status;
@@ -251,7 +252,21 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
         bill.vendorName.toLowerCase().includes(search.toLowerCase()) ||
         (bill.notes && bill.notes.toLowerCase().includes(search.toLowerCase()));
       
-      return matchesStatus && matchesCategory && matchesTipo && matchesSearch;
+      let matchesDateRange = true;
+      if (startDate && endDate && bill.datapagamento) {
+        const paymentDate = new Date(bill.datapagamento);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        
+        matchesDateRange = paymentDate >= start && paymentDate <= end;
+      } else if ((startDate || endDate) && !bill.datapagamento) {
+        matchesDateRange = false;
+      }
+      
+      return matchesStatus && matchesCategory && matchesTipo && matchesSearch && matchesDateRange;
     });
   };
 

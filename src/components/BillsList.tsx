@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, ChevronDown } from 'lucide-react';
+import { Search, Filter, ChevronDown, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,7 +10,14 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useBills } from '@/context/BillContext';
 import BillCard from '@/components/BillCard';
 import { getCategoryInfo } from '@/utils/formatters';
@@ -18,6 +26,8 @@ import { Category } from '@/hooks/useCategoryManagement';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const BillsList: React.FC = () => {
   const { filterBills, bills, isLoading } = useBills();
@@ -27,6 +37,9 @@ const BillsList: React.FC = () => {
   const [filteredBills, setFilteredBills] = useState(bills);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [dateRangeOpen, setDateRangeOpen] = useState(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -54,7 +67,7 @@ const BillsList: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    const filtered = filterBills(status, categoryFilter, searchQuery);
+    const filtered = filterBills(status, categoryFilter, searchQuery, 'pagar', startDate, endDate);
     
     const sortedBills = [...filtered].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
@@ -63,7 +76,7 @@ const BillsList: React.FC = () => {
     });
     
     setFilteredBills(sortedBills);
-  }, [bills, status, categoryFilter, searchQuery, filterBills]);
+  }, [bills, status, categoryFilter, searchQuery, filterBills, startDate, endDate]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -85,8 +98,15 @@ const BillsList: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const clearDateFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setDateRangeOpen(false);
   };
 
   const exportToPDF = () => {
@@ -102,14 +122,27 @@ const BillsList: React.FC = () => {
     let categoryText = 'Todas as categorias';
     if (categoryFilter !== 'all') categoryText = `Categoria: ${categoryFilter}`;
     
-    doc.text(`${statusText} - ${categoryText}`, 14, 30);
-    doc.text(`Data do relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+    let dateRangeText = '';
+    if (startDate && endDate) {
+      dateRangeText = `Período de pagamento: ${formatDate(startDate)} a ${formatDate(endDate)}`;
+    }
     
-    const tableColumn = ["Fornecedor", "Valor", "Vencimento", "Categoria", "Status"];
+    doc.text(`${statusText} - ${categoryText}`, 14, 30);
+    if (dateRangeText) {
+      doc.text(dateRangeText, 14, 36);
+      doc.text(`Data do relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 42);
+    } else {
+      doc.text(`Data do relatório: ${new Date().toLocaleDateString('pt-BR')}`, 14, 36);
+    }
+    
+    const startY = dateRangeText ? 50 : 45;
+    
+    const tableColumn = ["Fornecedor", "Valor", "Vencimento", "Pagamento", "Categoria", "Status"];
     const tableRows = filteredBills.map(bill => [
       bill.vendorName,
       formatCurrency(bill.amount),
       formatDate(bill.dueDate),
+      formatDate(bill.datapagamento),
       bill.category,
       bill.status === 'paid' ? 'Paga' : 'Pendente'
     ]);
@@ -117,7 +150,7 @@ const BillsList: React.FC = () => {
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 45,
+      startY: startY,
       styles: { 
         fontSize: 10,
         cellPadding: 3,
@@ -130,7 +163,7 @@ const BillsList: React.FC = () => {
     });
     
     const totalAmount = filteredBills.reduce((total, bill) => total + bill.amount, 0);
-    const finalY = (doc as any).lastAutoTable.finalY || 45;
+    const finalY = (doc as any).lastAutoTable.finalY || startY;
     
     doc.text(`Total: ${formatCurrency(totalAmount)}`, 14, finalY + 10);
     
@@ -170,7 +203,55 @@ const BillsList: React.FC = () => {
           />
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <Popover open={dateRangeOpen} onOpenChange={setDateRangeOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("flex items-center gap-1", (startDate || endDate) && "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200")}>
+                <Calendar className="h-4 w-4 mr-1" />
+                <span className={isMobile ? "" : "inline"}>
+                  {startDate && endDate 
+                    ? `${formatDate(startDate)} - ${formatDate(endDate)}`
+                    : "Período de Pagamento"
+                  }
+                </span>
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-4" align="end">
+              <div className="space-y-4">
+                <h4 className="font-medium">Filtrar por data de pagamento</h4>
+                <div className="grid gap-2">
+                  <div className="grid gap-1">
+                    <label htmlFor="startDate" className="text-sm">Data inicial</label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label htmlFor="endDate" className="text-sm">Data final</label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <Button size="sm" variant="outline" onClick={clearDateFilters}>
+                    Limpar
+                  </Button>
+                  <Button size="sm" onClick={() => setDateRangeOpen(false)}>
+                    Aplicar
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-1">
