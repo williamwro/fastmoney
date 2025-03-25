@@ -60,7 +60,7 @@ const DepositorTable: React.FC = () => {
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar depositante..."
+            placeholder="Buscar fornecedor..."
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -70,7 +70,7 @@ const DepositorTable: React.FC = () => {
         <Button asChild className="sm:self-end w-full sm:w-auto">
           <Link to="/depositors/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Novo Depositante
+            Novo Fornecedor
           </Link>
         </Button>
       </div>
@@ -125,7 +125,7 @@ const DepositorTable: React.FC = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir o depositante "{depositorToDelete?.descri}"? 
+                              Tem certeza que deseja excluir o fornecedor "{depositorToDelete?.descri}"? 
                               Esta ação não pode ser desfeita.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -150,8 +150,8 @@ const DepositorTable: React.FC = () => {
               <TableRow>
                 <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
                   {search 
-                    ? "Nenhum depositante encontrado com os critérios de busca." 
-                    : "Nenhum depositante cadastrado. Clique em 'Novo Depositante' para adicionar."}
+                    ? "Nenhum fornecedor encontrado com os critérios de busca." 
+                    : "Nenhum fornecedor cadastrado. Clique em 'Novo Fornecedor' para adicionar."}
                 </TableCell>
               </TableRow>
             )}
