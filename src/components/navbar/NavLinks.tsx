@@ -95,7 +95,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ isAuthenticated, mobile, closeMenu 
           onClick={closeMenu}
         >
           <Building2 className="mr-2 h-4 w-4" />
-          Depositantes
+          Fornecedores
         </NavLink>
       </li>
       

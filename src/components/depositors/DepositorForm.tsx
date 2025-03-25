@@ -87,7 +87,7 @@ const DepositorForm = () => {
       if (foundDepositor) {
         setDepositor(foundDepositor);
       } else {
-        setError('Depositante não encontrado');
+        setError('Fornecedor não encontrado');
       }
     }
   }, [id, getDepositor, isEditMode, depositorsLoading]);
@@ -179,7 +179,7 @@ const DepositorForm = () => {
           <div className="flex-1 w-0 flex items-center">
             <div className="ml-4 flex-1">
               <p className="text-lg font-medium text-green-800 dark:text-green-300">
-                Depositante salvo com sucesso!
+                Fornecedor salvo com sucesso!
               </p>
             </div>
           </div>
@@ -200,7 +200,7 @@ const DepositorForm = () => {
       }, 1000);
     } catch (error) {
       console.error('Error submitting form:', error);
-      setError('Ocorreu um erro ao salvar o depositante. Tente novamente.');
+      setError('Ocorreu um erro ao salvar o fornecedor. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -229,10 +229,10 @@ const DepositorForm = () => {
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-col text-left mb-6">
             <h1 className="text-3xl font-bold tracking-tight">
-              {isEditMode ? 'Editar Depositante' : 'Novo Depositante'}
+              {isEditMode ? 'Editar Fornecedor' : 'Novo Fornecedor'}
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              {isEditMode ? 'Atualize os dados do depositante' : 'Preencha os dados do novo depositante'}
+              {isEditMode ? 'Atualize os dados do fornecedor' : 'Preencha os dados do novo fornecedor'}
             </p>
           </div>
           

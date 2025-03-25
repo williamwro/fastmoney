@@ -31,9 +31,9 @@ const Depositors = () => {
         
         <main className="container mx-auto px-4 pt-20 pb-12">
           <div className="flex flex-col text-left mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">Depositantes</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Fornecedores</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Gerencie os depositantes do sistema
+              Gerencie os fornecedores do sistema
             </p>
           </div>
           

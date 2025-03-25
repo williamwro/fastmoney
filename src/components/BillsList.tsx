@@ -10,8 +10,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
   Popover,
@@ -217,7 +215,7 @@ const BillsList: React.FC = () => {
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-4" align="end">
+            <PopoverContent className="w-auto p-4 pointer-events-auto" align="end">
               <div className="space-y-4">
                 <h4 className="font-medium">Filtrar por data de pagamento</h4>
                 <div className="grid gap-2">
