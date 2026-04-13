@@ -40,8 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated: propIsAuthenticated })
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
+          <div className="flex items-center">
             <UserMenu 
               user={user} 
               logout={logout} 
