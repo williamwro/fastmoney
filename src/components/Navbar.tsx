@@ -8,7 +8,7 @@ import NavLinks from './navbar/NavLinks';
 import UserMenu from './navbar/UserMenu';
 import MobileMenuButton from './navbar/MobileMenuButton';
 import MobileMenu from './navbar/MobileMenu';
-import ThemeToggle from './ThemeToggle';
+
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -40,8 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated: propIsAuthenticated })
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
+          <div className="flex items-center">
             <UserMenu 
               user={user} 
               logout={logout} 

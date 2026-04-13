@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Key } from 'lucide-react';
+import { LogOut, User, Key, Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -32,6 +33,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   
   const getInitials = (name: string) => {
     return name
@@ -141,6 +143,20 @@ const UserMenu: React.FC<UserMenuProps> = ({
             <Key className="mr-2 h-4 w-4" />
             <span>Alterar Senha</span>
           </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer text-foreground" onClick={toggleTheme}>
+            {theme === 'light' ? (
+              <>
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Modo Escuro</span>
+              </>
+            ) : (
+              <>
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Modo Claro</span>
+              </>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer text-foreground" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sair</span>
