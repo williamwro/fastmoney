@@ -37,10 +37,10 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
     : `/bills/${bill.id}/edit`;
   
   return (
-    <Card className={`w-full transition-all duration-300 hover:shadow-md animate-scale-in 
+    <Card className={`w-full overflow-hidden transition-all duration-300 hover:shadow-md animate-scale-in 
       ${bill.tipo === 'receber' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-blue-500'}`}>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <CardContent className="p-4 overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-0">
           <div className="flex flex-col">
             <div className="flex items-center justify-between md:justify-start">
               <h3 className="font-medium text-lg truncate mr-2">{bill.vendorName}</h3>
