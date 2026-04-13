@@ -173,7 +173,7 @@ const Index = () => {
                   Contas que vencem nos próximos 7 dias
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 overflow-hidden">
                 {dueSoonBills.length === 0 ? (
                   <div className="text-center py-6 text-gray-500 dark:text-gray-400">
                     Não há contas vencendo em breve.
