@@ -143,6 +143,20 @@ const UserMenu: React.FC<UserMenuProps> = ({
             <Key className="mr-2 h-4 w-4" />
             <span>Alterar Senha</span>
           </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer text-foreground" onClick={toggleTheme}>
+            {theme === 'light' ? (
+              <>
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Modo Escuro</span>
+              </>
+            ) : (
+              <>
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Modo Claro</span>
+              </>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer text-foreground" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sair</span>

@@ -8,7 +8,7 @@ import NavLinks from './navbar/NavLinks';
 import UserMenu from './navbar/UserMenu';
 import MobileMenuButton from './navbar/MobileMenuButton';
 import MobileMenu from './navbar/MobileMenu';
-import ThemeToggle from './ThemeToggle';
+
 
 interface NavbarProps {
   isAuthenticated?: boolean;
