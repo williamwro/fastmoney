@@ -41,9 +41,9 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
       ${bill.tipo === 'receber' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-blue-500'}`}>
       <CardContent className="p-4 overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-0">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between md:justify-start">
-              <h3 className="font-medium text-lg truncate mr-2">{bill.vendorName}</h3>
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex items-center justify-between md:justify-start min-w-0">
+              <h3 className="font-medium text-lg truncate mr-2 min-w-0">{bill.vendorName}</h3>
               <span className={`${badgeColor} text-xs px-2 py-1 rounded-full inline-flex items-center`}>
                 {bill.tipo === 'receber' 
                   ? (bill.status === 'paid' ? 'Recebido' : statusText)
