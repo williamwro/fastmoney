@@ -33,6 +33,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   
   const getInitials = (name: string) => {
     return name
