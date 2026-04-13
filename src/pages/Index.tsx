@@ -6,7 +6,6 @@ import NavLinks from '@/components/navbar/NavLinks';
 import UserMenu from '@/components/navbar/UserMenu';
 import DashboardSummary from '@/components/DashboardSummary';
 import BillCard from '@/components/BillCard';
-import ThemeToggle from '@/components/ThemeToggle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, Navigate } from 'react-router-dom';
@@ -74,17 +73,6 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowQrCode(true)}
-              className="flex items-center gap-1 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
-              size={isMobile ? "sm" : "default"}
-            >
-              <Smartphone className="h-4 w-4" />
-              <span className="hidden sm:inline">Abrir no App</span>
-              <QrCode className="h-4 w-4" />
-            </Button>
-            <ThemeToggle />
             <div className="hidden md:block">
               <UserMenu 
                 user={user} 
@@ -107,20 +95,33 @@ const Index = () => {
       
       <main className="container mx-auto px-4 pt-6 pb-12 animate-fade-in">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="text-left">
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-gray-500 dark:text-gray-400 mt-1">
                 Gerencie suas contas a pagar de forma eficiente
               </p>
             </div>
-            
-            <Link to="/bills/new">
-              <Button className="mt-4 md:mt-0">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Nova Conta
+
+            <div className="flex flex-col sm:flex-row gap-3 md:items-center">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowQrCode(true)}
+                className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm border-gray-200 dark:border-gray-700"
+                size={isMobile ? 'sm' : 'default'}
+              >
+                <Smartphone className="h-4 w-4" />
+                <span>Abrir no App</span>
+                <QrCode className="h-4 w-4" />
               </Button>
-            </Link>
+
+              <Link to="/bills/new">
+                <Button className="w-full sm:w-auto">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Nova Conta
+                </Button>
+              </Link>
+            </div>
           </div>
           
           <DashboardSummary />
