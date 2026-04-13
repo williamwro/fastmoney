@@ -67,7 +67,7 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
             )}
           </div>
           
-          <div className="flex flex-col md:items-end">
+          <div className="flex flex-col md:items-end flex-shrink-0">
             <span className={`text-xl font-bold ${bill.tipo === 'receber' ? 'text-green-600' : 'text-blue-600'}`}>
               {formatCurrency(bill.amount)}
             </span>
