@@ -37,13 +37,13 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
     : `/bills/${bill.id}/edit`;
   
   return (
-    <Card className={`w-full transition-all duration-300 hover:shadow-md animate-scale-in 
+    <Card className={`w-full overflow-hidden transition-all duration-300 hover:shadow-md animate-scale-in 
       ${bill.tipo === 'receber' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-blue-500'}`}>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between md:justify-start">
-              <h3 className="font-medium text-lg truncate mr-2">{bill.vendorName}</h3>
+      <CardContent className="p-4 overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-0">
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex items-center justify-between md:justify-start min-w-0">
+              <h3 className="font-medium text-lg truncate mr-2 min-w-0">{bill.vendorName}</h3>
               <span className={`${badgeColor} text-xs px-2 py-1 rounded-full inline-flex items-center`}>
                 {bill.tipo === 'receber' 
                   ? (bill.status === 'paid' ? 'Recebido' : statusText)
@@ -67,7 +67,7 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
             )}
           </div>
           
-          <div className="flex flex-col md:items-end">
+          <div className="flex flex-col md:items-end flex-shrink-0">
             <span className={`text-xl font-bold ${bill.tipo === 'receber' ? 'text-green-600' : 'text-blue-600'}`}>
               {formatCurrency(bill.amount)}
             </span>
