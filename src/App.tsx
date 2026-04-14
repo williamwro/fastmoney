@@ -21,6 +21,8 @@ import Depositors from '@/pages/Depositors';
 import NotFound from '@/pages/NotFound';
 import Auth from '@/pages/Auth';
 import Users from '@/pages/Users';
+import ResetPassword from '@/pages/ResetPassword';
+import ForgotPassword from '@/pages/ForgotPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 
@@ -50,6 +52,8 @@ const App: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 
                 {/* Bills Routes */}
                 <Route path="/bills" element={<ProtectedRoute element={<Bills />} />} />

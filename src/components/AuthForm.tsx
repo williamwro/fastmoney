@@ -162,6 +162,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               />
             )}
             
+            {isLogin && (
+              <div className="text-right">
+                <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400">
+                  Esqueci minha senha
+                </a>
+              </div>
+            )}
+
             <Button 
               type="submit" 
               className="w-full mt-6 bg-blue-500 hover:bg-blue-600"
