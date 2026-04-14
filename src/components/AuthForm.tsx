@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isLogin = type === 'login';
   const title = isLogin ? 'Login' : 'Criar Conta';
   const schema = isLogin ? loginSchema : signupSchema;
@@ -128,7 +129,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="password" placeholder="********" {...field} />
+                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showPassword ? "text" : "password"} placeholder="********" {...field} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -144,10 +148,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormItem>
                     <FormLabel className="text-gray-700 dark:text-gray-200">Confirmar Senha</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="password" placeholder="********" {...field} />
-                      </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showConfirmPassword ? "text" : "password"} placeholder="********" {...field} />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
