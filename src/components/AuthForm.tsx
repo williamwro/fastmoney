@@ -43,7 +43,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const isLogin = type === 'login';
   const title = isLogin ? 'Login' : 'Criar Conta';
   const schema = isLogin ? loginSchema : signupSchema;
