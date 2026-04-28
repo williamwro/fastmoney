@@ -1,0 +1,1 @@
+DELETE FROM public.bills WHERE EXTRACT(YEAR FROM due_date) = 2025;
