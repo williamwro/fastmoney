@@ -165,6 +165,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_private: boolean
           name: string | null
           updated_at: string
         }
@@ -173,6 +174,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          is_private?: boolean
           name?: string | null
           updated_at?: string
         }
@@ -181,6 +183,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_private?: boolean
           name?: string | null
           updated_at?: string
         }
@@ -192,6 +195,7 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      is_private_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
