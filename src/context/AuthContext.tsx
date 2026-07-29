@@ -16,6 +16,16 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getAuthErrorMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message : '';
+
+  if (/failed to fetch|networkerror/i.test(message)) {
+    return 'Não foi possível conectar ao Supabase. Verifique DNS/internet/firewall e tente novamente.';
+  }
+
+  return message || 'Erro ao fazer login';
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -54,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast.success('Login realizado com sucesso');
     } catch (error) {
-      toast.error((error as Error).message || 'Erro ao fazer login');
+      toast.error(getAuthErrorMessage(error));
       throw error;
     } finally {
       setIsLoading(false);
