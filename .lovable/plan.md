@@ -1,64 +1,32 @@
-## Objetivo
+## Diagnóstico
 
-Criar um modo "particular" isolado para o novo usuário `gs.armazemfinanceiro@yahoo.com.br`, sem afetar Denise (`denisepaixao_vga@hotmail.com`) nem os demais usuários da empresa, que continuam vendo/compartilhando tudo como hoje.
+O backend está funcionando: consultei o banco `newmoney` agora (respondeu, 4 perfis) e o endpoint de autenticação retornou **200**. Ou seja, o Supabase não está fora do ar.
 
-## Conceito
+O `NetworkError when attempting to fetch resource` acontece no navegador, antes da requisição chegar ao Supabase. A causa mais provável é o **Service Worker antigo** do app:
 
-- Marcar apenas o novo usuário como `is_private = true` na tabela `profiles`.
-- Lançamentos (`bills`) criados por um usuário particular ficam visíveis SOMENTE para ele.
-- Lançamentos criados por usuários "empresa" continuam visíveis para todos os usuários "empresa" (comportamento atual preservado).
-- Usuários particulares NÃO veem dados da empresa, e usuários da empresa NÃO veem dados particulares.
-- Categorias e Fornecedores continuam compartilhados (sem mudança), já que não foi pedido isolá-los.
+- O projeto tem um service worker escrito à mão em `public/sw.js` (cache `fastmoney-v1`).
+- Ao mesmo tempo existem arquivos gerados pelo plugin de PWA (`dev-dist/sw.js`, `workbox-*.js`).
+- Dois service workers concorrentes + cache antigo instalado no navegador do usuário = requisições interceptadas e falhando com "NetworkError", inclusive as de login.
 
-## Passos
+## O que fazer
 
-### 1. Banco de dados (migração)
+1. **Substituir `public/sw.js` por um "kill-switch"** — um service worker que, ao ser instalado, apaga os caches criados por ele mesmo, recarrega as abas abertas e se desregistra. É o único jeito de remover um service worker já instalado nos navegadores dos usuários (apagar o arquivo não resolve).
+2. **Remover o registro do service worker** do código do app (onde ele é registrado no `main.tsx` / componentes de PWA), mantendo apenas o manifesto e os ícones para que o app continue instalável na tela inicial / no Windows.
+3. **Limpar os artefatos obsoletos** `dev-dist/` do repositório.
+4. **Manter intacto** todo o resto: autenticação, telas, políticas do banco e regras de isolamento da conta particular.
 
-- Adicionar coluna `is_private boolean NOT NULL DEFAULT false` em `public.profiles`.
-- Criar função `security definer` `public.is_private_user(_user_id uuid)` que lê `profiles.is_private` (evita recursão em RLS).
-- Substituir a policy de SELECT em `public.bills` por uma regra que faz:
-  - se o dono do lançamento (`user_id`) for particular → só ele mesmo enxerga;
-  - se o dono for da empresa → todos os usuários da empresa enxergam; particulares não enxergam.
-- Ajustar policies de UPDATE e DELETE em `bills` com a mesma lógica de visibilidade (cada grupo só altera/exclui o que pode ver). INSERT continua exigindo `auth.uid() = user_id`.
-- Marcar `is_private = true` para o usuário `gs.armazemfinanceiro@yahoo.com.br` (após ele ser criado/cadastrado).
+## Resultado esperado
 
-### 2. Criação do novo usuário
+- O login volta a funcionar (as requisições passam direto para o Supabase, sem interceptação).
+- O app continua podendo ser instalado no celular e no Windows.
+- O modo offline deixa de existir — se você quiser offline de volta depois, dá para reconstruir da forma correta com o plugin oficial.
 
-- O novo login `gs.armazemfinanceiro@yahoo.com.br` será criado pelo fluxo normal de cadastro do sistema (ou pelo painel admin de Usuários).
-- Após o cadastro, rodar um UPDATE marcando `is_private = true` apenas nesse perfil.
+## Depois de aplicar
 
-### 3. Frontend
-
-- Nenhuma mudança funcional necessária: a RLS faz todo o isolamento.
-- As telas de Contas a Pagar / Receber, Dashboard e Relatórios continuam consultando `bills` normalmente — cada usuário só vai receber as linhas permitidas pela RLS.
-- Categorias, Fornecedores, gestão de usuários e área admin (`william@makecard.com.br`) permanecem inalterados.
-
-## Garantias de não regressão
-
-- Denise (`denisepaixao_vga@hotmail.com`) e demais usuários permanecem com `is_private = false` → mesma visibilidade compartilhada de hoje.
-- Apenas `gs.armazemfinanceiro@yahoo.com.br` será marcado como particular.
-- Lançamentos antigos (todos da empresa) continuam visíveis ao grupo empresa exatamente como agora.
+Será necessário **publicar o app**, e na primeira visita o navegador do usuário troca o worker antigo pelo kill-switch e recarrega sozinho. Em caso de teimosia, um Ctrl+Shift+R resolve.
 
 ## Detalhes técnicos
 
-- Função auxiliar:
-  ```sql
-  create or replace function public.is_private_user(_user_id uuid)
-  returns boolean language sql stable security definer set search_path = public as $$
-    select coalesce((select is_private from public.profiles where id = _user_id), false)
-  $$;
-  ```
-- Policy SELECT em `bills` (substitui a atual `Authenticated users can view bills`):
-  ```sql
-  using (
-    case
-      when public.is_private_user(bills.user_id) then bills.user_id = auth.uid()
-      else not public.is_private_user(auth.uid())
-    end
-  )
-  ```
-- Mesma expressão aplicada em UPDATE (using/with check) e DELETE.
-
-## Pergunta antes de implementar
-
-O novo usuário `gs.armazemfinanceiro@yahoo.com.br` já foi criado no sistema, ou devo deixar você criá-lo pela tela de cadastro/Usuários e, em seguida, eu rodo só o UPDATE marcando `is_private = true`?
+- `public/sw.js` passa a apagar somente os caches de escopo próprio (`caches.keys()` filtrados) e chamar `self.registration.unregister()` dentro de `finally`, no evento `activate`.
+- Remoção de `serviceWorker.register` / `virtual:pwa-register` e de qualquer configuração do `vite-plugin-pwa` em `vite.config.ts` que gere `sw.js`.
+- `public/manifest.json` e os ícones permanecem, junto com as tags `manifest`/`theme-color`/`apple-touch-icon` no `index.html`.
