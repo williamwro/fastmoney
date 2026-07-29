@@ -112,7 +112,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="email" placeholder="seu@email.com" {...field} />
+                        <Input className="pl-10 bg-white dark:bg-gray-700 dark:text-white" type="email" autoComplete="email" placeholder="seu@email.com" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -129,7 +129,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showPassword ? "text" : "password"} placeholder="********" {...field} />
+                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showPassword ? "text" : "password"} autoComplete={isLogin ? "current-password" : "new-password"} placeholder="********" {...field} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -150,7 +150,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showConfirmPassword ? "text" : "password"} placeholder="********" {...field} />
+                      <Input className="pl-10 pr-10 bg-white dark:bg-gray-700 dark:text-white" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" placeholder="********" {...field} />
                       <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
