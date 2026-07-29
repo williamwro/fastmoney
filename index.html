@@ -36,58 +36,31 @@
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Remove qualquer service worker antigo que possa interceptar requisições.
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          try {
-            const registration = await navigator.serviceWorker.register('/sw.js', {
-              scope: '/'
-            });
-            console.info('Service Worker registered with scope:', registration.scope);
-            
-            // Verificar atualizações do service worker
-            registration.addEventListener('updatefound', () => {
-              const newWorker = registration.installing;
-              console.info('Service Worker update found!');
-              
-              newWorker.addEventListener('statechange', () => {
-                console.info('Service Worker state changed:', newWorker.state);
-              });
-            });
-            
-            // Verificar se deve exibir prompt de instalação
-            window.addEventListener('beforeinstallprompt', (e) => {
-              // Prevenir o comportamento padrão
-              e.preventDefault();
-              // Armazenar o evento para uso posterior
-              window.deferredPrompt = e;
-              console.info('Install prompt available');
-              
-              // Disparar um evento personalizado para informar a aplicação
-              const event = new CustomEvent('pwaInstallable');
-              window.dispatchEvent(event);
-            });
-            
-            // Detectar quando o app é instalado
-            window.addEventListener('appinstalled', () => {
-              window.deferredPrompt = null;
-              console.info('PWA installed successfully');
-              
-              // Registrar a instalação (poderia enviar para analytics)
-              const event = new CustomEvent('pwaInstalled');
-              window.dispatchEvent(event);
-            });
-          } catch (error) {
-            console.error('Service Worker registration failed:', error);
-          }
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => registration.unregister());
+          });
         });
-        
-        // Verificar se está rodando como PWA
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            (window.navigator).standalone === true) {
-          console.info('Running in PWA mode');
-          document.documentElement.classList.add('pwa-mode');
-        }
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwaInstallable'));
+      });
+
+      window.addEventListener('appinstalled', () => {
+        window.deferredPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwaInstalled'));
+      });
+
+      if (window.matchMedia('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true) {
+        document.documentElement.classList.add('pwa-mode');
       }
     </script>
+
   </body>
 </html>
