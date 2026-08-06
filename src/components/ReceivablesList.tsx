@@ -38,6 +38,9 @@ const ReceivablesList: React.FC = () => {
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [dueRangeOpen, setDueRangeOpen] = useState(false);
+  const [dueStartDate, setDueStartDate] = useState<string>('');
+  const [dueEndDate, setDueEndDate] = useState<string>('');
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -65,7 +68,7 @@ const ReceivablesList: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    const filtered = filterBills(status, categoryFilter, searchQuery, 'receber', startDate, endDate);
+    const filtered = filterBills(status, categoryFilter, searchQuery, 'receber', startDate, endDate, dueStartDate, dueEndDate);
     
     const sortedBills = [...filtered].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
@@ -74,7 +77,7 @@ const ReceivablesList: React.FC = () => {
     });
     
     setFilteredBills(sortedBills);
-  }, [bills, status, categoryFilter, searchQuery, filterBills, startDate, endDate]);
+  }, [bills, status, categoryFilter, searchQuery, filterBills, startDate, endDate, dueStartDate, dueEndDate]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -107,6 +110,12 @@ const ReceivablesList: React.FC = () => {
     setDateRangeOpen(false);
   };
 
+  const clearDueDateFilters = () => {
+    setDueStartDate('');
+    setDueEndDate('');
+    setDueRangeOpen(false);
+  };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     
@@ -123,6 +132,10 @@ const ReceivablesList: React.FC = () => {
     let dateRangeText = '';
     if (startDate && endDate) {
       dateRangeText = `Período de pagamento: ${formatDate(startDate)} a ${formatDate(endDate)}`;
+    }
+    if (dueStartDate || dueEndDate) {
+      const dueText = `Vencimento: ${dueStartDate ? formatDate(dueStartDate) : '...'} a ${dueEndDate ? formatDate(dueEndDate) : '...'}`;
+      dateRangeText = dateRangeText ? `${dateRangeText} | ${dueText}` : dueText;
     }
     
     doc.text(`${statusText} - ${categoryText}`, 14, 30);
@@ -243,6 +256,54 @@ const ReceivablesList: React.FC = () => {
                     Limpar
                   </Button>
                   <Button size="sm" onClick={() => setDateRangeOpen(false)}>
+                    Aplicar
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover open={dueRangeOpen} onOpenChange={setDueRangeOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("flex items-center gap-1", (dueStartDate || dueEndDate) && "border-green-500 bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-200")}>
+                <Calendar className="h-4 w-4 mr-1" />
+                <span className={isMobile ? "" : "inline"}>
+                  {dueStartDate && dueEndDate
+                    ? `${formatDate(dueStartDate)} - ${formatDate(dueEndDate)}`
+                    : "Período de Vencimento"
+                  }
+                </span>
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-4 pointer-events-auto" align="end">
+              <div className="space-y-4">
+                <h4 className="font-medium">Filtrar por data de vencimento</h4>
+                <div className="grid gap-2">
+                  <div className="grid gap-1">
+                    <label htmlFor="dueStartDate" className="text-sm">Data inicial</label>
+                    <Input
+                      id="dueStartDate"
+                      type="date"
+                      value={dueStartDate}
+                      onChange={(e) => setDueStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label htmlFor="dueEndDate" className="text-sm">Data final</label>
+                    <Input
+                      id="dueEndDate"
+                      type="date"
+                      value={dueEndDate}
+                      onChange={(e) => setDueEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <Button size="sm" variant="outline" onClick={clearDueDateFilters}>
+                    Limpar
+                  </Button>
+                  <Button size="sm" onClick={() => setDueRangeOpen(false)}>
                     Aplicar
                   </Button>
                 </div>
