@@ -242,7 +242,9 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
     search: string = '',
     tipo: 'pagar' | 'receber' | 'all' = 'all',
     startDate: string = '',
-    endDate: string = ''
+    endDate: string = '',
+    dueStartDate: string = '',
+    dueEndDate: string = ''
   ) => {
     return bills.filter(bill => {
       const matchesStatus = status === 'all' || bill.status === status;
@@ -265,10 +267,31 @@ export const BillProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if ((startDate || endDate) && !bill.datapagamento) {
         matchesDateRange = false;
       }
+
+      let matchesDueRange = true;
+      if (dueStartDate || dueEndDate) {
+        if (!bill.dueDate) {
+          matchesDueRange = false;
+        } else {
+          const due = new Date(bill.dueDate);
+          due.setHours(12, 0, 0, 0);
+          if (dueStartDate) {
+            const s = new Date(dueStartDate);
+            s.setHours(0, 0, 0, 0);
+            if (due < s) matchesDueRange = false;
+          }
+          if (dueEndDate) {
+            const e = new Date(dueEndDate);
+            e.setHours(23, 59, 59, 999);
+            if (due > e) matchesDueRange = false;
+          }
+        }
+      }
       
-      return matchesStatus && matchesCategory && matchesTipo && matchesSearch && matchesDateRange;
+      return matchesStatus && matchesCategory && matchesTipo && matchesSearch && matchesDateRange && matchesDueRange;
     });
   };
+
 
   const getTotalDue = (tipo: 'pagar' | 'receber' = 'pagar') => {
     return bills
