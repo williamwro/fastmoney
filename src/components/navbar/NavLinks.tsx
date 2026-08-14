@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Building2, ReceiptText, Gem, BarcodeIcon, Users, TrendingUp } from 'lucide-react';
+import { Building2, ReceiptText, Gem, BarcodeIcon, Users, TrendingUp, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface NavLinksProps {
