@@ -69,6 +69,10 @@ const App: React.FC = () => {
                 {/* Categories Routes */}
                 <Route path="/categories" element={<ProtectedRoute element={<Categories />} />} />
                 
+                {/* Reports */}
+                <Route path="/relatorios" element={<ProtectedRoute element={<Reports />} />} />
+                
+                
                 {/* Depositors Routes */}
                 <Route path="/depositors" element={<ProtectedRoute element={<Depositors />} />} />
                 <Route path="/depositors/new" element={<ProtectedRoute element={<DepositorForm />} />} />
