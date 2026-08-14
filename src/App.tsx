@@ -18,6 +18,7 @@ import ReceivableForm from '@/pages/ReceivableForm';
 import Categories from '@/pages/Categories';
 import DepositorForm from '@/pages/DepositorForm';
 import Depositors from '@/pages/Depositors';
+import Reports from '@/pages/Reports';
 import NotFound from '@/pages/NotFound';
 import Auth from '@/pages/Auth';
 import Users from '@/pages/Users';
