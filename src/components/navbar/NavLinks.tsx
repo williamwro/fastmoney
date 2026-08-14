@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Building2, ReceiptText, Gem, BarcodeIcon, Users, TrendingUp } from 'lucide-react';
+import { Building2, ReceiptText, Gem, BarcodeIcon, Users, TrendingUp, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface NavLinksProps {
@@ -98,6 +98,23 @@ const NavLinks: React.FC<NavLinksProps> = ({ isAuthenticated, mobile, closeMenu 
           Fornecedores
         </NavLink>
       </li>
+      <li>
+        <NavLink
+          to="/relatorios"
+          className={({ isActive }) =>
+            `flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+              isActive
+                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+            }`
+          }
+          onClick={closeMenu}
+        >
+          <BarChart3 className="mr-2 h-4 w-4" />
+          Relatórios
+        </NavLink>
+      </li>
+      
       
       {isAdmin && (
         <li>
