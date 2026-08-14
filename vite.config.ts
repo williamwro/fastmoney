@@ -14,9 +14,16 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
+    // Keep every dependency on the same React instance. Without this, Vite's
+    // optimized dependency graph can retain a second React runtime after HMR,
+    // which makes hooks fail with a null dispatcher.
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client"],
   },
 }));
 
